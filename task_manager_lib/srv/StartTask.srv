@@ -1,0 +1,4 @@
+string name
+dynamic_reconfigure/Config config
+---
+int32 id

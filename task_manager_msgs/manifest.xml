@@ -1,0 +1,18 @@
+<package>
+  <description brief="task_manager_msgs">
+
+     task_manager_msgs
+
+  </description>
+  <author>Cedric Pradalier</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/task_manager_msgs</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="dynamic_reconfigure"/>
+
+</package>
+
+
