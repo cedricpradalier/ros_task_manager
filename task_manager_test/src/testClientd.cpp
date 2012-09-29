@@ -5,44 +5,45 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "TaskClient.h"
+#include "task_manager_lib/TaskClient.h"
 
 #define DEBUG(c) printf("Executing "#c":");res=c;printf("%d\n",res);
-#define DEBUGSTATUS(c) printf("Executing "#c":");sm=c;printf("%d\n",sm.size());
+#define DEBUGSTATUS(c) printf("Executing "#c);
 
 int end = 0;
 void sighdl(int n) {
 	end ++;
 }
 
-int main()
+int main(int argc, char * argv[])
 {
+    ros::init(argc,argv,"client");
+    ros::NodeHandle nh("~");
 	int i,res = -1;
 	TaskParameters tp;
 	TaskClient::StatusMap sm;
 	signal(SIGINT,sighdl);
 
-	TaskClient client("localhost");
-	DEBUG(client.open());
+	TaskClient client("/tasks",nh);
 
 	DEBUG(client.updateTaskList());
 
 	printf("Task list on the server:\n");
 	client.printTaskList();
 
-	DEBUGSTATUS(client.getStatus());
+	DEBUGSTATUS(client.updateAllStatus());
 	printf("Task status on the server:\n");
 	client.printStatusMap();
 
 	printf("Running task Test\n");
 	DEBUG(client.startTask("Test",true,0.5,tp));
-	DEBUGSTATUS(client.getStatus());
+	DEBUGSTATUS(client.updateAllStatus());
 	printf("Task status on the server:\n");
 	client.printStatusMap();
 
 	printf("Sleeping 3 sec\n");
 	for (i=0;i<3;i++) {
-		DEBUGSTATUS(client.getStatus());
+		DEBUGSTATUS(client.updateAllStatus());
 		printf("Task status on the server:\n");
 		client.printStatusMap();
 		sleep(1);
@@ -51,7 +52,7 @@ int main()
 
 	printf("Back to idle, by termination\n");
 	for (i=0;i<5;i++) {
-		DEBUGSTATUS(client.getStatus());
+		DEBUGSTATUS(client.updateAllStatus());
 		printf("Task status on the server:\n");
 		client.printStatusMap();
 		sleep(1);

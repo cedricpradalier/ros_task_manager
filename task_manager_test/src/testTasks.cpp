@@ -1,9 +1,13 @@
 
-#include "TaskIdle.h"
-#include "DynamicTask.h"
+#include "task_manager_test/TaskIdle.h"
+#include "task_manager_lib/DynamicTask.h"
 
-int main()
+using namespace task_manager_msgs;
+
+int main(int argc, char *argv[])
 {
+    ros::init(argc,argv,"tasks");
+    ros::NodeHandle nh("~");
 	unsigned int i;
 	TaskEnvironment env;
 	TaskParameters tp;
@@ -16,10 +20,10 @@ int main()
 	idle->doTerminate();
 	delete idle;
 
-	TaskDefinition *dtask = new DynamicTask("./libTaskTest.so",&env);
+	TaskDefinition *dtask = new DynamicTask("./lib/libTaskTest.so",&env);
 	dtask->doConfigure(tp);
 	dtask->doInitialise(tp);
-	while (dtask->getStatus() != TASK_COMPLETED) {
+	while (dtask->getStatus() != TaskStatus::TASK_COMPLETED) {
 		dtask->doIterate();
 	}
 	dtask->doTerminate();

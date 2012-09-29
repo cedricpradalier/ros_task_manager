@@ -13,6 +13,7 @@ DynamicTask::DynamicTask(const std::string & fname, TaskEnvironment *env) :
 
 	handle = dlopen(fbuffer, RTLD_LAZY);
 	if (!handle) {
+        printf("dlopen: %s",dlerror());
 		std::string error("dlopen returned NULL handle for file '");
 		error += filename + "'";
 		throw DLLoadError(error);

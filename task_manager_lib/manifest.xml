@@ -12,6 +12,11 @@
   <depend package="dynamic_reconfigure"/>
   <depend package="roscpp"/>
   <depend package="rospy"/>
+  <export>
+    <!-- The standard flags that allow other packages to include and link this package -->
+      <cpp cflags="-I${prefix}/include" 
+           lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ltask_manager_lib "/>
+  </export>
 
 </package>
 

@@ -85,6 +85,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double
 
 	printf("Task scheduler created: debug %d\n",debug);
 
+    n = nh;
     startTaskSrv = nh.advertiseService("start_task", &TaskScheduler::startTask,this);
     stopTaskSrv = nh.advertiseService("stop_task", &TaskScheduler::stopTask,this);
     getTaskListSrv = nh.advertiseService("get_all_tasks", &TaskScheduler::getTaskList,this);
@@ -120,7 +121,7 @@ TaskScheduler::~TaskScheduler()
 bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
          task_manager_lib::StartTask::Response &res )
 {
-    TaskId id = launchTask(req.name,req.config);
+    TaskId id = launchTask(req.name,TaskParameters(req.config));
     res.id = id;
     return true;
 }
@@ -128,8 +129,16 @@ bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
 bool TaskScheduler::stopTask(task_manager_lib::StopTask::Request  &req,
          task_manager_lib::StopTask::Response &res )
 {
-    TaskId id = launchIdleTask();
-    res.id = id;
+    if (req.id == -1) {
+        TaskId id = launchIdleTask();
+        res.id = id;
+    } else {
+        TaskSet::iterator it = runningThreads.find(req.id);
+        if (it != runningThreads.end()) {
+            terminateTask(it->second);
+        }
+        res.id = 0;
+    }
     return true;
 }
 
@@ -185,12 +194,16 @@ void TaskScheduler::loadTask(const std::string & filename, TaskEnvironment *env)
 	addTask(td);
 }
 
-void TaskScheduler::configureTasks(const std::string & dirname, const std::string & extension)
+void TaskScheduler::configureTasks(/*const std::string & dirname, const std::string & extension*/)
 {
 	TaskDirectory::const_iterator tit;
 	for (tit = tasks.begin();tit!=tasks.end();tit++) {
 		// Try loading from the parameter server / launch file
-        dynamic_reconfigure::Config tp = tit->second->getParametersFromServer();
+        TaskParameters tp = tit->second->getParametersFromServer(n);
+        std::string rename;
+        if (tp.getParameter("task_rename",rename) && !rename.empty()) {
+            tit->second->setName(rename);
+        }
 		tit->second->doConfigure(tp);
 	}
 }
@@ -310,9 +323,9 @@ TaskScheduler::TaskId TaskScheduler::launchTask(ThreadParameters *tp)
 }
 
 TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname, 
-		const dynamic_reconfigure::Config & tp)
+		const TaskParameters & tp)
 {
-	bool mainTask = false;
+	bool mainTask = true;
 	double period = defaultPeriod;
 	TaskDirectory::const_iterator tdit;
 	tdit = tasks.find(taskname);
@@ -322,11 +335,11 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
 	}
 
 	// See if some runtime period has been defined in the parameters
-    if (!dynamic_reconfigure::ConfigTools::getParameter(tp,"task_period",period)) {
+    if (!tp.getParameter("task_period",period)) {
 		fprintf(stderr, "Invalid conversion for parameter task_period\n");
 		return -1;
 	}
-    dynamic_reconfigure::ConfigTools::getParameter(tp,"main_task",mainTask); // ignore return
+    tp.getParameter("main_task",mainTask); // ignore return
 
 	// Finally create the thread responsible for running the task
 	ThreadParameters *tparam = new ThreadParameters(statusPub, this, tdit->second, period);
@@ -365,7 +378,7 @@ void * TaskScheduler::runAperiodicTask(void *arg)
 
 int TaskScheduler::runTask(ThreadParameters * tp)
 {
-    ros::Time tstart = ros::Time::now();
+    double tstart = ros::Time::now().toSec();
 	PRINTF(0,"Runnning task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 	pthread_cond_broadcast(&tp->task_condition);
 	pthread_mutex_unlock(&tp->task_mutex);
@@ -384,18 +397,18 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 	if (tp->task->isPeriodic()) {
 		PRINTF(2,"Initialisation done\n");
 		while (1) {
-            ros::Time t0 = ros::Time::now();
-			if ((tp->task->getTimeout() > 0) && ((t0-tstart).toSec() > tp->task->getTimeout())) {
+            double t0 = ros::Time::now().toSec();
+			if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
 				tp->task->debug("TIMEOUT\n");
-				tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",t0);
+				tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
 				break;
 			}
 
-            ros::Time t1 = t0;
+            double t1 = t0;
 			try {
 				// tp->task->debug("Iterating...\n");
 				tp->task->doIterate();
-				tp->updateStatus(t1 = now());
+				tp->updateStatus(now());
 			} catch (const std::exception & e) {
 				tp->task->debug("Exception %s\n",e.what());
 				tp->updateStatus(now());
@@ -405,7 +418,7 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 				PRINTF(2,"Task not running anymore\n");
 				break;
 			}
-			usleep((unsigned int)(std::max(1e-3,(tp->period - (t1-t0).toSec()))*1e6));
+			usleep((unsigned int)(std::max(1e-3,(tp->period - (t1-t0)))*1e6));
 		}
 	} else {
 		bool first = true;
@@ -414,21 +427,21 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 		pthread_create(&id, NULL, runAperiodicTask, tp);
 		while (1) {
 			struct timespec ts;
-            ros::Time t0 = ros::Time::now();
-			if ((tp->task->getTimeout() > 0) && ((t0-tstart).toSec() > tp->task->getTimeout())) {
+            double t0 = ros::Time::now().toSec();
+			if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
 				tp->task->debug("TIMEOUT\n");
-				tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",t0);
+				tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
 				break;
 			}
-            ros::Time t1 = t0;
-			tp->updateStatus(t1 = ros::Time::now());
+            double t1 = t0;
+			tp->updateStatus(ros::Time::now());
 			if (!first && tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
 				tp->task->debug("Task not running anymore\n");
 				break;
 			}
 
 			double ttimeout = startingTime + (ros::Time::now().toSec() +
-				std::max(1e-3,(tp->period - (t1-t0).toSec())));
+				std::max(1e-3,(tp->period - (t1-t0))));
 			ts.tv_sec = (unsigned long)floor(ttimeout);
 			ts.tv_nsec = (unsigned long)floor((ttimeout - ts.tv_sec)*1e9);
 			pthread_cond_timedwait(&tp->aperiodic_task_condition,
@@ -748,7 +761,7 @@ int TaskScheduler::runSchedulerLoop()
 				PRINTF(2,"CONDITIONALLY_IDLE\n");
 				// TODO: this does not work. If a background task has been
 				// created, we need to idle, but gtpid has changed
-				if (mainThread==NULL) {
+				if ((mainThread==NULL) && runScheduler) {
 					// no new task has been created yet, and only this function
 					// can trigger new task creation
 					launchIdleTask();

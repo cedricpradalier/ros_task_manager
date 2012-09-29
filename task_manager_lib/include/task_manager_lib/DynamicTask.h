@@ -37,7 +37,7 @@ class DynamicTask : public TaskDefinition
 		virtual void resetStatus() {
 			task->resetStatus();
 		}
-		virtual TaskStatus getStatus() const {
+		virtual TaskIndicator getStatus() const {
 			//printf("DynamicTask: status of %s: %s\n",name.c_str(),taskStatusToString(task->getStatus()));
 			return task->getStatus();
 		}
@@ -45,26 +45,26 @@ class DynamicTask : public TaskDefinition
 			return task->getStatusString();
 		}
 
-        virtual dynamic_reconfigure::Config getParametersFromServer() {
-            return task->getParametersFromServer();
+        virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
+            return task->getParametersFromServer(nh);
         }
 
-		virtual TaskStatus configure(const dynamic_reconfigure::Config & parameters) throw (InvalidParameter) {
+		virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) {
 			task->doConfigure(parameters);
 			return task->getStatus();
 		}
 
-		virtual TaskStatus initialise(const dynamic_reconfigure::Config & parameters) throw (InvalidParameter) {
+		virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter) {
 			task->doInitialise(parameters);
 			return task->getStatus();
 		}
 
-		virtual TaskStatus iterate() {
+		virtual TaskIndicator iterate() {
 			task->doIterate();
 			return task->getStatus();
 		}
 
-		virtual TaskStatus terminate() {
+		virtual TaskIndicator terminate() {
 			task->doTerminate();
 			return task->getStatus();
 		}

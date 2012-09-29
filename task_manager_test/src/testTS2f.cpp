@@ -1,7 +1,7 @@
 
-#include "TaskScheduler.h"
-#include "DynamicTask.h"
-#include "TaskIdle.h"
+#include "task_manager_lib/TaskScheduler.h"
+#include "task_manager_lib/DynamicTask.h"
+#include "task_manager_test/TaskIdle.h"
 
 void waitabit(unsigned int bit)
 {
@@ -18,41 +18,42 @@ void waitabit(unsigned int bit)
 void testTSe()
 {
 	TaskEnvironment env;
+    ros::NodeHandle nh("~");
 	TaskParameters tp;
 	printf("\n*******************\n\nTesting task scheduler functions (sequence)\n");
 	printf("Loading tasks parameters\n");
 	// tp.loadFromString(config);
-	tp.setDoubleParam("task_timeout",10);
-	tp.setLongParam("main_task",1);
+	tp.setParameter("task_timeout",10.);
+    tp.setParameter("main_task",false);
 
 	printf("Creating tasks\n");
 	TaskDefinition *idle = new TaskIdle(&env);
-	TaskDefinition *dtask1 = new DynamicTask("./libTaskLong.so",&env);
+	TaskDefinition *dtask1 = new DynamicTask("./lib/libTaskLong.so",&env);
 	dtask1->setName("Task1");
-	TaskDefinition *dtask2 = new DynamicTask("./libTaskTest.so",&env);
+	TaskDefinition *dtask2 = new DynamicTask("./lib/libTaskTest.so",&env);
 	dtask2->setName("Task2");
 
 	printf("Creating task scheduler\n");
-	TaskScheduler ts(idle, 0.5);
+	TaskScheduler ts(nh,idle, 0.5);
 	ts.printTaskDirectory();
 	printf("Adding tasks\n");
 	ts.addTask(dtask1);
 	ts.addTask(dtask2);
 	ts.printTaskDirectory();
 	printf("Configuring tasks\n");
-	ts.configureTasks("../../tests","cfg");
+	ts.configureTasks();
 	printf("Launching idle task\n");
 	ts.startScheduler();
 	waitabit(2);
 	printf("Launching test tasks in foreground\n");
-	tp.setDoubleParam("task_period",0.5);
+	tp.setParameter("task_period",0.5);
 	TaskScheduler::TaskId id1 = ts.launchTask(dtask1->getName(),tp);
 	printf("Task id: %d\n",(int)id1);
 	ts.waitTaskCompletion(id1,50.0);
 	printf("Task completed\n");
 
 
-	tp.setDoubleParam("task_period",0.7);
+	tp.setParameter("task_period",0.7);
 	TaskScheduler::TaskId id2 = ts.launchTask(dtask2->getName(),tp);
 	printf("Task id: %d\n",(int)id2);
 	ts.waitTaskCompletion(id2,50.0);
@@ -63,8 +64,9 @@ void testTSe()
 }
 
 
-int main()
+int main(int argc, char * argv[])
 {
+    ros::init(argc,argv,"client");
 	testTSe();
 
 	return 0;

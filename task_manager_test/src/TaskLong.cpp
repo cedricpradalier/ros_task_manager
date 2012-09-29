@@ -1,40 +1,47 @@
 
-#include "TaskLong.h"
+#include "task_manager_test/TaskLongConfig.h"
+#include "task_manager_test/TaskLong.h"
+using namespace task_manager_msgs;
+using namespace task_manager_test;
 
-TaskStatus TaskLong::configure(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskLong::configure(const TaskParameters & parameters) throw (InvalidParameter)
 {
 	debug("Configuring...\n");
-	this->setName(parameters.stringParam("task_rename",name));
-	return TASK_CONFIGURED;
+	return TaskStatus::TASK_CONFIGURED;
 }
 
-TaskStatus TaskLong::initialise(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskLong::initialise(const TaskParameters & parameters) throw (InvalidParameter)
 {
-	duration = parameters.longParam("task_duration",3);
+    duration = 3;
+    dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_duration",duration);
 	counter = 0;
 	debug("Initialising (duration = %d)...\n",duration);
-	return TASK_INITIALISED;
+	return TaskStatus::TASK_INITIALISED;
 }
 
-TaskStatus TaskLong::iterate()
+TaskIndicator TaskLong::iterate()
 {
 	char tmp[128];
 	while (counter < duration) {
-		taskStatus = TASK_RUNNING;
-		sprintf(tmp,"Longing (%d/%d)...\n",counter,duration);
+		taskStatus = TaskStatus::TASK_RUNNING;
+		sprintf(tmp,"Longing (%d/%.1f)...\n",counter,duration);
 		setStatusString(tmp);
 		debug(tmp);
 		counter += 1;
 		sleep(1);
 	}
 	debug(" -= Task completed =- \n");
-	return TASK_COMPLETED;
+	return TaskStatus::TASK_COMPLETED;
 }
 
-TaskStatus TaskLong::terminate()
+TaskIndicator TaskLong::terminate()
 {
 	debug("Terminating...\n");
-	return TASK_TERMINATED;
+	return TaskStatus::TASK_TERMINATED;
+}
+
+TaskParameters TaskLong::getParametersFromServer(const ros::NodeHandle & nh) {
+    return parametersFromServer<TaskLongConfig>(nh);
 }
 
 DYNAMIC_TASK(TaskLong);

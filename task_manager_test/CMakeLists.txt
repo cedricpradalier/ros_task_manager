@@ -7,7 +7,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+set(ROS_BUILD_TYPE Debug)
 
 rosbuild_init()
 
@@ -15,6 +15,11 @@ rosbuild_init()
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
+#add dynamic reconfigure api
+rosbuild_find_ros_package(dynamic_reconfigure)
+include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
+gencfg()
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
@@ -28,3 +33,75 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+
+ROSBUILD_ADD_LIBRARY( TaskTest SHARED src/TaskTest.cpp)
+TARGET_LINK_LIBRARIES(TaskTest dl)
+
+ROSBUILD_ADD_LIBRARY( TaskLong SHARED src/TaskLong.cpp)
+TARGET_LINK_LIBRARIES(TaskLong dl)
+
+
+ROSBUILD_ADD_EXECUTABLE( testTasks src/testTasks.cpp src/TaskIdle.cpp)
+TARGET_LINK_LIBRARIES( testTasks dl)
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS1a src/testTS1a.cpp src/TaskIdle.cpp)
+TARGET_LINK_LIBRARIES( testTS1a dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS1b src/testTS1b.cpp src/TaskIdle.cpp)
+TARGET_LINK_LIBRARIES( testTS1b dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS1c src/testTS1c.cpp src/TaskIdle.cpp)
+TARGET_LINK_LIBRARIES( testTS1c dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS2a src/testTS2a.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testTS2a dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS2b src/testTS2b.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testTS2b dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS2c src/testTS2c.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testTS2c dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS2d src/testTS2d.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testTS2d dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS2e src/testTS2e.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testTS2e dl )
+	
+ROSBUILD_ADD_EXECUTABLE( testTS2f src/testTS2f.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testTS2f dl )
+	
+	
+ROSBUILD_ADD_EXECUTABLE( testServer src/testServer.cpp src/TaskIdle.cpp) 
+TARGET_LINK_LIBRARIES( testServer dl )
+	
+	
+ROSBUILD_ADD_EXECUTABLE( testClienta src/testClienta.cpp) 
+TARGET_LINK_LIBRARIES( testClienta )
+	
+	
+ROSBUILD_ADD_EXECUTABLE( testClientb src/testClientb.cpp) 
+TARGET_LINK_LIBRARIES( testClientb )
+	
+	
+ROSBUILD_ADD_EXECUTABLE( testClientc src/testClientc.cpp) 
+TARGET_LINK_LIBRARIES( testClientc )
+	
+	
+ROSBUILD_ADD_EXECUTABLE( testClientd src/testClientd.cpp) 
+TARGET_LINK_LIBRARIES( testClientd )
+	
+	
+ROSBUILD_ADD_EXECUTABLE( testCliente src/testCliente.cpp) 
+TARGET_LINK_LIBRARIES( testCliente )
+	
+

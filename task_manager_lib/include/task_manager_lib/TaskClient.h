@@ -15,7 +15,7 @@ class TaskClient {
 		struct TaskState {
 			TaskScheduler::TaskId id;
 			std::string name;
-			TaskStatus status;
+			TaskIndicator status;
 			std::string statusString;
             ros::Time statusTime;
 			bool foreground;
@@ -44,13 +44,13 @@ class TaskClient {
 		void printTaskList() const;
 
 		TaskScheduler::TaskId startTask(const std::string & taskname, 
-				const dynamic_reconfigure::Config & tp);
+				const TaskParameters & tp);
 		TaskScheduler::TaskId startTask(const std::string & taskname, 
 				bool foreground, double period,
-				const dynamic_reconfigure::Config & tp);
+				const TaskParameters & tp);
 
 		bool startTaskAndWait(const std::string & taskname, 
-				const dynamic_reconfigure::Config & tp);
+				const TaskParameters & tp);
 		int idle();
 
 		bool waitTask(TaskScheduler::TaskId tid);

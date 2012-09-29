@@ -1,7 +1,7 @@
 
-#include "TaskScheduler.h"
-#include "DynamicTask.h"
-#include "TaskIdle.h"
+#include "task_manager_lib/TaskScheduler.h"
+#include "task_manager_lib/DynamicTask.h"
+#include "task_manager_test/TaskIdle.h"
 
 void wait5sec()
 {
@@ -17,17 +17,18 @@ void wait5sec()
 
 void testTSb()
 {
+    ros::NodeHandle nh("~");
 	TaskEnvironment env;
 	printf("\n*******************\n\nTesting basic task scheduler functions (B)\n");
 	printf("Creating tasks\n");
 	TaskDefinition *idle = new TaskIdle(&env);
 	printf("Creating task scheduler\n");
-	TaskScheduler ts(idle, 1.0);
+	TaskScheduler ts(nh,idle, 1.0);
 	ts.printTaskDirectory();
 	printf("Loading tasks\n");
-	ts.loadTask("./libTaskTest.so",&env);
+	ts.loadTask("./lib/libTaskTest.so",&env);
 	printf("Configuring tasks\n");
-	ts.configureTasks("../../tests","cfg");
+	ts.configureTasks();
 	// don't delete tasks, because the ts took responsibility for them
 	ts.printTaskDirectory();
 	printf("Launching idle task\n");
@@ -37,8 +38,9 @@ void testTSb()
 }
 
 
-int main()
+int main(int argc, char * argv[])
 {
+    ros::init(argc,argv,"client");
 
 	testTSb();
 

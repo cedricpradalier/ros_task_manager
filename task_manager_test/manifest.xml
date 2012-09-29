@@ -8,6 +8,7 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/task_manager_test</url>
+  <depend package="dynamic_reconfigure"/>
   <depend package="task_manager_lib"/>
   <depend package="task_manager_msgs"/>
   <depend package="roscpp"/>

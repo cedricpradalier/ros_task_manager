@@ -28,7 +28,7 @@ class TaskScheduler
 			bool foreground,running;
 			unsigned int tpid;
 			TaskDefinition *task;
-            dynamic_reconfigure::Config params;
+            TaskParameters params;
 			TaskScheduler *that;
 			double period;
 			pthread_t tid;
@@ -39,7 +39,7 @@ class TaskScheduler
 			pthread_mutex_t aperiodic_task_mutex;
 
             ros::Time statusTime;
-			TaskStatus status;
+			TaskIndicator status;
 			std::string statusString;
             ros::Publisher statusPub;
 
@@ -59,7 +59,7 @@ class TaskScheduler
             }
 				
 
-			void setStatus(TaskStatus newstatus, const std::string & text, const ros::Time & tnow) {
+			void setStatus(TaskIndicator newstatus, const std::string & text, const ros::Time & tnow) {
 				status = newstatus;
 				statusString = text;
 				statusTime = tnow;
@@ -79,6 +79,7 @@ class TaskScheduler
 			}
 		};
     protected:
+        ros::NodeHandle n;
         ros::Publisher statusPub;
         ros::ServiceServer startTaskSrv;
         ros::ServiceServer stopTaskSrv;
@@ -167,7 +168,7 @@ class TaskScheduler
 		~TaskScheduler();
 		int terminateAllTasks();
 		void printTaskDirectory() const;
-		void configureTasks(const std::string & dirname=".", const std::string & extension="cfg");
+		void configureTasks(/* const std::string & dirname=".", const std::string & extension="cfg" */);
 
 		int startScheduler();
 		int stopScheduler();
@@ -175,7 +176,7 @@ class TaskScheduler
 
 		const TaskDirectory & getDirectory() const {return tasks;}
 
-		TaskId launchTask(const std::string & taskname, const dynamic_reconfigure::Config & tp);
+		TaskId launchTask(const std::string & taskname, const TaskParameters & tp);
 		TaskId launchIdleTask();
 		int waitTaskCompletion(TaskId id, double timeout);
 

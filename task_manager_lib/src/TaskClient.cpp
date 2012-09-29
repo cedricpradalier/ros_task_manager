@@ -29,7 +29,7 @@ void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& m
     TaskState td;
     td.id = ts.id;
     td.name = ts.name;
-    td.status = (TaskStatus)(ts.status & TASK_STATUS_MASK);
+    td.status = (TaskIndicator)(ts.status & TASK_STATUS_MASK);
     td.foreground = (ts.status & TASK_FOREGROUND)?true:false; 
     td.statusString = ts.status_string;
     td.statusTime = ts.status_time;
@@ -81,7 +81,7 @@ void TaskClient::printStatusMap() const
 
 TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname, 
 		bool foreground, double period,
-		const dynamic_reconfigure::Config & tprm)
+		const TaskParameters & tprm)
 {
     task_manager_lib::StartTask srv;
     srv.request.name = taskname;
@@ -98,7 +98,7 @@ TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname,
 }
 
 TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname, 
-		const dynamic_reconfigure::Config & tprm)
+		const TaskParameters & tprm)
 {
     task_manager_lib::StartTask srv;
     srv.request.name = taskname;
@@ -112,7 +112,7 @@ TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname,
 }
 
 bool TaskClient::startTaskAndWait(const std::string & taskname, 
-		const dynamic_reconfigure::Config & tp) 
+		const TaskParameters & tp) 
 {
 	TaskScheduler::TaskId tid = startTask(taskname,tp);
 	return waitTask(tid);
@@ -168,7 +168,7 @@ void TaskClient::updateAllStatus()
 		TaskState td;
 		td.id = ts.id;
         td.name = ts.name;
-        td.status = (TaskStatus)(ts.status & TASK_STATUS_MASK);
+        td.status = (TaskIndicator)(ts.status & TASK_STATUS_MASK);
 		td.foreground = (ts.status & TASK_FOREGROUND)?true:false; 
 		td.statusString = ts.status_string;
 		td.statusTime = ts.status_time;
@@ -180,7 +180,7 @@ void TaskClient::updateAllStatus()
 		TaskState td;
 		td.id = ts.id;
         td.name = ts.name;
-        td.status = (TaskStatus)(ts.status & TASK_STATUS_MASK);
+        td.status = (TaskIndicator)(ts.status & TASK_STATUS_MASK);
 		td.foreground = (ts.status & TASK_FOREGROUND)?true:false; 
 		td.statusString = ts.status_string;
 		td.statusTime = ts.status_time;

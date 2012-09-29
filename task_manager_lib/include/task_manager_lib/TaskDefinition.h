@@ -4,22 +4,72 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <ros/ros.h>
 
 #include <string>
 #include <task_manager_msgs/TaskStatus.h>
 #include <task_manager_msgs/TaskDescription.h>
 #include <dynamic_reconfigure/ConfigDescription.h>
 #include <dynamic_reconfigure/Config.h>
+#include <dynamic_reconfigure/config_tools.h>
 
 class DynamicTask;
 
 // Enum defined in TaskStatus msg
-typedef unsigned int TaskStatus;
+typedef unsigned int TaskIndicator;
+
+class TaskParameters: public dynamic_reconfigure::Config {
+    protected:
+        template <class VT, class T>
+            bool setParameter(std::vector<VT> &vec, const std::string &name, const T &val)
+            {
+                for (typename std::vector<VT>::iterator i = vec.begin(); i != vec.end(); i++)
+                    if (i->name == name)
+                    {
+                        i->value = val;
+                        return true;
+                    }
+                return false;
+            }
+
+
+    public:
+        TaskParameters() 
+            : dynamic_reconfigure::Config() { setDefaultParameters(); }
+        TaskParameters(const dynamic_reconfigure::Config & cfg) 
+            : dynamic_reconfigure::Config(cfg) {}
+        TaskParameters(const TaskParameters & cfg) 
+            : dynamic_reconfigure::Config(cfg) {}
+
+        void setDefaultParameters() {
+            dynamic_reconfigure::ConfigTools::appendParameter(*this,"task_rename","");
+            dynamic_reconfigure::ConfigTools::appendParameter(*this,"main_task",true);
+            dynamic_reconfigure::ConfigTools::appendParameter(*this,"task_period",-1.);
+            dynamic_reconfigure::ConfigTools::appendParameter(*this,"task_timeout",-1.);
+        }
+
+
+        template <class T>
+            bool getParameter(const std::string &name, T &val) const
+            {
+                return dynamic_reconfigure::ConfigTools::getParameter(
+                        dynamic_reconfigure::ConfigTools::getVectorForType(*this, val), name, val);
+            }
+
+        template <class T>
+            void setParameter(const std::string &name, const T &val)
+            {
+                if (!setParameter(dynamic_reconfigure::ConfigTools::getVectorForType(*this, val), name, val)) {
+                    dynamic_reconfigure::ConfigTools::appendParameter(*this,name,val);
+                }
+            }
+};
+
 /**
  * Basic function to build the string representation of one of the status above
  * */
 extern
-const char * taskStatusToString(TaskStatus ts);
+const char * taskStatusToString(TaskIndicator ts);
 
 /**
  *
@@ -73,7 +123,7 @@ class TaskDefinition
 		 * from the output of the configure, initialise, iterate and terminate
 		 * functions
 		 * */
-		TaskStatus taskStatus;
+		TaskIndicator taskStatus;
 
 		/**
 		 * Default timeout of the tasks, for each new cycle
@@ -92,7 +142,7 @@ class TaskDefinition
         /**
          * value of the parameters
          * */
-        dynamic_reconfigure::Config config;
+        TaskParameters config;
 
 	public:
 		TaskDefinition(const std::string & tname, const std::string & thelp, 
@@ -101,7 +151,8 @@ class TaskDefinition
             taskStatus(task_manager_msgs::TaskStatus::TASK_NEWBORN), 
 			defaultTimeout(deftTimeout), timeout(deftTimeout) {}
 		virtual ~TaskDefinition() {
-			// printf("Delete task '%s'\n",name.c_str());
+			printf("Delete task '%s'\n",name.c_str());
+            fflush(stdout);
 		}
 
 
@@ -114,12 +165,12 @@ class TaskDefinition
 		virtual double getTimeout() const;
 
 		virtual void resetStatus();
-		virtual TaskStatus getStatus() const;
+		virtual TaskIndicator getStatus() const;
 		virtual const std::string & getStatusString() const;
 
-		void doConfigure(const dynamic_reconfigure::Config & parameters);
+		void doConfigure(const TaskParameters & parameters);
 
-		void doInitialise(const dynamic_reconfigure::Config & parameters);
+		void doInitialise(const TaskParameters & parameters);
 
 		void doIterate();
 
@@ -130,7 +181,7 @@ class TaskDefinition
         task_manager_msgs::TaskDescription getDescription() const;
         task_manager_msgs::TaskStatus getRosStatus() const;
 
-        virtual dynamic_reconfigure::Config getParametersFromServer() = 0;
+        virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh) = 0;
 
 	protected:
 		friend class DynamicTask;
@@ -142,14 +193,22 @@ class TaskDefinition
 			statusString = s;
 		}
 
+        template <class CFG>
+            TaskParameters parametersFromServer(const ros::NodeHandle & nh) {
+                TaskParameters tp;
+                CFG cfg;
+                cfg.__fromServer__(nh);
+                cfg.__toMessage__(tp);
+                return tp;
+            }
 
-		virtual TaskStatus configure(const dynamic_reconfigure::Config & parameters) throw (InvalidParameter) = 0;
+		virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) = 0;
 
-		virtual TaskStatus initialise(const dynamic_reconfigure::Config & parameters) throw (InvalidParameter) = 0;
+		virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter) = 0;
 
-		virtual TaskStatus iterate() = 0;
+		virtual TaskIndicator iterate() = 0;
 
-		virtual TaskStatus terminate() = 0;
+		virtual TaskIndicator terminate() = 0;
 
 };
 

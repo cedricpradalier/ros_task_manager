@@ -1,36 +1,43 @@
 
-#include "TaskTest.h"
+#include "task_manager_test/TaskTest.h"
+#include "task_manager_test/TaskTestConfig.h"
+using namespace task_manager_msgs;
+using namespace task_manager_test;
 
-TaskStatus TaskTest::configure(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskTest::configure(const TaskParameters & parameters) throw (InvalidParameter)
 {
 	debug("Configuring...\n");
-	this->setName(parameters.stringParam("task_rename",name));
-	return TASK_CONFIGURED;
+	return TaskStatus::TASK_CONFIGURED;
 }
 
-TaskStatus TaskTest::initialise(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskTest::initialise(const TaskParameters & parameters) throw (InvalidParameter)
 {
-	duration = parameters.longParam("task_duration",3);
+    duration = 3;
+    dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_duration",duration);
 	counter = 0;
-	debug("Initialising (duration = %d)...\n",duration);
-	return TASK_INITIALISED;
+	debug("Initialising (duration = %.1f)...\n",duration);
+	return TaskStatus::TASK_INITIALISED;
 }
 
-TaskStatus TaskTest::iterate()
+TaskIndicator TaskTest::iterate()
 {
-	debug("Testing (%d/%d)...\n",counter,duration);
+	debug("Testing (%d/%.1f)...\n",counter,duration);
 	counter += 1;
 	if (counter >= duration) {
 		debug(" -= Task Completed =-\n");
-		return TASK_COMPLETED;
+		return TaskStatus::TASK_COMPLETED;
 	}
-	return TASK_RUNNING;
+	return TaskStatus::TASK_RUNNING;
 }
 
-TaskStatus TaskTest::terminate()
+TaskIndicator TaskTest::terminate()
 {
 	debug("Terminating...\n");
-	return TASK_TERMINATED;
+	return TaskStatus::TASK_TERMINATED;
+}
+
+TaskParameters TaskTest::getParametersFromServer(const ros::NodeHandle & nh) {
+    return parametersFromServer<TaskTestConfig>(nh);
 }
 
 DYNAMIC_TASK(TaskTest);

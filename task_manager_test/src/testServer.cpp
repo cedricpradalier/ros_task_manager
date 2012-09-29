@@ -3,10 +3,9 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "TaskServer.h"
-#include "TaskScheduler.h"
-#include "DynamicTask.h"
-#include "TaskIdle.h"
+#include "task_manager_lib/TaskScheduler.h"
+#include "task_manager_lib/DynamicTask.h"
+#include "task_manager_test/TaskIdle.h"
 
 int end = 0;
 
@@ -15,39 +14,28 @@ void sighdl(int n) {
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
-	TaskEnvironment env;
-	TaskParameters tp;
-	signal(SIGINT,sighdl);
+    ros::init(argc,argv,"tasks");
+    ros::NodeHandle nh("~");
 
+	TaskEnvironment env;
 	printf("\n*******************\n\nTesting task server functions\n");
-	printf("Loading tasks parameters\n");
-	// tp.loadFromString(config);
-	tp.setDoubleParam("task_timeout",10);
-	tp.setDoubleParam("task_period",0.5);
-	tp.setLongParam("main_task",1);
 
 	printf("Creating tasks\n");
 	TaskDefinition *idle = new TaskIdle(&env);
 	printf("Creating task scheduler\n");
-	TaskScheduler ts(idle, 0.5);
+	TaskScheduler ts(nh, idle, 0.5);
 	ts.printTaskDirectory();
 	printf("Scanning tasks directory\n");
-	ts.loadAllTasks(".",&env);
+	ts.loadAllTasks("./lib",&env);
 	printf("Configuring tasks\n");
-	ts.configureTasks("../../tests","cfg");
+	ts.configureTasks();
 	// don't delete tasks, because the ts took responsibility for them
 	printf("Launching idle task\n");
 	ts.startScheduler();
 
-	TaskServer server(ts);
-	server.initialiseServer(TaskServer::TS_PORT);
-
-	while (!end) {
-		sleep(1);
-	}
-	server.terminateServer();
+    ros::spin();
 
 	return 0;
 }

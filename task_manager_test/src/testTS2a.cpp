@@ -1,7 +1,7 @@
 
-#include "TaskScheduler.h"
-#include "DynamicTask.h"
-#include "TaskIdle.h"
+#include "task_manager_lib/TaskScheduler.h"
+#include "task_manager_lib/DynamicTask.h"
+#include "task_manager_test/TaskIdle.h"
 
 void waitabit(unsigned int bit)
 {
@@ -18,25 +18,26 @@ void waitabit(unsigned int bit)
 void testTSa()
 {
 	TaskEnvironment env;
+    ros::NodeHandle nh("~");
 	TaskParameters tp;
 	printf("\n*******************\n\nTesting task scheduler functions (foreground)\n");
 	printf("Loading tasks parameters\n");
 	// tp.loadFromString(config);
-	tp.setDoubleParam("task_timeout",10);
-	tp.setDoubleParam("task_period",0.5);
-	tp.setLongParam("main_task",1);
+    tp.setParameter("task_timeout",10.);
+    tp.setParameter("task_period",0.5);
+    tp.setParameter("main_task",true);
 
 	printf("Creating tasks\n");
 	TaskDefinition *idle = new TaskIdle(&env);
-	TaskDefinition *dtask = new DynamicTask("./libTaskTest.so",&env);
+	TaskDefinition *dtask = new DynamicTask("./lib/libTaskTest.so",&env);
 	printf("Creating task scheduler\n");
-	TaskScheduler ts(idle, 0.5);
+	TaskScheduler ts(nh,idle, 0.5);
 	ts.printTaskDirectory();
 	printf("Adding tasks\n");
 	ts.addTask(dtask);
 	ts.printTaskDirectory();
 	printf("Configuring tasks\n");
-	ts.configureTasks("../../tests","cfg");
+	ts.configureTasks();
 	// don't delete tasks, because the ts took responsibility for them
 	printf("Launching idle task\n");
 	ts.startScheduler();
@@ -49,9 +50,9 @@ void testTSa()
 
 
 
-int main()
+int main(int argc, char * argv[])
 {
-
+    ros::init(argc,argv,"client");
 	testTSa();
 	return 0;
 }

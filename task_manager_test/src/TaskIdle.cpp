@@ -1,27 +1,32 @@
-#include "TaskIdle.h"
+#include "task_manager_test/TaskIdle.h"
+using namespace task_manager_msgs;
 
-TaskStatus TaskIdle::configure(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskIdle::configure(const TaskParameters & parameters) throw (InvalidParameter)
 {
 	debug("configuring...\n");
-	return TASK_CONFIGURED;
+	return TaskStatus::TASK_CONFIGURED;
 }
 
-TaskStatus TaskIdle::initialise(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskIdle::initialise(const TaskParameters & parameters) throw (InvalidParameter)
 {
 	debug("initialising...\n");
-	return TASK_INITIALISED;
+	return TaskStatus::TASK_INITIALISED;
 }
 
-TaskStatus TaskIdle::iterate()
+TaskIndicator TaskIdle::iterate()
 {
 	debug("Idling...\n");
-	return TASK_RUNNING;
+	return TaskStatus::TASK_RUNNING;
 }
 
-TaskStatus TaskIdle::terminate()
+TaskIndicator TaskIdle::terminate()
 {
 	debug("terminating...\n");
-	return TASK_TERMINATED;
+	return TaskStatus::TASK_TERMINATED;
+}
+
+TaskParameters TaskIdle::getParametersFromServer(const ros::NodeHandle & nh) {
+    return TaskParameters();
 }
 
 DYNAMIC_TASK(TaskIdle);

@@ -1,3 +1,5 @@
-# nothing there for now
+# id = -1 kill the main task
+int32 id
 ---
+# return the id of task idle
 int32 id

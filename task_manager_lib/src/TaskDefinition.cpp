@@ -22,7 +22,7 @@ double TaskDefinition::getTimeout() const {
 	return timeout;
 }
 
-TaskStatus TaskDefinition::getStatus() const {
+TaskIndicator TaskDefinition::getStatus() const {
 	// printf("TaskDefinition: status of %s: %s\n",name.c_str(),taskStatusToString(taskStatus));
 	return taskStatus;
 }
@@ -32,7 +32,7 @@ task_manager_msgs::TaskStatus TaskDefinition::getRosStatus() const {
     st.name = name;
     st.status = getStatus();
     st.status_string = getStatusString();
-    st.plist = config;
+    st.plist = (dynamic_reconfigure::Config)config;
     return st;
 }
 
@@ -64,7 +64,7 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 	va_end(args);
 }
 
-void TaskDefinition::doConfigure(const dynamic_reconfigure::Config & parameters)
+void TaskDefinition::doConfigure(const TaskParameters & parameters)
 {
     dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_timeout",timeout);
 
@@ -73,7 +73,7 @@ void TaskDefinition::doConfigure(const dynamic_reconfigure::Config & parameters)
 	taskStatus = this->configure(parameters);
 }
 
-void TaskDefinition::doInitialise(const dynamic_reconfigure::Config & parameters)
+void TaskDefinition::doInitialise(const TaskParameters & parameters)
 {
     dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_timeout",timeout);
 	statusString.clear();
@@ -93,7 +93,7 @@ void TaskDefinition::doTerminate()
 	taskStatus = this->terminate();
 }
 
-const char * taskStatusToString(TaskStatus ts)
+const char * taskStatusToString(TaskIndicator ts)
 {
 	switch (ts) {
         case task_manager_msgs::TaskStatus::TASK_NEWBORN: return "NEWBORN"; 
