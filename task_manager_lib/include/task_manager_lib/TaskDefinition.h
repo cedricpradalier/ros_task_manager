@@ -134,10 +134,6 @@ class TaskDefinition
 		 * */
 		double timeout;
 
-        /**
-         * description of the parameters
-         * */
-        dynamic_reconfigure::ConfigDescription parameterDescription;
 
         /**
          * value of the parameters
@@ -182,6 +178,11 @@ class TaskDefinition
         task_manager_msgs::TaskStatus getRosStatus() const;
 
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh) = 0;
+
+        /**
+         * description of the parameters
+         * */
+        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const = 0;
 
 	protected:
 		friend class DynamicTask;

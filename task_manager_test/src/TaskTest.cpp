@@ -40,4 +40,8 @@ TaskParameters TaskTest::getParametersFromServer(const ros::NodeHandle & nh) {
     return parametersFromServer<TaskTestConfig>(nh);
 }
 
+dynamic_reconfigure::ConfigDescription TaskTest::getParameterDescription() const {
+    return TaskTestConfig::__getDescriptionMessage__();
+}
+
 DYNAMIC_TASK(TaskTest);

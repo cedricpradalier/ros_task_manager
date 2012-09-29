@@ -1,6 +1,6 @@
 
-#include "task_manager_test/TaskLongConfig.h"
 #include "task_manager_test/TaskLong.h"
+#include "task_manager_test/TaskLongConfig.h"
 using namespace task_manager_msgs;
 using namespace task_manager_test;
 
@@ -42,6 +42,10 @@ TaskIndicator TaskLong::terminate()
 
 TaskParameters TaskLong::getParametersFromServer(const ros::NodeHandle & nh) {
     return parametersFromServer<TaskLongConfig>(nh);
+}
+
+dynamic_reconfigure::ConfigDescription TaskLong::getParameterDescription() const {
+    return TaskLongConfig::__getDescriptionMessage__();
 }
 
 DYNAMIC_TASK(TaskLong);

@@ -42,7 +42,7 @@ task_manager_msgs::TaskDescription TaskDefinition::getDescription() const {
     td.description = help;
     td.periodic = periodic;
     td.timeout_s = defaultTimeout;
-    td.config = parameterDescription;
+    td.config = this->getParameterDescription();
     return td;
 }
 

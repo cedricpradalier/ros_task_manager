@@ -19,6 +19,10 @@ class TaskIdle : public TaskDefinition
 		virtual TaskIndicator terminate();
 
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh);
+
+        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {
+            return dynamic_reconfigure::ConfigDescription();
+        }
 };
 
 #endif // TASK_IDLE_H

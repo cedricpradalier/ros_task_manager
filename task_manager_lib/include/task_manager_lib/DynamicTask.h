@@ -45,6 +45,10 @@ class DynamicTask : public TaskDefinition
 			return task->getStatusString();
 		}
 
+        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {
+            return task->getParameterDescription();
+        }
+
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
             return task->getParametersFromServer(nh);
         }

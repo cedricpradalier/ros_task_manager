@@ -21,6 +21,8 @@ class TaskLong : public TaskDefinition
 		virtual TaskIndicator terminate();
 
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh);
+
+        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const ;
 };
 
 #endif // TASK_LONG_H
