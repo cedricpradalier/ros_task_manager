@@ -1,5 +1,6 @@
 #include "task_manager_test/TaskIdle.h"
 using namespace task_manager_msgs;
+using namespace task_manager_test;
 
 TaskIndicator TaskIdle::configure(const TaskParameters & parameters) throw (InvalidParameter)
 {
@@ -25,8 +26,5 @@ TaskIndicator TaskIdle::terminate()
 	return TaskStatus::TASK_TERMINATED;
 }
 
-TaskParameters TaskIdle::getParametersFromServer(const ros::NodeHandle & nh) {
-    return TaskParameters();
-}
 
 DYNAMIC_TASK(TaskIdle);

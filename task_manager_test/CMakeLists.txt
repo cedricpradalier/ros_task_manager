@@ -41,48 +41,51 @@ TARGET_LINK_LIBRARIES(TaskTest dl)
 ROSBUILD_ADD_LIBRARY( TaskLong SHARED src/TaskLong.cpp)
 TARGET_LINK_LIBRARIES(TaskLong dl)
 
+ROSBUILD_ADD_LIBRARY( TaskIdle SHARED src/TaskIdle.cpp)
+TARGET_LINK_LIBRARIES(TaskIdle dl)
 
-ROSBUILD_ADD_EXECUTABLE( testTasks src/testTasks.cpp src/TaskIdle.cpp)
-TARGET_LINK_LIBRARIES( testTasks dl)
-	
 
-ROSBUILD_ADD_EXECUTABLE( testTS1a src/testTS1a.cpp src/TaskIdle.cpp)
-TARGET_LINK_LIBRARIES( testTS1a dl )
-	
-
-ROSBUILD_ADD_EXECUTABLE( testTS1b src/testTS1b.cpp src/TaskIdle.cpp)
-TARGET_LINK_LIBRARIES( testTS1b dl )
+ROSBUILD_ADD_EXECUTABLE( testTasks src/testTasks.cpp)
+TARGET_LINK_LIBRARIES( testTasks TaskIdle dl)
 	
 
-ROSBUILD_ADD_EXECUTABLE( testTS1c src/testTS1c.cpp src/TaskIdle.cpp)
-TARGET_LINK_LIBRARIES( testTS1c dl )
+ROSBUILD_ADD_EXECUTABLE( testTS1a src/testTS1a.cpp)
+TARGET_LINK_LIBRARIES( testTS1a TaskIdle dl )
 	
 
-ROSBUILD_ADD_EXECUTABLE( testTS2a src/testTS2a.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testTS2a dl )
+ROSBUILD_ADD_EXECUTABLE( testTS1b src/testTS1b.cpp)
+TARGET_LINK_LIBRARIES( testTS1b TaskIdle dl )
 	
 
-ROSBUILD_ADD_EXECUTABLE( testTS2b src/testTS2b.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testTS2b dl )
+ROSBUILD_ADD_EXECUTABLE( testTS1c src/testTS1c.cpp)
+TARGET_LINK_LIBRARIES( testTS1c TaskIdle dl )
 	
 
-ROSBUILD_ADD_EXECUTABLE( testTS2c src/testTS2c.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testTS2c dl )
+ROSBUILD_ADD_EXECUTABLE( testTS2a src/testTS2a.cpp) 
+TARGET_LINK_LIBRARIES( testTS2a TaskIdle dl )
 	
 
-ROSBUILD_ADD_EXECUTABLE( testTS2d src/testTS2d.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testTS2d dl )
+ROSBUILD_ADD_EXECUTABLE( testTS2b src/testTS2b.cpp) 
+TARGET_LINK_LIBRARIES( testTS2b TaskIdle dl )
 	
 
-ROSBUILD_ADD_EXECUTABLE( testTS2e src/testTS2e.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testTS2e dl )
+ROSBUILD_ADD_EXECUTABLE( testTS2c src/testTS2c.cpp) 
+TARGET_LINK_LIBRARIES( testTS2c TaskIdle dl )
 	
-ROSBUILD_ADD_EXECUTABLE( testTS2f src/testTS2f.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testTS2f dl )
+
+ROSBUILD_ADD_EXECUTABLE( testTS2d src/testTS2d.cpp) 
+TARGET_LINK_LIBRARIES( testTS2d TaskIdle dl )
+	
+
+ROSBUILD_ADD_EXECUTABLE( testTS2e src/testTS2e.cpp) 
+TARGET_LINK_LIBRARIES( testTS2e TaskIdle dl )
+	
+ROSBUILD_ADD_EXECUTABLE( testTS2f src/testTS2f.cpp) 
+TARGET_LINK_LIBRARIES( testTS2f TaskIdle dl )
 	
 	
-ROSBUILD_ADD_EXECUTABLE( testServer src/testServer.cpp src/TaskIdle.cpp) 
-TARGET_LINK_LIBRARIES( testServer dl )
+ROSBUILD_ADD_EXECUTABLE( testServer src/testServer.cpp) 
+TARGET_LINK_LIBRARIES( testServer TaskIdle dl )
 	
 	
 ROSBUILD_ADD_EXECUTABLE( testClienta src/testClienta.cpp) 

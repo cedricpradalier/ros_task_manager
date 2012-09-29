@@ -63,6 +63,11 @@ class TaskParameters: public dynamic_reconfigure::Config {
                     dynamic_reconfigure::ConfigTools::appendParameter(*this,name,val);
                 }
             }
+
+        void update(const TaskParameters & tnew) {
+            // TODO: make that a smart merge
+            *this = tnew;
+        }
 };
 
 /**
@@ -178,6 +183,7 @@ class TaskDefinition
         task_manager_msgs::TaskStatus getRosStatus() const;
 
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh) = 0;
+        virtual TaskParameters getDefaultParameters() const = 0;
 
         /**
          * description of the parameters
@@ -194,15 +200,6 @@ class TaskDefinition
 			statusString = s;
 		}
 
-        template <class CFG>
-            TaskParameters parametersFromServer(const ros::NodeHandle & nh) {
-                TaskParameters tp;
-                CFG cfg;
-                cfg.__fromServer__(nh);
-                cfg.__toMessage__(tp);
-                return tp;
-            }
-
 		virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) = 0;
 
 		virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter) = 0;
@@ -211,6 +208,35 @@ class TaskDefinition
 
 		virtual TaskIndicator terminate() = 0;
 
+};
+
+template <class CFG>
+class TaskDefinitionWithConfig : public TaskDefinition {
+    public:
+		TaskDefinitionWithConfig(const std::string & tname, const std::string & thelp, 
+				bool isperiodic, double deftTimeout) :
+            TaskDefinition(tname,thelp,isperiodic,deftTimeout) {}
+        virtual ~TaskDefinitionWithConfig() {}
+
+        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {
+            return CFG::__getDescriptionMessage__();
+        }
+
+        virtual TaskParameters getDefaultParameters() const {
+            TaskParameters tp;
+            CFG cfg = CFG::__getDefault__();
+            cfg.__toMessage__(tp);
+            return tp;
+        }
+
+
+        virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
+            TaskParameters tp;
+            CFG cfg;
+            cfg.__fromServer__(nh);
+            cfg.__toMessage__(tp);
+            return tp;
+        }
 };
 
 /**

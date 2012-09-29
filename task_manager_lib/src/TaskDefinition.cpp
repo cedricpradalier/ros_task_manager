@@ -66,18 +66,20 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 
 void TaskDefinition::doConfigure(const TaskParameters & parameters)
 {
-    dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_timeout",timeout);
+    config = this->getDefaultParameters();
+    config.update(parameters);
+
+    parameters.getParameter("task_timeout",timeout);
 
 	statusString.clear();
-    config = parameters;
 	taskStatus = this->configure(parameters);
 }
 
 void TaskDefinition::doInitialise(const TaskParameters & parameters)
 {
-    dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_timeout",timeout);
+    config.update(parameters);
+    parameters.getParameter("task_timeout",timeout);
 	statusString.clear();
-    config = parameters;
 	taskStatus = this->initialise(parameters);
 }
 

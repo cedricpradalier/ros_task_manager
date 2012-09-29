@@ -14,6 +14,8 @@ void sighdl(int n) {
 }
 
 
+using namespace task_manager_test;
+
 int main(int argc, char *argv[])
 {
     ros::init(argc,argv,"tasks");

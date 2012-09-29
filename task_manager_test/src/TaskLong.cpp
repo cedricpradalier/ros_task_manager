@@ -40,12 +40,5 @@ TaskIndicator TaskLong::terminate()
 	return TaskStatus::TASK_TERMINATED;
 }
 
-TaskParameters TaskLong::getParametersFromServer(const ros::NodeHandle & nh) {
-    return parametersFromServer<TaskLongConfig>(nh);
-}
-
-dynamic_reconfigure::ConfigDescription TaskLong::getParameterDescription() const {
-    return TaskLongConfig::__getDescriptionMessage__();
-}
 
 DYNAMIC_TASK(TaskLong);

@@ -3,6 +3,8 @@
 #include "task_manager_lib/DynamicTask.h"
 #include "task_manager_test/TaskIdle.h"
 
+using namespace task_manager_test;
+
 void wait5sec()
 {
 	printf("Waiting:"); fflush(stdout);

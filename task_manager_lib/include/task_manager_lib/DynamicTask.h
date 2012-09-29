@@ -49,6 +49,10 @@ class DynamicTask : public TaskDefinition
             return task->getParameterDescription();
         }
 
+        virtual TaskParameters getDefaultParameters() const {
+            return task->getDefaultParameters();
+        }
+
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
             return task->getParametersFromServer(nh);
         }

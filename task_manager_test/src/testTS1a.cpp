@@ -2,6 +2,7 @@
 #include "task_manager_lib/TaskScheduler.h"
 #include "task_manager_lib/DynamicTask.h"
 #include "task_manager_test/TaskIdle.h"
+using namespace task_manager_test;
 
 void wait5sec()
 {
@@ -36,6 +37,7 @@ void testTSa()
 	wait5sec();
 	printf("Destroying task scheduler\n");
 }
+
 
 
 

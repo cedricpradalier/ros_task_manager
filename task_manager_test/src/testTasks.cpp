@@ -3,6 +3,8 @@
 #include "task_manager_lib/DynamicTask.h"
 
 using namespace task_manager_msgs;
+using namespace task_manager_test;
+
 
 int main(int argc, char *argv[])
 {

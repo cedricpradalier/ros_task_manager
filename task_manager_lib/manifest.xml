@@ -14,7 +14,7 @@
   <depend package="rospy"/>
   <export>
     <!-- The standard flags that allow other packages to include and link this package -->
-      <cpp cflags="-I${prefix}/include" 
+    <cpp cflags="-I${prefix}/include -I${prefix}/cfg/cpp" 
            lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ltask_manager_lib "/>
   </export>
 
