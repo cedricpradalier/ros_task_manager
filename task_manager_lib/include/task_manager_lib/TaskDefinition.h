@@ -42,10 +42,10 @@ class TaskParameters: public dynamic_reconfigure::Config {
             : dynamic_reconfigure::Config(cfg) {}
 
         void setDefaultParameters() {
-            dynamic_reconfigure::ConfigTools::appendParameter(*this,"task_rename","");
-            dynamic_reconfigure::ConfigTools::appendParameter(*this,"main_task",true);
-            dynamic_reconfigure::ConfigTools::appendParameter(*this,"task_period",-1.);
-            dynamic_reconfigure::ConfigTools::appendParameter(*this,"task_timeout",-1.);
+            setParameter("task_rename",std::string());
+            setParameter("main_task",true);
+            setParameter("task_period",-1.);
+            setParameter("task_timeout",-1.);
         }
 
 
@@ -65,8 +65,33 @@ class TaskParameters: public dynamic_reconfigure::Config {
             }
 
         void update(const TaskParameters & tnew) {
-            // TODO: make that a smart merge
-            *this = tnew;
+            for (unsigned int i = 0; i < tnew.bools.size(); i++) {
+                setParameter(tnew.bools[i].name,(bool)tnew.bools[i].value);
+            }
+            for (unsigned int i = 0; i < tnew.ints.size(); i++) {
+                setParameter(tnew.ints[i].name,(int)tnew.ints[i].value);
+            }
+            for (unsigned int i = 0; i < tnew.doubles.size(); i++) {
+                setParameter(tnew.doubles[i].name,(double)tnew.doubles[i].value);
+            }
+            for (unsigned int i = 0; i < tnew.strs.size(); i++) {
+                setParameter(tnew.strs[i].name,tnew.strs[i].value);
+            }
+        }
+
+        void print(FILE * fp=stdout) const {
+            for (unsigned int i = 0; i < bools.size(); i++) {
+                fprintf(fp,"bool: %s = %s\n",bools[i].name.c_str(),bools[i].value?"true":"false");
+            }
+            for (unsigned int i = 0; i < ints.size(); i++) {
+                fprintf(fp,"int : %s = %d\n",ints[i].name.c_str(),ints[i].value);
+            }
+            for (unsigned int i = 0; i < doubles.size(); i++) {
+                fprintf(fp,"dbl : %s = %e\n",doubles[i].name.c_str(),doubles[i].value);
+            }
+            for (unsigned int i = 0; i < strs.size(); i++) {
+                fprintf(fp,"str : %s = '%s'\n",strs[i].name.c_str(),strs[i].value.c_str());
+            }
         }
 };
 
@@ -131,10 +156,6 @@ class TaskDefinition
 		TaskIndicator taskStatus;
 
 		/**
-		 * Default timeout of the tasks, for each new cycle
-		 * */
-		double defaultTimeout;
-		/**
 		 * Timeout value for this cycle
 		 * */
 		double timeout;
@@ -150,7 +171,7 @@ class TaskDefinition
 				bool isperiodic, double deftTimeout) :
 			name(tname), help(thelp), periodic(isperiodic), 
             taskStatus(task_manager_msgs::TaskStatus::TASK_NEWBORN), 
-			defaultTimeout(deftTimeout), timeout(deftTimeout) {}
+			timeout(deftTimeout) {}
 		virtual ~TaskDefinition() {
 			printf("Delete task '%s'\n",name.c_str());
             fflush(stdout);
@@ -168,6 +189,7 @@ class TaskDefinition
 		virtual void resetStatus();
 		virtual TaskIndicator getStatus() const;
 		virtual const std::string & getStatusString() const;
+        virtual const TaskParameters & getConfig() const;
 
 		void doConfigure(const TaskParameters & parameters);
 
@@ -232,7 +254,7 @@ class TaskDefinitionWithConfig : public TaskDefinition {
 
         virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
             TaskParameters tp;
-            CFG cfg;
+            CFG cfg = CFG::__getDefault__();
             cfg.__fromServer__(nh);
             cfg.__toMessage__(tp);
             return tp;

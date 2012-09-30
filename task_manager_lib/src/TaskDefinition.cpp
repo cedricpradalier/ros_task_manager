@@ -14,6 +14,10 @@ const std::string & TaskDefinition::getHelp() const {
 	return help;
 }
 
+const TaskParameters & TaskDefinition::getConfig() const {
+	return config;
+}
+
 bool TaskDefinition::isPeriodic() const {
 	return periodic;
 }
@@ -29,19 +33,19 @@ TaskIndicator TaskDefinition::getStatus() const {
 
 task_manager_msgs::TaskStatus TaskDefinition::getRosStatus() const {
     task_manager_msgs::TaskStatus st;
-    st.name = name;
-    st.status = getStatus();
-    st.status_string = getStatusString();
-    st.plist = (dynamic_reconfigure::Config)config;
+    st.name = this->getName();
+    st.status = this->getStatus();
+    st.status_string = this->getStatusString();
+    st.plist = this->getConfig();
     return st;
 }
 
 task_manager_msgs::TaskDescription TaskDefinition::getDescription() const {
     task_manager_msgs::TaskDescription td;
-    td.name = name;
-    td.description = help;
-    td.periodic = periodic;
-    td.timeout_s = defaultTimeout;
+    td.name = this->getName();
+    td.description = this->getHelp();
+    td.periodic = this->isPeriodic();
+    td.timeout_s = this->getTimeout();
     td.config = this->getParameterDescription();
     return td;
 }
@@ -67,9 +71,16 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 void TaskDefinition::doConfigure(const TaskParameters & parameters)
 {
     config = this->getDefaultParameters();
+    // printf("Configure %s: default values\n",this->getName().c_str());
+    // config.print(stdout);
+    // printf("Configure %s: proposed values\n",this->getName().c_str());
+    // parameters.print(stdout);
     config.update(parameters);
+    // printf("Configure %s: after update\n",this->getName().c_str());
+    // config.print(stdout);
 
     parameters.getParameter("task_timeout",timeout);
+
 
 	statusString.clear();
 	taskStatus = this->configure(parameters);
@@ -78,6 +89,8 @@ void TaskDefinition::doConfigure(const TaskParameters & parameters)
 void TaskDefinition::doInitialise(const TaskParameters & parameters)
 {
     config.update(parameters);
+    // printf("Initialise %s: after update\n",this->getName().c_str());
+    // config.print(stdout);
     parameters.getParameter("task_timeout",timeout);
 	statusString.clear();
 	taskStatus = this->initialise(parameters);

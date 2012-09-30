@@ -31,6 +31,7 @@ class DynamicTask : public TaskDefinition
 		virtual void setName(const std::string & n) {task->setName(n);}
 		virtual const std::string & getName() const {return task->getName();}
 		virtual const std::string & getHelp() const {return task->getHelp();}
+		virtual const TaskParameters & getConfig() const {return task->getConfig();}
 		virtual bool isPeriodic() const {return task->isPeriodic();}
 
 		virtual double getTimeout() const {return task->getTimeout();}

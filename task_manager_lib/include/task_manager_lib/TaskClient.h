@@ -24,10 +24,12 @@ class TaskClient {
 		typedef std::map<TaskScheduler::TaskId,
 				TaskState, std::less<TaskScheduler::TaskId> > StatusMap;
 	protected:
+        mutable pthread_mutex_t mutex;
 		unsigned int messageid;
 		std::vector<task_manager_msgs::TaskDescription> taskList; 
 		StatusMap taskStatus;
 
+        ros::AsyncSpinner spinner;
         ros::ServiceClient startTaskClt;
         ros::ServiceClient stopTaskClt;
         ros::ServiceClient getTaskListClt;

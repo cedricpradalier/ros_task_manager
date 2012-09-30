@@ -22,28 +22,22 @@ int main(int argc, char * argv[])
 	int i,res = -1;
 	TaskParameters tp;
 	TaskClient::StatusMap sm;
-	signal(SIGINT,sighdl);
 
 	TaskClient client("/tasks",nh);
-
-	DEBUG(client.updateTaskList());
 
 	printf("Task list on the server:\n");
 	client.printTaskList();
 
-	DEBUGSTATUS(client.updateAllStatus());
 	printf("Task status on the server:\n");
 	client.printStatusMap();
 
 	printf("Running task Test\n");
 	DEBUG(client.startTask("Test",true,0.5,tp));
-	DEBUGSTATUS(client.updateAllStatus());
 	printf("Task status on the server:\n");
 	client.printStatusMap();
 
 	printf("Sleeping 3 sec\n");
 	for (i=0;i<3;i++) {
-		DEBUGSTATUS(client.updateAllStatus());
 		printf("Task status on the server:\n");
 		client.printStatusMap();
 		sleep(1);
@@ -52,7 +46,6 @@ int main(int argc, char * argv[])
 
 	printf("Back to idle, by termination\n");
 	for (i=0;i<5;i++) {
-		DEBUGSTATUS(client.updateAllStatus());
 		printf("Task status on the server:\n");
 		client.printStatusMap();
 		sleep(1);

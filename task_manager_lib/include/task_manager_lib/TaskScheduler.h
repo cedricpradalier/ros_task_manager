@@ -71,6 +71,7 @@ class TaskScheduler
 				statusString = task->getStatusString();
 				statusTime = tnow;
                 statusPub.publish(getRosStatus());
+                // ROS_INFO("Pub: task %d %s %s",tpid, task->getName().c_str(),taskStatusToString(status));
 			}
 
 			

@@ -132,7 +132,7 @@ class TaskClient:
 
 	def idle(self):
         try:
-            resp = self.stop_task()
+            resp = self.stop_task(-1)
             return 0
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e

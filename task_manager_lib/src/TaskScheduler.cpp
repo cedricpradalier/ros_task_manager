@@ -29,7 +29,6 @@ TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskSchedu
 	that = ts;
 	period = tperiod;
 	foreground = true;
-	updateStatus(ros::Time());
 	pthread_cond_init(&task_condition,NULL);
 	pthread_mutex_init(&task_mutex,NULL);
 	pthread_cond_init(&aperiodic_task_condition,NULL);
@@ -91,7 +90,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double
     getTaskListSrv = nh.advertiseService("get_all_tasks", &TaskScheduler::getTaskList,this);
     getAllTaskStatusSrv = nh.advertiseService("get_all_status", &TaskScheduler::getAllTaskStatus,this);
 
-    statusPub = nh.advertise<task_manager_msgs::TaskStatus>("status",1);
+    statusPub = nh.advertise<task_manager_msgs::TaskStatus>("status",20);
 }
 
 TaskScheduler::~TaskScheduler()
@@ -200,6 +199,8 @@ void TaskScheduler::configureTasks(/*const std::string & dirname, const std::str
 	for (tit = tasks.begin();tit!=tasks.end();tit++) {
 		// Try loading from the parameter server / launch file
         TaskParameters tp = tit->second->getParametersFromServer(n);
+        // printf("TS %s param from server\n",tit->second->getName().c_str());
+        // tp.print();
         std::string rename;
         if (tp.getParameter("task_rename",rename) && !rename.empty()) {
             tit->second->setName(rename);
@@ -382,6 +383,7 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 	PRINTF(0,"Runnning task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 	pthread_cond_broadcast(&tp->task_condition);
 	pthread_mutex_unlock(&tp->task_mutex);
+    tp->updateStatus(ros::Time::now());
 
 	tp->running = true;
 	try {
@@ -492,6 +494,7 @@ int TaskScheduler::cleanupTask(ThreadParameters * tp)
 	tp->status = task_manager_msgs::TaskStatus::TASK_TERMINATED;
 	tp->statusTime = now();
 	tp->statusString = "terminated";
+    tp->updateStatus(now());
 
 	lockScheduler();
 	zombieThreads.insert(TaskSetItem(tp->tpid,tp));
