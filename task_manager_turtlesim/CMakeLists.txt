@@ -38,6 +38,9 @@ gencfg()
 ROSBUILD_ADD_LIBRARY( TaskGoTo SHARED tasks/TaskGoTo.cpp)
 TARGET_LINK_LIBRARIES(TaskGoTo dl)
 
+ROSBUILD_ADD_LIBRARY( TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
+TARGET_LINK_LIBRARIES(TaskReachAngle dl)
+
 ROSBUILD_ADD_LIBRARY( TaskSetPen SHARED tasks/TaskSetPen.cpp)
 TARGET_LINK_LIBRARIES(TaskSetPen dl)
 

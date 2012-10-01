@@ -82,7 +82,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
 	pthread_mutex_init(&aqMutex,NULL);
 	pthread_cond_init(&aqCond,NULL);
 
-	printf("Task scheduler created: debug %d\n",debug);
+	ROS_INFO("Task scheduler created: debug %d\n",debug);
 
     n = nh;
     startTaskSrv = nh.advertiseService("start_task", &TaskScheduler::startTask,this);
@@ -182,7 +182,7 @@ void TaskScheduler::addTask(boost::shared_ptr<TaskDefinition> td)
 	tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinition> >(td->getName(),td));
 }
 
-void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> &env)
+void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env)
 {
     boost::shared_ptr<TaskDefinition> td(new DynamicTask(filename, env));
 
@@ -218,7 +218,7 @@ static int dllfilter(const struct dirent * d) {
 }
 
 void TaskScheduler::loadAllTasks(const std::string & dirname, 
-		boost::shared_ptr<TaskEnvironment> & env)
+		boost::shared_ptr<TaskEnvironment> env)
 {
     struct dirent **namelist;
     int n;
@@ -327,13 +327,13 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
 	TaskDirectory::const_iterator tdit;
 	tdit = tasks.find(taskname);
 	if (tdit==tasks.end()) {
-		fprintf(stderr, "Impossible to find task '%s'\n",taskname.c_str());
+		ROS_ERROR("Impossible to find task '%s'\n",taskname.c_str());
 		return -1;
 	}
 
 	// See if some runtime period has been defined in the parameters
     if (!tp.getParameter("task_period",period)) {
-		fprintf(stderr, "Missing required parameter task_period\n");
+		ROS_ERROR("Missing required parameter task_period\n");
 		return -1;
 	}
     tp.getParameter("main_task",mainTask); // ignore return
@@ -391,7 +391,7 @@ int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 		return -1;
 	}
 	tp->running = true;
-	PRINTF(0,"Running task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
+	ROS_INFO("Running task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 
 	if (tp->task->isPeriodic()) {
 		PRINTF(2,"Initialisation done\n");
@@ -561,7 +561,7 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
 	}
 	it = runningThreads.find(id);
 	if (it == runningThreads.end()) {
-		printf("Cannot find reference to task %d\n",id);
+		ROS_ERROR("Cannot find reference to task %d\n",id);
 		unlockScheduler();
 		return -1;
 	}

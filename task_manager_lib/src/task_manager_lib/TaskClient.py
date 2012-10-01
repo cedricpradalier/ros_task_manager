@@ -48,10 +48,10 @@ class TaskClient:
             if ('main_task' in paramdict):
                 foreground = bool(paramdict['main_task'])
             if (foreground):
-                print "Starting task %s in foreground" % self.name
+                rospy.loginfo("Starting task %s in foreground" % self.name)
                 return self.client.startTaskAndWait(paramdict)
             else:
-                print "Starting task %s in background" % self.name
+                rospy.loginfo("Starting task %s in background" % self.name)
                 return self.client.startTask(paramdict)
 
     class TaskStatus:
@@ -86,7 +86,7 @@ class TaskClient:
             rospy.wait_for_service(self.server_node + '/get_all_status')
             self.get_status = rospy.ServiceProxy(self.server_node + '/get_all_status', GetAllTaskStatus)
         except rospy.ServiceException, e:
-            print "Service initialisation failed: %s"%e
+            rospy.logerr("Service initialisation failed: %s"%e)
             raise
 
         self.keepAlivePub = rospy.Publisher(self.server_node + "/keep_alive",std_msgs.msg.Header)
@@ -119,7 +119,7 @@ class TaskClient:
             for t in resp.tlist:
                 self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,self)
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            rospy.logerr("Service call failed: %s"%e)
 
     def printTaskList(self):
         for k,v in self.tasklist.iteritems():
@@ -141,18 +141,17 @@ class TaskClient:
                 paramdict['task_period'] = float(period)
             config = encode_config(paramdict)
             # print config
-            if (self.verbose):
-                print "Starting task %s" % name
+            rospy.loginfo("Starting task %s" % name)
             resp = self.start_task(name,config)
             return resp.id
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            rospy.logerr( "Service call failed: %s"%e)
             raise
 
     def startTaskAndWait(self,paramdict,name="",foreground=True,period=-1.):
         tid = self.startTask(paramdict,name,foreground,period)
         if (self.verbose):
-            print "Waiting task %d" % tid
+            rospy.logdebug( "Waiting task %d" % tid)
         return self.waitTask(tid)
 
     def idle(self):
@@ -160,7 +159,7 @@ class TaskClient:
             resp = self.stop_task(-1)
             return 0
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            rospy.logerr( "Service call failed: %s"%e)
             raise
 
     def status_callback(self,t):
@@ -196,7 +195,7 @@ class TaskClient:
                 ts.statusTime = t.status_time.to_sec()
                 self.taskstatus[ts.id] = ts
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            rospy.logerr( "Service call failed: %s"%e)
             raise
 
 
@@ -208,15 +207,15 @@ class TaskClient:
             t1 = rospy.Time.now().to_sec()
             if ((t1-t0) > 1.0) and (id not in self.taskstatus):
                 if (self.verbose):
-                    print "Id %d not in taskstatus" % id
+                    rospy.logerr("Id %d not in taskstatus" % id)
                 raise TaskException("Task %d did not appear in task status" % id);
             if (self.taskstatus[id].status == statusTerminated):
                 if (self.verbose):
-                    print "Task %d terminated" % id
+                    rospy.loginfo("Task %d terminated" % id)
                 return True
             if (self.taskstatus[id].status > statusTerminated):
                 if (self.verbose):
-                    print "Task %d failed" % id
+                    rospy.logwarn( "Task %d failed" % id)
                 raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
         if rospy.core.is_shutdown():
             raise TaskException("Aborting due to ROS shutdown");

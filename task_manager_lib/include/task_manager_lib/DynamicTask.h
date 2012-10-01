@@ -6,11 +6,18 @@
 
 #include "TaskDefinition.h"
 
+// Specialisation of the TaskDefinition to use a task dynamically loaded from a
+// library. Note that such a dynamically loaded class must have a constructor
+// with the following profile:
+//    TaskXXX(boost::shared_ptr<TaskEnvironment> env)
 class DynamicTask : public TaskDefinition
 {
 	protected:
+        // DLL file
 		std::string filename;
+        // Pointer to the dll object
 		void * handle;
+        // Shared pointer on the loaded task
         boost::shared_ptr<TaskDefinition> task;
 
 		struct DLLoadError : public std::exception {
@@ -25,8 +32,15 @@ class DynamicTask : public TaskDefinition
 		};
 
 	public:
+        // Load a class from a library file fname, and pass env to its
+        // constructor. 
 		DynamicTask(const std::string & fname, boost::shared_ptr<TaskEnvironment> env);
 		virtual ~DynamicTask();
+
+        //
+        // All virtual function below are just forwarding their function to the
+        // loaded class.
+        //
 
 		virtual void setName(const std::string & n) {task->setName(n);}
 		virtual const std::string & getName() const {return task->getName();}

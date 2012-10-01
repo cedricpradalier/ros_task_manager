@@ -1,19 +1,19 @@
-#ifndef TASK_GOTO_H
-#define TASK_GOTO_H
+#ifndef TASK_REACH_ANGLE_H
+#define TASK_REACH_ANGLE_H
 
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
-#include "task_manager_turtlesim/TaskGoToConfig.h"
+#include "task_manager_turtlesim/TaskReachAngleConfig.h"
 
 namespace task_manager_turtlesim {
-    class TaskGoTo : public TaskDefinitionWithConfig<TaskGoToConfig>
+    class TaskReachAngle : public TaskDefinitionWithConfig<TaskReachAngleConfig>
     {
         protected:
             boost::shared_ptr<TurtleSimEnv> env;
-            TaskGoToConfig cfg;
+            TaskReachAngleConfig cfg;
         public:
-            TaskGoTo(boost::shared_ptr<TaskEnvironment> env); 
-            virtual ~TaskGoTo() {};
+            TaskReachAngle(boost::shared_ptr<TaskEnvironment> env); 
+            virtual ~TaskReachAngle() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);
 
@@ -26,4 +26,4 @@ namespace task_manager_turtlesim {
     };
 };
 
-#endif // TASK_GOTO_H
+#endif // TASK_REACH_ANGLE_H

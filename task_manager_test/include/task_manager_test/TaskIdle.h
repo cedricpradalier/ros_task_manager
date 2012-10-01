@@ -9,7 +9,7 @@ namespace task_manager_test {
     {
         protected:
         public:
-            TaskIdle(boost::shared_ptr<TaskEnvironment> &env) 
+            TaskIdle(boost::shared_ptr<TaskEnvironment> env) 
                 : TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig>("Idle","Do nothing",true,-1) {}
             virtual ~TaskIdle() {};
 

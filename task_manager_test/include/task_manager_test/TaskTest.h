@@ -11,7 +11,7 @@ namespace task_manager_test {
             double duration;
             unsigned int counter;
         public:
-            TaskTest(boost::shared_ptr<TaskEnvironment> &env) : TaskDefinitionWithConfig<TaskTestConfig>("Test","Do nothing",true,-1.), counter(0) {}
+            TaskTest(boost::shared_ptr<TaskEnvironment> env) : TaskDefinitionWithConfig<TaskTestConfig>("Test","Do nothing",true,-1.), counter(0) {}
             virtual ~TaskTest() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);

@@ -62,10 +62,12 @@ const std::string & TaskDefinition::getStatusString() const {
 
 void TaskDefinition::debug(const char *stemplate,...) const {
 	va_list args;
-	printf("%s: ",this->getName().c_str());
+    char buffer[1024];
 	va_start(args, stemplate);
-	vprintf(stemplate,args);
+	vsnprintf(buffer,1023, stemplate,args);
 	va_end(args);
+    buffer[1023]=0;
+	ROS_DEBUG("%s: %s",this->getName().c_str(),buffer);
 }
 
 void TaskDefinition::doConfigure(const TaskParameters & parameters)

@@ -18,6 +18,7 @@
 #define TASK_FOREGROUND 0x100l
 #define TASK_BACKGROUND 0x000l
 
+// Class that manages the execution of task directly or through ROS services
 class TaskScheduler
 {
 	public:
@@ -125,7 +126,8 @@ class TaskScheduler
 		};
 		static const char * actionString(ActionType at);
 
-		
+        // Action queueing mecanism. Action are used to manage the threads
+        // associated with each task.
 		typedef std::map<double, ThreadAction, std::less<double> > ActionQueue;
 		ActionQueue actionQueue;
 		ThreadAction getNextAction();
@@ -149,6 +151,7 @@ class TaskScheduler
 		pthread_mutex_t scheduler_mutex;
 		pthread_cond_t scheduler_condition;
 
+        // Basic thread management functions
 		static void * thread_func(void *);
 		static void cleanitup(void * arg);
 		static void* runAperiodicTask(void * arg);
@@ -158,8 +161,11 @@ class TaskScheduler
 		int cleanupTask(boost::shared_ptr<ThreadParameters> tp);
 		int deleteTask(boost::shared_ptr<ThreadParameters> tp);
 
+        // Wrapper around pthread_mutex_lock/unlock
 		void lockScheduler();
 		void unlockScheduler();
+
+        // All ROS callbacks
         bool startTask(task_manager_lib::StartTask::Request  &req,
                 task_manager_lib::StartTask::Response &res );
         bool stopTask(task_manager_lib::StopTask::Request  &req,
@@ -169,33 +175,55 @@ class TaskScheduler
         bool getTaskList(task_manager_lib::GetTaskList::Request  &req,
                 task_manager_lib::GetTaskList::Response &res );
 
+        // Generate a task description list, ready to be published by ROS
+		void generateTaskList(std::vector<task_manager_msgs::TaskDescription> & tlist) const;
+        // Generate a task status vector, ready to be published by ROS
+		void generateTaskStatus(std::vector<task_manager_msgs::TaskStatus> & running,
+                std::vector<task_manager_msgs::TaskStatus> & zombies) ;
+
+        // convenience function
+        ros::Time now() { return ros::Time::now();}
 	public:
+        // Default constructor:
+        // nh: ros NodeHandle in which all the services and topic will  be
+        // created.
+        // idle: a pointer to the definition of the idle class
+        // deftPeriod: the default period for task execution
 		TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinition> idle, double deftPeriod);
 		~TaskScheduler();
+        
+        // Cleanup all the task
 		int terminateAllTasks();
+        // Print the task directory (added task plus dynamic tasks)
 		void printTaskDirectory() const;
-		void configureTasks(/* const std::string & dirname=".", const std::string & extension="cfg" */);
-
-		int startScheduler();
-		int stopScheduler();
-        ros::Time now() { return ros::Time::now();}
-
+        // Return the task directory
 		const TaskDirectory & getDirectory() const {return tasks;}
 
+        // Call the configure function of all the tasks
+		void configureTasks();
+
+        // Start the scheduling thread
+		int startScheduler();
+        // Stop the scheduling thread
+		int stopScheduler();
+        
+
+        // Start a task by name and parameters
 		TaskId launchTask(const std::string & taskname, const TaskParameters & tp);
+        // Start the idle task, eventually terminating the current foreground
 		TaskId launchIdleTask();
+        // Wait for a given task to complete
 		int waitTaskCompletion(TaskId id, double timeout);
 
 
+        // Add a task to the directory
 		void addTask(boost::shared_ptr<TaskDefinition> task);
 
-		void loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> &env);
-		void loadAllTasks(const std::string & dirname, boost::shared_ptr<TaskEnvironment> &env);
-
-
-		void generateTaskList(std::vector<task_manager_msgs::TaskDescription> & tlist) const;
-		void generateTaskStatus(std::vector<task_manager_msgs::TaskStatus> & running,
-                std::vector<task_manager_msgs::TaskStatus> & zombies) ;
+        // Load a task from a file to the directory, and create it with
+        // argument env
+		void loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env);
+        // Load all task from a folder and initialise all of them with env.
+		void loadAllTasks(const std::string & dirname, boost::shared_ptr<TaskEnvironment> env);
 
 };
 

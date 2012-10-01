@@ -4,7 +4,7 @@
 using namespace task_manager_msgs;
 using namespace task_manager_turtlesim;
 
-TaskSetPen::TaskSetPen(boost::shared_ptr<TaskEnvironment> &tenv)
+TaskSetPen::TaskSetPen(boost::shared_ptr<TaskEnvironment> tenv)
     : TaskDefinitionWithConfig<TaskSetPenConfig>("SetPen","Set pen value",false,-1.)
 {
     env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
