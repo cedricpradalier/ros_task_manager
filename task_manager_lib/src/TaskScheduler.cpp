@@ -19,7 +19,7 @@ const double TaskScheduler::DELETE_TIMEOUT=2.0;
 const double TaskScheduler::IDLE_TIMEOUT=0.5;
 
 TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskScheduler *ts, 
-		TaskDefinition *td, double tperiod) : statusPub(pub)
+		boost::shared_ptr<TaskDefinition> td, double tperiod) : statusPub(pub)
 {
 	gtpid += 1;
 	tpid = gtpid;
@@ -63,7 +63,7 @@ TaskScheduler::ThreadParameters::~ThreadParameters()
 	pthread_mutex_destroy(&aperiodic_task_mutex);
 }
 
-TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double deftPeriod)
+TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinition> tidle, double deftPeriod)
 {
 	aqid = 0;
 	runScheduler = false;
@@ -76,7 +76,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double
 	startingTime = ros::Time::now().toSec();
 
 
-	mainThread = NULL;
+	mainThread.reset();
 	pthread_mutex_init(&scheduler_mutex,NULL);
 	pthread_cond_init(&scheduler_condition,NULL);
 	pthread_mutex_init(&aqMutex,NULL);
@@ -91,6 +91,13 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double
     getAllTaskStatusSrv = nh.advertiseService("get_all_status", &TaskScheduler::getAllTaskStatus,this);
 
     statusPub = nh.advertise<task_manager_msgs::TaskStatus>("status",20);
+    keepAliveSub = nh.subscribe("keep_alive",1,&TaskScheduler::keepAliveCallback,this);
+    lastKeepAlive = ros::Time::now();
+}
+
+void TaskScheduler::keepAliveCallback(const std_msgs::Header::ConstPtr& msg) 
+{
+    lastKeepAlive = ros::Time::now();
 }
 
 TaskScheduler::~TaskScheduler()
@@ -98,19 +105,8 @@ TaskScheduler::~TaskScheduler()
 	terminateAllTasks();
 	stopScheduler();
 
-	TaskSet::iterator it;
-	for (it = zombieThreads.begin();it!=zombieThreads.end();it++) {
-		// delete pointer and empty the list of running tasks
-		delete it->second;
-	}
 	zombieThreads.clear();
-	TaskDirectory::iterator tit;
-	for (tit = tasks.begin();tit!=tasks.end();tit++) {
-		delete tit->second;
-	}
 	tasks.clear();
-	// Do not delete idle, because it is in tasks already
-	idle = NULL;
 	pthread_mutex_destroy(&scheduler_mutex);
 	pthread_cond_destroy(&scheduler_condition);
 	pthread_mutex_destroy(&aqMutex);
@@ -177,23 +173,23 @@ int TaskScheduler::terminateAllTasks()
 		terminateTask(it->second);
 	}
 	runningThreads.clear();
-	mainThread = NULL;
+	mainThread.reset();
 	return 0;
 }
 
-void TaskScheduler::addTask(TaskDefinition *td) 
+void TaskScheduler::addTask(boost::shared_ptr<TaskDefinition> td) 
 {
-	tasks.insert(std::pair<std::string,TaskDefinition*>(td->getName(),td));
+	tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinition> >(td->getName(),td));
 }
 
-void TaskScheduler::loadTask(const std::string & filename, TaskEnvironment *env)
+void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> &env)
 {
-	TaskDefinition *td = new DynamicTask(filename, env);
+    boost::shared_ptr<TaskDefinition> td(new DynamicTask(filename, env));
 
 	addTask(td);
 }
 
-void TaskScheduler::configureTasks(/*const std::string & dirname, const std::string & extension*/)
+void TaskScheduler::configureTasks()
 {
 	TaskDirectory::const_iterator tit;
 	for (tit = tasks.begin();tit!=tasks.end();tit++) {
@@ -222,7 +218,7 @@ static int dllfilter(const struct dirent * d) {
 }
 
 void TaskScheduler::loadAllTasks(const std::string & dirname, 
-		TaskEnvironment *env)
+		boost::shared_ptr<TaskEnvironment> & env)
 {
     struct dirent **namelist;
     int n;
@@ -242,16 +238,16 @@ void TaskScheduler::loadAllTasks(const std::string & dirname,
 
 void TaskScheduler::cleanitup(void * arg)
 {
-	TaskScheduler::ThreadParameters *tp = (ThreadParameters*)arg;
+    boost::shared_ptr<ThreadParameters> tp = *(boost::shared_ptr<ThreadParameters>*)arg;
 	TaskScheduler *that = tp->that;
 	that->cleanupTask(tp);
 }
 
 void * TaskScheduler::thread_func(void * arg)
 {
-	ThreadParameters *tp = (ThreadParameters*)arg;
+    boost::shared_ptr<ThreadParameters> tp = *(boost::shared_ptr<ThreadParameters>*)arg;
 	TaskScheduler *that = tp->that;
-	pthread_cleanup_push(cleanitup,tp);
+	pthread_cleanup_push(cleanitup,&tp);
 	that->runTask(tp);
 	pthread_cleanup_pop(1);
 	return NULL;
@@ -273,20 +269,20 @@ TaskScheduler::TaskId TaskScheduler::launchIdleTask()
 	PRINTF(3,"lit:Locking\n");
 	lockScheduler();
 	PRINTF(3,"lit:Locked\n");
-	mainThread = new ThreadParameters(statusPub, this, idle, period);
+	mainThread = boost::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, idle, period));
 	mainThread->foreground = true;
 	runningThreads[mainThread->tpid] = mainThread;
 	if (debug>=3) printTaskSet("After launch idle",runningThreads);
 	unlockScheduler();
 	PRINTF(3,"lit:Unlocked\n");
 
-	if (pthread_create(&mainThread->tid,NULL,thread_func,mainThread)) {
+	if (pthread_create(&mainThread->tid,NULL,thread_func,&mainThread)) {
 		return 0;
 	}
 	return mainThread->tpid;
 }
 
-TaskScheduler::TaskId TaskScheduler::launchTask(ThreadParameters *tp)
+TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParameters> tp)
 {
 
 	if (tp->foreground) {
@@ -306,7 +302,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(ThreadParameters *tp)
 	PRINTF(3,"lt:Unlocked\n");
 
 	pthread_mutex_lock(&tp->task_mutex);
-	if (pthread_create(&tp->tid,NULL,thread_func,tp)) {
+	if (pthread_create(&tp->tid,NULL,thread_func,&tp)) {
 		// there is a risk to check here
 		pthread_cond_broadcast(&tp->task_condition);
 		pthread_mutex_unlock(&tp->task_mutex);
@@ -343,7 +339,8 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     tp.getParameter("main_task",mainTask); // ignore return
 
 	// Finally create the thread responsible for running the task
-	ThreadParameters *tparam = new ThreadParameters(statusPub, this, tdit->second, period);
+    boost::shared_ptr<ThreadParameters> tparam =
+        boost::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, tdit->second, period));
 	tparam->params = tp;
 	tparam->foreground = mainTask;
 	tparam->running = false;
@@ -365,7 +362,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
 
 void * TaskScheduler::runAperiodicTask(void *arg)
 {
-	ThreadParameters *tp = (ThreadParameters*)arg;
+    boost::shared_ptr<ThreadParameters> tp = *(boost::shared_ptr<ThreadParameters>*)arg;
 
 	// Just a barrier...
 	pthread_mutex_lock(&tp->aperiodic_task_mutex);
@@ -377,7 +374,7 @@ void * TaskScheduler::runAperiodicTask(void *arg)
 	return NULL;
 }
 
-int TaskScheduler::runTask(ThreadParameters * tp)
+int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 {
     double tstart = ros::Time::now().toSec();
 	pthread_cond_broadcast(&tp->task_condition);
@@ -400,6 +397,12 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 		PRINTF(2,"Initialisation done\n");
 		while (1) {
             double t0 = ros::Time::now().toSec();
+            if (mainThread && (mainThread->task!=idle) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+				tp->task->debug("KEEPALIVE failed\n");
+				tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
+				break;
+            }
+
 			if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
 				tp->task->debug("TIMEOUT\n");
 				tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
@@ -426,10 +429,15 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 		bool first = true;
 		pthread_t id;
 		pthread_mutex_lock(&tp->aperiodic_task_mutex);
-		pthread_create(&id, NULL, runAperiodicTask, tp);
+		pthread_create(&id, NULL, runAperiodicTask, &tp);
 		while (1) {
 			struct timespec ts;
             double t0 = ros::Time::now().toSec();
+            if (mainThread && (mainThread->task!=idle) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+				tp->task->debug("KEEPALIVE failed\n");
+				tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
+				break;
+            }
 			if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
 				tp->task->debug("TIMEOUT\n");
 				tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
@@ -461,9 +469,9 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 	return 0;
 }
 
-int TaskScheduler::terminateTask(ThreadParameters *tp)
+int TaskScheduler::terminateTask(boost::shared_ptr<ThreadParameters> tp)
 {
-	if (tp == NULL) return 0;
+	if (!tp) return 0;
 	PRINTF(1,"Terminating thread %s\n",tp->task->getName().c_str());
 
 	pthread_cancel(tp->tid);
@@ -485,7 +493,7 @@ void TaskScheduler::printTaskSet(const std::string & name, const TaskScheduler::
 	printf("-------------------\n");
 }
 
-int TaskScheduler::cleanupTask(ThreadParameters * tp)
+int TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
 {
 	if (tp == NULL) return 0;
 	PRINTF(1,"Cleaning up task %d:%s\n",tp->tpid,tp->task->getName().c_str());
@@ -507,7 +515,7 @@ int TaskScheduler::cleanupTask(ThreadParameters * tp)
 
 
 	if (tp->foreground) {
-		mainThread = NULL;
+		mainThread.reset();
 		if (tp->task!=idle) {
 			enqueueAction(ros::Time::now()+ros::Duration(IDLE_TIMEOUT),CONDITIONALLY_IDLE,tp);
 		}
@@ -524,7 +532,7 @@ int TaskScheduler::cleanupTask(ThreadParameters * tp)
 	return 0;
 }
 
-int TaskScheduler::deleteTask(ThreadParameters *tp)
+int TaskScheduler::deleteTask(boost::shared_ptr<ThreadParameters> tp)
 {
 	TaskSet::iterator it = zombieThreads.find(tp->tpid);
 	assert(it != zombieThreads.end());
@@ -532,7 +540,7 @@ int TaskScheduler::deleteTask(ThreadParameters *tp)
 	if (tp->tid) {
 		pthread_join(tp->tid,NULL);
 	}
-	delete tp;
+	tp.reset();
 	return 0;
 }
 
@@ -586,7 +594,7 @@ void TaskScheduler::cleanup_action(void *arg) {
 	ThreadAction *ta = (ThreadAction*)arg;
 	PRINTF(2,"Action wait cancelled\n");
 	ta->type = WAIT_CANCELLED;
-	ta->tp = NULL;
+	ta->tp.reset();
 }
 
 void TaskScheduler::removeConditionalIdle()
@@ -666,7 +674,7 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
 	return ta;
 }
 
-void TaskScheduler::enqueueAction(ActionType type,ThreadParameters *tp)
+void TaskScheduler::enqueueAction(ActionType type,boost::shared_ptr<ThreadParameters> tp)
 {
 	ThreadAction ta;
 	PRINTF(3,"ea:Locking\n");
@@ -686,7 +694,7 @@ void TaskScheduler::enqueueAction(ActionType type,ThreadParameters *tp)
 	pthread_mutex_unlock(&aqMutex);
 }
 
-void TaskScheduler::enqueueAction(const ros::Time & when, ActionType type,ThreadParameters *tp)
+void TaskScheduler::enqueueAction(const ros::Time & when, ActionType type,boost::shared_ptr<ThreadParameters> tp)
 {
 	ThreadAction ta;
 	PRINTF(3,"ea:Locking\n");
@@ -785,7 +793,7 @@ int TaskScheduler::startScheduler()
 {
 	assert(!runScheduler);
 	runScheduler = true;
-	enqueueAction(START_IDLE_TASK,NULL);
+	enqueueAction(START_IDLE_TASK,boost::shared_ptr<ThreadParameters>());
 	int res = pthread_create(&aqid,NULL,scheduler_thread,this);
 	return res;
 }
@@ -795,7 +803,7 @@ int TaskScheduler::stopScheduler()
 	PRINTF(2,"Stopping scheduler (%d)\n",runScheduler);
 	if (!runScheduler) return 0;
 	runScheduler = false;
-	enqueueAction(WAIT_CANCELLED,NULL);
+	enqueueAction(WAIT_CANCELLED,boost::shared_ptr<ThreadParameters>());
 	pthread_join(aqid,NULL);
 	aqid = 0;
 	PRINTF(2,"Cleaning-up action queue (%d)\n",actionQueue.size());

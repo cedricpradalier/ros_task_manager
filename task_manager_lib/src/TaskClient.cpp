@@ -1,4 +1,5 @@
 
+#include <std_msgs/Header.h>
 #include "task_manager_lib/TaskClient.h"
 #include "task_manager_lib/StartTask.h"
 #include "task_manager_lib/StopTask.h"
@@ -15,11 +16,13 @@ TaskClient::TaskClient(const std::string & node, ros::NodeHandle & nh) : spinner
     getAllTaskStatusClt = nh.serviceClient<task_manager_lib::GetAllTaskStatus>(node+"/get_all_status");
     updateAllStatus();
 
+    keepAlivePub = nh.advertise<std_msgs::Header>(node+"/keep_alive",1);
     statusSub = nh.subscribe(node+"/status",0,&TaskClient::statusCallback,this);
     pthread_mutex_init(&mutex,NULL);
     updateTaskList();
     updateAllStatus();
     spinner.start();
+    keepAliveTimer = nh.createTimer(ros::Duration(0.1), &TaskClient::timerCallback, this);
     ros::Duration(0.5).sleep();
 }
 
@@ -27,6 +30,11 @@ TaskClient::~TaskClient()
 {
 }
 
+void TaskClient::timerCallback(const ros::TimerEvent &) {
+    std_msgs::Header header;
+    header.stamp = ros::Time::now();
+    keepAlivePub.publish(header);
+}
 
 void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& msg) 
 {
@@ -158,7 +166,7 @@ bool TaskClient::waitTask(TaskScheduler::TaskId tid)
 	StatusMap::const_iterator it;
     bool finished = false;
     bool result = false;
-	while (!finished) {
+	while (ros::ok() && !finished) {
         // TODO: blocking wait
         pthread_mutex_lock(&mutex);
 		const StatusMap & sm = getStatusMap();

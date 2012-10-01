@@ -18,11 +18,11 @@ void wait5sec()
 void testTSa()
 {
     ros::NodeHandle nh("~");
-	TaskEnvironment env;
+    boost::shared_ptr<TaskEnvironment> env(new TaskEnvironment());
 	printf("\n*******************\n\nTesting basic task scheduler functions (A)\n");
 	printf("Creating tasks\n");
-	TaskDefinition *idle = new TaskIdle(&env);
-	TaskDefinition *dtask = new DynamicTask("./lib/libTaskTest.so",&env);
+    boost::shared_ptr<TaskDefinition> idle(new TaskIdle(env));
+    boost::shared_ptr<TaskDefinition> dtask(new DynamicTask("./lib/libTaskTest.so",env));
 	printf("Creating task scheduler\n");
 	TaskScheduler ts(nh,idle, 1.0);
 	ts.printTaskDirectory();

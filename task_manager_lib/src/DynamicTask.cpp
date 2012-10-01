@@ -3,7 +3,7 @@
 #include "task_manager_lib/DynamicTask.h"
 
 
-DynamicTask::DynamicTask(const std::string & fname, TaskEnvironment *env) :
+DynamicTask::DynamicTask(const std::string & fname, boost::shared_ptr<TaskEnvironment> env) :
 	TaskDefinition("DynamicTask","undefined",true,-1.0),filename(fname) 
 {
 	// Hack to garantee alignment on 32 bits, for valgrind
@@ -30,8 +30,7 @@ DynamicTask::DynamicTask(const std::string & fname, TaskEnvironment *env) :
 DynamicTask::~DynamicTask()
 {
 	// printf("Deleting dynamic task: ");
-	delete task; 
-	task = NULL;
+	task.reset();
 	dlclose(handle);
 	handle = NULL;
 }

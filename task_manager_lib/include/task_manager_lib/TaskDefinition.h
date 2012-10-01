@@ -48,6 +48,20 @@ class TaskParameters: public dynamic_reconfigure::Config {
             setParameter("task_timeout",-1.);
         }
 
+        template <class CFG>
+            CFG toConfig() const {
+                CFG cfg = CFG::__getDefault__();
+                dynamic_reconfigure::Config drc = *this;
+                cfg.__fromMessage__(drc);
+                return cfg;
+            }
+
+        template <class CFG>
+            void fromConfig(const CFG & cfg) {
+                dynamic_reconfigure::Config drc = *this;
+                cfg.__toMessage__(drc);
+                *this = drc;
+            }
 
         template <class T>
             bool getParameter(const std::string &name, T &val) const
@@ -272,10 +286,10 @@ class TaskEnvironment {
 		virtual ~TaskEnvironment() {}
 };
 
-typedef TaskDefinition* (*TaskFactory)(TaskEnvironment *);
+typedef boost::shared_ptr<TaskDefinition> (*TaskFactory)(boost::shared_ptr<TaskEnvironment>&);
 #define DYNAMIC_TASK(T) extern "C" {\
-	TaskDefinition* TaskFactoryObject(TaskEnvironment *environment) {\
-		return new T(environment);\
+    boost::shared_ptr<TaskDefinition> TaskFactoryObject(boost::shared_ptr<TaskEnvironment> &environment) {\
+		return boost::shared_ptr<TaskDefinition>(new T(environment));\
 	} \
 }
 

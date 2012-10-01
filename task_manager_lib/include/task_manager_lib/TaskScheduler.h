@@ -7,6 +7,7 @@
 
 #include "TaskDefinition.h"
 #include <ros/ros.h>
+#include <std_msgs/Header.h>
 #include "task_manager_lib/StartTask.h"
 #include "task_manager_lib/StopTask.h"
 #include "task_manager_lib/GetTaskList.h"
@@ -27,7 +28,7 @@ class TaskScheduler
 
 			bool foreground,running;
 			unsigned int tpid;
-			TaskDefinition *task;
+            boost::shared_ptr<TaskDefinition> task;
             TaskParameters params;
 			TaskScheduler *that;
 			double period;
@@ -44,7 +45,7 @@ class TaskScheduler
             ros::Publisher statusPub;
 
 			ThreadParameters(ros::Publisher pub, TaskScheduler *ts, 
-					TaskDefinition *td, 
+					boost::shared_ptr<TaskDefinition> td, 
 					double tperiod);
 			ThreadParameters(const ThreadParameters & tp);
 			~ThreadParameters();
@@ -81,25 +82,29 @@ class TaskScheduler
 		};
     protected:
         ros::NodeHandle n;
+        ros::Time lastKeepAlive;
+        ros::Subscriber keepAliveSub;
         ros::Publisher statusPub;
         ros::ServiceServer startTaskSrv;
         ros::ServiceServer stopTaskSrv;
         ros::ServiceServer getTaskListSrv;
         ros::ServiceServer getAllTaskStatusSrv;
 
+        void keepAliveCallback(const std_msgs::Header::ConstPtr& msg);
+
 	protected:
 
 
-		TaskDefinition *idle;
-		typedef std::map<std::string,TaskDefinition*,std::less<std::string> > TaskDirectory;
-		typedef std::pair<unsigned int, ThreadParameters*> TaskSetItem;
-		typedef std::map<unsigned int, ThreadParameters*, std::less<unsigned int> > TaskSet;
+        boost::shared_ptr<TaskDefinition> idle;
+		typedef std::map<std::string,boost::shared_ptr<TaskDefinition>,std::less<std::string> > TaskDirectory;
+		typedef std::pair<unsigned int, boost::shared_ptr<ThreadParameters> > TaskSetItem;
+		typedef std::map<unsigned int, boost::shared_ptr<ThreadParameters>, std::less<unsigned int> > TaskSet;
 		TaskDirectory tasks;
 
 		TaskSet runningThreads,zombieThreads;
 		static void printTaskSet(const std::string & name, const TaskSet & ts);
 
-		ThreadParameters *mainThread;
+        boost::shared_ptr<ThreadParameters> mainThread;
 
 	protected:
 		static unsigned int debug;
@@ -116,7 +121,7 @@ class TaskScheduler
 		} ActionType;
 		struct ThreadAction {
 			ActionType type;
-			ThreadParameters *tp;
+            boost::shared_ptr<ThreadParameters> tp;
 		};
 		static const char * actionString(ActionType at);
 
@@ -124,8 +129,8 @@ class TaskScheduler
 		typedef std::map<double, ThreadAction, std::less<double> > ActionQueue;
 		ActionQueue actionQueue;
 		ThreadAction getNextAction();
-		void enqueueAction(ActionType type,ThreadParameters * tp);
-		void enqueueAction(const ros::Time & when, ActionType type,ThreadParameters * tp);
+		void enqueueAction(ActionType type,boost::shared_ptr<ThreadParameters> tp);
+		void enqueueAction(const ros::Time & when, ActionType type,boost::shared_ptr<ThreadParameters> tp);
 		void removeConditionalIdle();
 		
 		bool runScheduler;
@@ -147,11 +152,11 @@ class TaskScheduler
 		static void * thread_func(void *);
 		static void cleanitup(void * arg);
 		static void* runAperiodicTask(void * arg);
-		TaskId launchTask(ThreadParameters *tp);
-		int runTask(ThreadParameters *tp);
-		int terminateTask(ThreadParameters *tp);
-		int cleanupTask(ThreadParameters *tp);
-		int deleteTask(ThreadParameters *tp);
+		TaskId launchTask(boost::shared_ptr<ThreadParameters> tp);
+		int runTask(boost::shared_ptr<ThreadParameters> tp);
+		int terminateTask(boost::shared_ptr<ThreadParameters> tp);
+		int cleanupTask(boost::shared_ptr<ThreadParameters> tp);
+		int deleteTask(boost::shared_ptr<ThreadParameters> tp);
 
 		void lockScheduler();
 		void unlockScheduler();
@@ -165,7 +170,7 @@ class TaskScheduler
                 task_manager_lib::GetTaskList::Response &res );
 
 	public:
-		TaskScheduler(ros::NodeHandle & nh, TaskDefinition *idle, double deftPeriod);
+		TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinition> idle, double deftPeriod);
 		~TaskScheduler();
 		int terminateAllTasks();
 		void printTaskDirectory() const;
@@ -182,10 +187,10 @@ class TaskScheduler
 		int waitTaskCompletion(TaskId id, double timeout);
 
 
-		void addTask(TaskDefinition *task);
+		void addTask(boost::shared_ptr<TaskDefinition> task);
 
-		void loadTask(const std::string & filename, TaskEnvironment *env);
-		void loadAllTasks(const std::string & dirname, TaskEnvironment *env);
+		void loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> &env);
+		void loadAllTasks(const std::string & dirname, boost::shared_ptr<TaskEnvironment> &env);
 
 
 		void generateTaskList(std::vector<task_manager_msgs::TaskDescription> & tlist) const;

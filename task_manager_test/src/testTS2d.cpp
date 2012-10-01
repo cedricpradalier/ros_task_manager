@@ -19,8 +19,8 @@ void waitabit(unsigned int bit)
 
 void testTSd()
 {
-	TaskEnvironment env;
     ros::NodeHandle nh("~");
+    boost::shared_ptr<TaskEnvironment> env(new TaskEnvironment());
 	TaskParameters tp;
 	printf("\n*******************\n\nTesting task scheduler functions (timeout)\n");
 	printf("Loading tasks parameters\n");
@@ -31,8 +31,8 @@ void testTSd()
     tp.setParameter("main_task",true);
 
 	printf("Creating tasks\n");
-	TaskDefinition *idle = new TaskIdle(&env);
-	TaskDefinition *dtask = new DynamicTask("./lib/libTaskTest.so",&env);
+    boost::shared_ptr<TaskDefinition> idle(new TaskIdle(env));
+    boost::shared_ptr<TaskDefinition> dtask(new DynamicTask("./lib/libTaskTest.so",env));
 	printf("Creating task scheduler\n");
 	TaskScheduler ts(nh,idle, 0.5);
 	ts.printTaskDirectory();

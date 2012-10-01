@@ -62,7 +62,7 @@ const std::string & TaskDefinition::getStatusString() const {
 
 void TaskDefinition::debug(const char *stemplate,...) const {
 	va_list args;
-	printf("%s: ",name.c_str());
+	printf("%s: ",this->getName().c_str());
 	va_start(args, stemplate);
 	vprintf(stemplate,args);
 	va_end(args);

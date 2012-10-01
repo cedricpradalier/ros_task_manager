@@ -11,25 +11,25 @@ int main(int argc, char *argv[])
     ros::init(argc,argv,"tasks");
     ros::NodeHandle nh("~");
 	unsigned int i;
-	TaskEnvironment env;
 	TaskParameters tp;
-	TaskDefinition *idle = new TaskIdle(&env);
+    boost::shared_ptr<TaskEnvironment> env(new TaskEnvironment());
+    boost::shared_ptr<TaskDefinition> idle(new TaskIdle(env));
 	idle->doConfigure(tp);
 	idle->doInitialise(tp);
 	for (i=0;i<5;i++) {
 		idle->doIterate();
 	}
 	idle->doTerminate();
-	delete idle;
+    idle.reset();
 
-	TaskDefinition *dtask = new DynamicTask("./lib/libTaskTest.so",&env);
+    boost::shared_ptr<TaskDefinition> dtask(new DynamicTask("./lib/libTaskTest.so",env));
 	dtask->doConfigure(tp);
 	dtask->doInitialise(tp);
 	while (dtask->getStatus() != TaskStatus::TASK_COMPLETED) {
 		dtask->doIterate();
 	}
 	dtask->doTerminate();
-	delete dtask;
+	dtask.reset();
 
 	return 0;
 }

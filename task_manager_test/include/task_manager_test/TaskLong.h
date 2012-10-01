@@ -11,7 +11,7 @@ namespace task_manager_test {
             double duration;
             unsigned int counter;
         public:
-            TaskLong(TaskEnvironment *env) : TaskDefinitionWithConfig<TaskLongConfig>("Long","Wait longly",false,25.0), counter(0) {}
+            TaskLong(boost::shared_ptr<TaskEnvironment> &env) : TaskDefinitionWithConfig<TaskLongConfig>("Long","Wait longly",false,25.0), counter(0) {}
             virtual ~TaskLong() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);

@@ -7,7 +7,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Debug)
+#set(ROS_BUILD_TYPE RelWithDebInfo)
 
 rosbuild_init()
 
@@ -21,22 +21,27 @@ rosbuild_find_ros_package(dynamic_reconfigure)
 include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 gencfg()
 
+
 #uncomment if you have defined messages
 #rosbuild_genmsg()
 #uncomment if you have defined services
-rosbuild_gensrv()
+#rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} 
-    src/DynamicTask.cpp
-    src/TaskClient.cpp
-    src/TaskDefinition.cpp
-    src/TaskScheduler.cpp
-    src/TaskIdleDefault.cpp
-    src/TaskWaitDefault.cpp
-)
-target_link_libraries(${PROJECT_NAME} dl)
+#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
+#target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+ROSBUILD_ADD_LIBRARY( TaskGoTo SHARED tasks/TaskGoTo.cpp)
+TARGET_LINK_LIBRARIES(TaskGoTo dl)
+
+ROSBUILD_ADD_LIBRARY( TaskSetPen SHARED tasks/TaskSetPen.cpp)
+TARGET_LINK_LIBRARIES(TaskSetPen dl)
+
+ROSBUILD_ADD_EXECUTABLE( task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
+TARGET_LINK_LIBRARIES( task_server dl )
+	
+

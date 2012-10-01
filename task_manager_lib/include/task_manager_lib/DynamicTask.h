@@ -11,7 +11,7 @@ class DynamicTask : public TaskDefinition
 	protected:
 		std::string filename;
 		void * handle;
-		TaskDefinition *task;
+        boost::shared_ptr<TaskDefinition> task;
 
 		struct DLLoadError : public std::exception {
 			std::string text;
@@ -25,7 +25,7 @@ class DynamicTask : public TaskDefinition
 		};
 
 	public:
-		DynamicTask(const std::string & fname, TaskEnvironment *env);
+		DynamicTask(const std::string & fname, boost::shared_ptr<TaskEnvironment> env);
 		virtual ~DynamicTask();
 
 		virtual void setName(const std::string & n) {task->setName(n);}

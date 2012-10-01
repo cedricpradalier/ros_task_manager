@@ -1,6 +1,9 @@
 # ROS specific imports
 import roslib; roslib.load_manifest('task_manager_lib')
 import rospy
+import rospy.core
+import rospy.timer
+import std_msgs.msg
 from task_manager_msgs.msg import *
 from task_manager_lib.srv import *
 from dynamic_reconfigure.encoding import *
@@ -8,6 +11,13 @@ from dynamic_reconfigure.encoding import *
 import time
 import socket
 import sys
+
+class TaskException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 
 class TaskClient:
     sock = None
@@ -76,10 +86,13 @@ class TaskClient:
             rospy.wait_for_service(self.server_node + '/get_all_status')
             self.get_status = rospy.ServiceProxy(self.server_node + '/get_all_status', GetAllTaskStatus)
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            print "Service initialisation failed: %s"%e
+            raise
 
+        self.keepAlivePub = rospy.Publisher(self.server_node + "/keep_alive",std_msgs.msg.Header)
         self.statusSub = rospy.Subscriber(self.server_node + "/status",
                 TaskStatus, self.status_callback)
+        self.timer = rospy.timer.Timer(rospy.Duration(0.1),self.timerCallback)
 
         self.updateTaskList()
         self.updateTaskStatus()
@@ -93,6 +106,11 @@ class TaskClient:
     def __getattr__(self,name):
         return self.tasklist[name]
 
+
+    def timerCallback(self,timerEvent):
+        header = std_msgs.msg.Header()
+        header.stamp = rospy.Time.now()
+        self.keepAlivePub.publish(header)
 
     def updateTaskList(self):
         try:
@@ -129,6 +147,7 @@ class TaskClient:
             return resp.id
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
+            raise
 
     def startTaskAndWait(self,paramdict,name="",foreground=True,period=-1.):
         tid = self.startTask(paramdict,name,foreground,period)
@@ -142,6 +161,7 @@ class TaskClient:
             return 0
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
+            raise
 
     def status_callback(self,t):
         ts = self.TaskStatus()
@@ -177,18 +197,19 @@ class TaskClient:
                 self.taskstatus[ts.id] = ts
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
+            raise
 
 
     def waitTask(self,id):
         statusTerminated = self.taskStatusId['TASK_TERMINATED']
         t0 = rospy.Time.now().to_sec()
-        while True:
+        while not rospy.core.is_shutdown():
             rospy.sleep(0.020)
             t1 = rospy.Time.now().to_sec()
             if ((t1-t0) > 1.0) and (id not in self.taskstatus):
                 if (self.verbose):
                     print "Id %d not in taskstatus" % id
-                return False
+                raise TaskException("Task %d did not appear in task status" % id);
             if (self.taskstatus[id].status == statusTerminated):
                 if (self.verbose):
                     print "Task %d terminated" % id
@@ -196,7 +217,9 @@ class TaskClient:
             if (self.taskstatus[id].status > statusTerminated):
                 if (self.verbose):
                     print "Task %d failed" % id
-                return False
+                raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
+        if rospy.core.is_shutdown():
+            raise TaskException("Aborting due to ROS shutdown");
         return False
 
     def printTaskStatus(self):

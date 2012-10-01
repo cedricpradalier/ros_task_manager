@@ -20,15 +20,15 @@ void wait5sec()
 void testTSb()
 {
     ros::NodeHandle nh("~");
-	TaskEnvironment env;
+    boost::shared_ptr<TaskEnvironment> env(new TaskEnvironment());
 	printf("\n*******************\n\nTesting basic task scheduler functions (B)\n");
 	printf("Creating tasks\n");
-	TaskDefinition *idle = new TaskIdle(&env);
+    boost::shared_ptr<TaskDefinition> idle(new TaskIdle(env));
 	printf("Creating task scheduler\n");
 	TaskScheduler ts(nh,idle, 1.0);
 	ts.printTaskDirectory();
 	printf("Loading tasks\n");
-	ts.loadTask("./lib/libTaskTest.so",&env);
+	ts.loadTask("./lib/libTaskTest.so",env);
 	printf("Configuring tasks\n");
 	ts.configureTasks();
 	// don't delete tasks, because the ts took responsibility for them

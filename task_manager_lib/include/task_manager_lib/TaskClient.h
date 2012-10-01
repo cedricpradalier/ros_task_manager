@@ -37,6 +37,10 @@ class TaskClient {
 
         ros::Subscriber statusSub;
         void statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& msg);
+
+        ros::Timer keepAliveTimer;
+        ros::Publisher keepAlivePub;
+        void timerCallback(const ros::TimerEvent&);
 	public:
 		TaskClient(const std::string & node, ros::NodeHandle & nh);
 		~TaskClient();
