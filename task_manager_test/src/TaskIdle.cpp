@@ -16,13 +16,13 @@ TaskIndicator TaskIdle::initialise(const TaskParameters & parameters) throw (Inv
 
 TaskIndicator TaskIdle::iterate()
 {
-	debug("Idling...\n");
+    printf("+");fflush(stdout);
 	return TaskStatus::TASK_RUNNING;
 }
 
 TaskIndicator TaskIdle::terminate()
 {
-	debug("terminating...\n");
+	debug("\nterminating...\n");
 	return TaskStatus::TASK_TERMINATED;
 }
 

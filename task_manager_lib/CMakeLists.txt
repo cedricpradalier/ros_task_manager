@@ -32,6 +32,7 @@ rosbuild_add_library(${PROJECT_NAME}
     src/TaskClient.cpp
     src/TaskDefinition.cpp
     src/TaskScheduler.cpp
+    src/TaskIdleDefault.cpp
 )
 target_link_libraries(${PROJECT_NAME} dl)
 #rosbuild_add_boost_directories()

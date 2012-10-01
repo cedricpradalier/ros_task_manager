@@ -11,7 +11,7 @@ namespace task_manager_test {
             double duration;
             unsigned int counter;
         public:
-            TaskTest(TaskEnvironment *env) : TaskDefinitionWithConfig<TaskTestConfig>("Test","Do nothing",true,5.0), counter(0) {}
+            TaskTest(TaskEnvironment *env) : TaskDefinitionWithConfig<TaskTestConfig>("Test","Do nothing",true,-1.), counter(0) {}
             virtual ~TaskTest() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);

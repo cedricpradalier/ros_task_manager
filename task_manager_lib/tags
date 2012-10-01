@@ -4,95 +4,617 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+<GetAllTaskStatus-request>	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defclass <GetAllTaskStatus-request> (roslisp-msg-protocol:ros-message)$/;"	f
+<GetAllTaskStatus-response>	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defclass <GetAllTaskStatus-response> (roslisp-msg-protocol:ros-message)$/;"	f
+<GetTaskList-request>	srv_gen/lisp/GetTaskList.lisp	/^(cl:defclass <GetTaskList-request> (roslisp-msg-protocol:ros-message)$/;"	f
+<GetTaskList-response>	srv_gen/lisp/GetTaskList.lisp	/^(cl:defclass <GetTaskList-response> (roslisp-msg-protocol:ros-message)$/;"	f
+<StartTask-request>	srv_gen/lisp/StartTask.lisp	/^(cl:defclass <StartTask-request> (roslisp-msg-protocol:ros-message)$/;"	f
+<StartTask-response>	srv_gen/lisp/StartTask.lisp	/^(cl:defclass <StartTask-response> (roslisp-msg-protocol:ros-message)$/;"	f
+<StopTask-request>	srv_gen/lisp/StopTask.lisp	/^(cl:defclass <StopTask-request> (roslisp-msg-protocol:ros-message)$/;"	f
+<StopTask-response>	srv_gen/lisp/StopTask.lisp	/^(cl:defclass <StopTask-response> (roslisp-msg-protocol:ros-message)$/;"	f
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	193;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	196;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	199;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	202;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	206;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	181;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	184;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	187;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	190;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	194;"	d	file:
+AbstractGroupDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      AbstractGroupDescription(std::string n, std::string t, int p, int i, bool s)$/;"	f	class:task_manager_lib::MinimalTaskConfig::AbstractGroupDescription
+AbstractGroupDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    class AbstractGroupDescription : public dynamic_reconfigure::Group$/;"	c	class:task_manager_lib::MinimalTaskConfig
+AbstractGroupDescriptionConstPtr	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    typedef boost::shared_ptr<const AbstractGroupDescription> AbstractGroupDescriptionConstPtr;$/;"	t	class:task_manager_lib::MinimalTaskConfig
+AbstractGroupDescriptionPtr	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    typedef boost::shared_ptr<AbstractGroupDescription> AbstractGroupDescriptionPtr;$/;"	t	class:task_manager_lib::MinimalTaskConfig
+AbstractParamDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      AbstractParamDescription(std::string n, std::string t, uint32_t l, $/;"	f	class:task_manager_lib::MinimalTaskConfig::AbstractParamDescription
+AbstractParamDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    class AbstractParamDescription : public dynamic_reconfigure::ParamDescription$/;"	c	class:task_manager_lib::MinimalTaskConfig
+AbstractParamDescriptionConstPtr	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    typedef boost::shared_ptr<const AbstractParamDescription> AbstractParamDescriptionConstPtr;$/;"	t	class:task_manager_lib::MinimalTaskConfig
+AbstractParamDescriptionPtr	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    typedef boost::shared_ptr<AbstractParamDescription> AbstractParamDescriptionPtr;$/;"	t	class:task_manager_lib::MinimalTaskConfig
 ActionQueue	include/task_manager_lib/TaskScheduler.h	/^		typedef std::map<double, ThreadAction, std::less<double> > ActionQueue;$/;"	t	class:TaskScheduler
 ActionType	include/task_manager_lib/TaskScheduler.h	/^		} ActionType;$/;"	t	class:TaskScheduler	typeref:enum:TaskScheduler::__anon1
+CMAKE_BINARY_DIR	build/Makefile	/^CMAKE_BINARY_DIR = \/home\/cedricp\/src\/ros_task_manager\/task_manager_lib\/build$/;"	m
+CMAKE_COMMAND	build/Makefile	/^CMAKE_COMMAND = \/usr\/bin\/cmake$/;"	m
+CMAKE_EDIT_COMMAND	build/Makefile	/^CMAKE_EDIT_COMMAND = \/usr\/bin\/ccmake$/;"	m
+CMAKE_SOURCE_DIR	build/Makefile	/^CMAKE_SOURCE_DIR = \/home\/cedricp\/src\/ros_task_manager\/task_manager_lib$/;"	m
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	10;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	13;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	16;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	19;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	22;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	25;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	28;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	32;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	34;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	36;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	40;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	43;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	46;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	49;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	52;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	55;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	58;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	61;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	66;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	77;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	80;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	86;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	89;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	92;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	12;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	15;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	18;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	21;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	24;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	27;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	30;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	34;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	36;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	38;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	42;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	45;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	48;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	51;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	54;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	57;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	60;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	65;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	68;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	74;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	77;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	80;"	d	file:
+COMPILER_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	9;"	d	file:
 CONDITIONALLY_IDLE	include/task_manager_lib/TaskScheduler.h	/^			CONDITIONALLY_IDLE,$/;"	e	enum:TaskScheduler::__anon1
+ConstPtr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::GetAllTaskStatusRequest_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::GetAllTaskStatusResponse_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::GetTaskListRequest_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::GetTaskListResponse_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StartTaskRequest_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::StartTaskRequest_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StartTaskResponse_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::StartTaskResponse_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StopTaskRequest_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::StopTaskRequest_
+ConstPtr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StopTaskResponse_<ContainerAllocator>  const> ConstPtr;$/;"	t	struct:task_manager_lib::StopTaskResponse_
+DEFAULT	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    DEFAULT()$/;"	f	class:task_manager_lib::MinimalTaskConfig::DEFAULT
+DEFAULT	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^class DEFAULT$/;"	c	class:task_manager_lib::MinimalTaskConfig
 DELETE_TASK	include/task_manager_lib/TaskScheduler.h	/^			DELETE_TASK,$/;"	e	enum:TaskScheduler::__anon1
 DELETE_TIMEOUT	include/task_manager_lib/TaskScheduler.h	/^		static const double DELETE_TIMEOUT;$/;"	m	class:TaskScheduler
 DELETE_TIMEOUT	src/TaskScheduler.cpp	/^const double TaskScheduler::DELETE_TIMEOUT=2.0;$/;"	m	class:TaskScheduler	file:
-DLL_EXT	src/TaskScheduler.cpp	203;"	d	file:
+DLL_EXT	src/TaskScheduler.cpp	212;"	d	file:
 DLLoadError	include/task_manager_lib/DynamicTask.h	/^			DLLoadError(const std::string & s) {$/;"	f	struct:DynamicTask::DLLoadError
 DLLoadError	include/task_manager_lib/DynamicTask.h	/^		struct DLLoadError : public std::exception {$/;"	s	class:DynamicTask
-DYNAMIC_TASK	include/task_manager_lib/TaskDefinition.h	164;"	d
+DYNAMIC_TASK	include/task_manager_lib/TaskDefinition.h	276;"	d
 DYNAMIC_TASK_DEFINITION_H	include/task_manager_lib/DynamicTask.h	2;"	d
+DataType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct DataType< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct DataType< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct DataType<task_manager_lib::GetAllTaskStatus> {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct DataType<task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct DataType<task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct DataType< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct DataType< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct DataType<task_manager_lib::GetTaskList> {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct DataType<task_manager_lib::GetTaskListRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct DataType<task_manager_lib::GetTaskListResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct DataType< ::task_manager_lib::StartTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct DataType< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct DataType<task_manager_lib::StartTask> {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct DataType<task_manager_lib::StartTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct DataType<task_manager_lib::StartTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct DataType< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct DataType< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct DataType<task_manager_lib::StopTask> {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct DataType<task_manager_lib::StopTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+DataType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct DataType<task_manager_lib::StopTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+Definition	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct Definition< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct Definition< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct Definition< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct Definition< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct Definition< ::task_manager_lib::StartTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct Definition< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct Definition< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+Definition	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct Definition< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
 DynamicTask	include/task_manager_lib/DynamicTask.h	/^class DynamicTask : public TaskDefinition$/;"	c
 DynamicTask	src/DynamicTask.cpp	/^DynamicTask::DynamicTask(const std::string & fname, TaskEnvironment *env) :$/;"	f	class:DynamicTask
+GetAllTaskStatus	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^class GetAllTaskStatus(object):$/;"	c
+GetAllTaskStatus	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct GetAllTaskStatus$/;"	s	namespace:task_manager_lib
+GetAllTaskStatus-request	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defclass GetAllTaskStatus-request (<GetAllTaskStatus-request>)$/;"	f
+GetAllTaskStatus-response	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defclass GetAllTaskStatus-response (<GetAllTaskStatus-response>)$/;"	f
+GetAllTaskStatusRequest	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^class GetAllTaskStatusRequest(genpy.Message):$/;"	c
+GetAllTaskStatusRequest	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef  ::task_manager_lib::GetAllTaskStatusRequest_<std::allocator<void> > GetAllTaskStatusRequest;$/;"	t	namespace:task_manager_lib
+GetAllTaskStatusRequestConstPtr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusRequest const> GetAllTaskStatusRequestConstPtr;$/;"	t	namespace:task_manager_lib
+GetAllTaskStatusRequestPtr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusRequest> GetAllTaskStatusRequestPtr;$/;"	t	namespace:task_manager_lib
+GetAllTaskStatusRequest_	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  GetAllTaskStatusRequest_()$/;"	f	struct:task_manager_lib::GetAllTaskStatusRequest_
+GetAllTaskStatusRequest_	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  GetAllTaskStatusRequest_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::GetAllTaskStatusRequest_
+GetAllTaskStatusRequest_	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct GetAllTaskStatusRequest_ {$/;"	s	namespace:task_manager_lib
+GetAllTaskStatusResponse	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^class GetAllTaskStatusResponse(genpy.Message):$/;"	c
+GetAllTaskStatusResponse	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef  ::task_manager_lib::GetAllTaskStatusResponse_<std::allocator<void> > GetAllTaskStatusResponse;$/;"	t	namespace:task_manager_lib
+GetAllTaskStatusResponseConstPtr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusResponse const> GetAllTaskStatusResponseConstPtr;$/;"	t	namespace:task_manager_lib
+GetAllTaskStatusResponsePtr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusResponse> GetAllTaskStatusResponsePtr;$/;"	t	namespace:task_manager_lib
+GetAllTaskStatusResponse_	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  GetAllTaskStatusResponse_()$/;"	f	struct:task_manager_lib::GetAllTaskStatusResponse_
+GetAllTaskStatusResponse_	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  GetAllTaskStatusResponse_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::GetAllTaskStatusResponse_
+GetAllTaskStatusResponse_	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct GetAllTaskStatusResponse_ {$/;"	s	namespace:task_manager_lib
+GetTaskList	src/task_manager_lib/srv/_GetTaskList.py	/^class GetTaskList(object):$/;"	c
+GetTaskList	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct GetTaskList$/;"	s	namespace:task_manager_lib
+GetTaskList-request	srv_gen/lisp/GetTaskList.lisp	/^(cl:defclass GetTaskList-request (<GetTaskList-request>)$/;"	f
+GetTaskList-response	srv_gen/lisp/GetTaskList.lisp	/^(cl:defclass GetTaskList-response (<GetTaskList-response>)$/;"	f
+GetTaskListRequest	src/task_manager_lib/srv/_GetTaskList.py	/^class GetTaskListRequest(genpy.Message):$/;"	c
+GetTaskListRequest	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef  ::task_manager_lib::GetTaskListRequest_<std::allocator<void> > GetTaskListRequest;$/;"	t	namespace:task_manager_lib
+GetTaskListRequestConstPtr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetTaskListRequest const> GetTaskListRequestConstPtr;$/;"	t	namespace:task_manager_lib
+GetTaskListRequestPtr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetTaskListRequest> GetTaskListRequestPtr;$/;"	t	namespace:task_manager_lib
+GetTaskListRequest_	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  GetTaskListRequest_()$/;"	f	struct:task_manager_lib::GetTaskListRequest_
+GetTaskListRequest_	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  GetTaskListRequest_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::GetTaskListRequest_
+GetTaskListRequest_	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct GetTaskListRequest_ {$/;"	s	namespace:task_manager_lib
+GetTaskListResponse	src/task_manager_lib/srv/_GetTaskList.py	/^class GetTaskListResponse(genpy.Message):$/;"	c
+GetTaskListResponse	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef  ::task_manager_lib::GetTaskListResponse_<std::allocator<void> > GetTaskListResponse;$/;"	t	namespace:task_manager_lib
+GetTaskListResponseConstPtr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetTaskListResponse const> GetTaskListResponseConstPtr;$/;"	t	namespace:task_manager_lib
+GetTaskListResponsePtr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef boost::shared_ptr< ::task_manager_lib::GetTaskListResponse> GetTaskListResponsePtr;$/;"	t	namespace:task_manager_lib
+GetTaskListResponse_	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  GetTaskListResponse_()$/;"	f	struct:task_manager_lib::GetTaskListResponse_
+GetTaskListResponse_	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  GetTaskListResponse_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::GetTaskListResponse_
+GetTaskListResponse_	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct GetTaskListResponse_ {$/;"	s	namespace:task_manager_lib
+GroupDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      GroupDescription(const GroupDescription<T, PT>& g): AbstractGroupDescription(g.name, g.type, g.parent, g.id, g.state), field(g.field), groups(g.groups)$/;"	f	class:task_manager_lib::MinimalTaskConfig::GroupDescription
+GroupDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      GroupDescription(std::string name, std::string type, int parent, int id, bool s, T PT::* f) : AbstractGroupDescription(name, type, parent, id, s), field(f)$/;"	f	class:task_manager_lib::MinimalTaskConfig::GroupDescription
+GroupDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    class GroupDescription : public AbstractGroupDescription$/;"	c	class:task_manager_lib::MinimalTaskConfig
 IDLE_TIMEOUT	include/task_manager_lib/TaskScheduler.h	/^		static const double IDLE_TIMEOUT;$/;"	m	class:TaskScheduler
 IDLE_TIMEOUT	src/TaskScheduler.cpp	/^const double TaskScheduler::IDLE_TIMEOUT=0.5;$/;"	m	class:TaskScheduler	file:
+ID_VOID_MAIN	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	6;"	d	file:
 InvalidParameter	include/task_manager_lib/TaskDefinition.h	/^			InvalidParameter(const std::string & txt) : text("Invalid Parameter: ") {$/;"	f	struct:TaskDefinition::InvalidParameter
 InvalidParameter	include/task_manager_lib/TaskDefinition.h	/^		struct InvalidParameter : public std::exception {$/;"	s	class:TaskDefinition
-PRINTF	src/TaskScheduler.cpp	13;"	d	file:
+IsFixedSize	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct IsFixedSize< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsFixedSize	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct IsFixedSize< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsFixedSize	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct IsFixedSize< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsFixedSize	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct IsFixedSize< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsFixedSize	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct IsFixedSize< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StartTaskRequest_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StartTaskRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StartTaskResponse_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StopTaskRequest_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StopTaskResponse_<ContainerAllocator>  const> : public TrueType {};$/;"	s	namespace:ros::message_traits
+IsMessage	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct IsMessage< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> > : public TrueType {};$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct MD5Sum< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct MD5Sum< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct MD5Sum<task_manager_lib::GetAllTaskStatus> {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct MD5Sum<task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^struct MD5Sum<task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct MD5Sum< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct MD5Sum< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct MD5Sum<task_manager_lib::GetTaskList> {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct MD5Sum<task_manager_lib::GetTaskListRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^struct MD5Sum<task_manager_lib::GetTaskListResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct MD5Sum< ::task_manager_lib::StartTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct MD5Sum< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct MD5Sum<task_manager_lib::StartTask> {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct MD5Sum<task_manager_lib::StartTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct MD5Sum<task_manager_lib::StartTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct MD5Sum< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct MD5Sum< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::message_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct MD5Sum<task_manager_lib::StopTask> {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct MD5Sum<task_manager_lib::StopTaskRequest_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MD5Sum	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct MD5Sum<task_manager_lib::StopTaskResponse_<ContainerAllocator> > {$/;"	s	namespace:ros::service_traits
+MinimalTaskConfig	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  class MinimalTaskConfig$/;"	c	namespace:task_manager_lib
+MinimalTaskConfigStatics	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    MinimalTaskConfigStatics()$/;"	f	class:task_manager_lib::MinimalTaskConfigStatics
+MinimalTaskConfigStatics	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  class MinimalTaskConfigStatics$/;"	c	namespace:task_manager_lib
+PACKAGE	cfg/MinimalTask.cfg	/^PACKAGE='task_manager_lib'$/;"	v
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	104;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	107;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	110;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	113;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	116;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	119;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	122;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	125;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	128;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	131;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	134;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	137;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	140;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	146;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	149;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	152;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	155;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	158;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	161;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	164;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	167;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	170;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	173;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	176;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	179;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	182;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	101;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	104;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	107;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	110;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	113;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	116;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	119;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	122;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	125;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	128;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	134;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	137;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	140;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	143;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	146;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	149;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	152;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	155;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	158;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	161;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	164;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	167;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	170;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	92;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	95;"	d	file:
+PLATFORM_ID	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	98;"	d	file:
+PRINTF	src/TaskScheduler.cpp	14;"	d	file:
+ParamDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      ParamDescription(std::string name, std::string type, uint32_t level, $/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+ParamDescription	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    class ParamDescription : public AbstractParamDescription$/;"	c	class:task_manager_lib::MinimalTaskConfig
+Ptr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::GetAllTaskStatusRequest_
+Ptr	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::GetAllTaskStatusResponse_
+Ptr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::GetTaskListRequest_
+Ptr	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef boost::shared_ptr< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::GetTaskListResponse_
+Ptr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StartTaskRequest_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::StartTaskRequest_
+Ptr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::StartTaskResponse_
+Ptr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::StopTaskRequest_
+Ptr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef boost::shared_ptr< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> > Ptr;$/;"	t	struct:task_manager_lib::StopTaskResponse_
+RM	build/Makefile	/^RM = \/usr\/bin\/cmake -E remove -f$/;"	m
+ROS_DECLARE_ALLINONE_SERIALIZER	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  ROS_DECLARE_ALLINONE_SERIALIZER;$/;"	m	struct:ros::serialization::Serializer
+ROS_DECLARE_ALLINONE_SERIALIZER	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  ROS_DECLARE_ALLINONE_SERIALIZER;$/;"	m	struct:ros::serialization::Serializer
+ROS_DECLARE_ALLINONE_SERIALIZER	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  ROS_DECLARE_ALLINONE_SERIALIZER;$/;"	m	struct:ros::serialization::Serializer
+ROS_DECLARE_ALLINONE_SERIALIZER	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  ROS_DECLARE_ALLINONE_SERIALIZER;$/;"	m	struct:ros::serialization::Serializer
+Request	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef GetAllTaskStatusRequest Request;$/;"	t	struct:task_manager_lib::GetAllTaskStatus
+Request	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef GetTaskListRequest Request;$/;"	t	struct:task_manager_lib::GetTaskList
+Request	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef StartTaskRequest Request;$/;"	t	struct:task_manager_lib::StartTask
+Request	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef StopTaskRequest Request;$/;"	t	struct:task_manager_lib::StopTask
+RequestType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef Request RequestType;$/;"	t	struct:task_manager_lib::GetAllTaskStatus
+RequestType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef Request RequestType;$/;"	t	struct:task_manager_lib::GetTaskList
+RequestType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef Request RequestType;$/;"	t	struct:task_manager_lib::StartTask
+RequestType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef Request RequestType;$/;"	t	struct:task_manager_lib::StopTask
+Response	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef GetAllTaskStatusResponse Response;$/;"	t	struct:task_manager_lib::GetAllTaskStatus
+Response	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef GetTaskListResponse Response;$/;"	t	struct:task_manager_lib::GetTaskList
+Response	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef StartTaskResponse Response;$/;"	t	struct:task_manager_lib::StartTask
+Response	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef StopTaskResponse Response;$/;"	t	struct:task_manager_lib::StopTask
+ResponseType	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^typedef Response ResponseType;$/;"	t	struct:task_manager_lib::GetAllTaskStatus
+ResponseType	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^typedef Response ResponseType;$/;"	t	struct:task_manager_lib::GetTaskList
+ResponseType	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef Response ResponseType;$/;"	t	struct:task_manager_lib::StartTask
+ResponseType	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef Response ResponseType;$/;"	t	struct:task_manager_lib::StopTask
+SHELL	build/Makefile	/^SHELL = \/bin\/sh$/;"	m
 START_IDLE_TASK	include/task_manager_lib/TaskScheduler.h	/^			START_IDLE_TASK, $/;"	e	enum:TaskScheduler::__anon1
 START_TASK	include/task_manager_lib/TaskScheduler.h	/^			START_TASK,$/;"	e	enum:TaskScheduler::__anon1
+SUFFIXES	build/Makefile	/^SUFFIXES =$/;"	m
+Serializer	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::StartTaskRequest_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::StartTaskResponse_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::StopTaskRequest_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+Serializer	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^template<class ContainerAllocator> struct Serializer< ::task_manager_lib::StopTaskResponse_<ContainerAllocator> >$/;"	s	namespace:ros::serialization
+StartTask	src/task_manager_lib/srv/_StartTask.py	/^class StartTask(object):$/;"	c
+StartTask	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct StartTask$/;"	s	namespace:task_manager_lib
+StartTask-request	srv_gen/lisp/StartTask.lisp	/^(cl:defclass StartTask-request (<StartTask-request>)$/;"	f
+StartTask-response	srv_gen/lisp/StartTask.lisp	/^(cl:defclass StartTask-response (<StartTask-response>)$/;"	f
+StartTaskRequest	src/task_manager_lib/srv/_StartTask.py	/^class StartTaskRequest(genpy.Message):$/;"	c
+StartTaskRequest	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef  ::task_manager_lib::StartTaskRequest_<std::allocator<void> > StartTaskRequest;$/;"	t	namespace:task_manager_lib
+StartTaskRequestConstPtr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StartTaskRequest const> StartTaskRequestConstPtr;$/;"	t	namespace:task_manager_lib
+StartTaskRequestPtr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StartTaskRequest> StartTaskRequestPtr;$/;"	t	namespace:task_manager_lib
+StartTaskRequest_	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  StartTaskRequest_()$/;"	f	struct:task_manager_lib::StartTaskRequest_
+StartTaskRequest_	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  StartTaskRequest_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::StartTaskRequest_
+StartTaskRequest_	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct StartTaskRequest_ {$/;"	s	namespace:task_manager_lib
+StartTaskResponse	src/task_manager_lib/srv/_StartTask.py	/^class StartTaskResponse(genpy.Message):$/;"	c
+StartTaskResponse	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef  ::task_manager_lib::StartTaskResponse_<std::allocator<void> > StartTaskResponse;$/;"	t	namespace:task_manager_lib
+StartTaskResponseConstPtr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StartTaskResponse const> StartTaskResponseConstPtr;$/;"	t	namespace:task_manager_lib
+StartTaskResponsePtr	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StartTaskResponse> StartTaskResponsePtr;$/;"	t	namespace:task_manager_lib
+StartTaskResponse_	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  StartTaskResponse_()$/;"	f	struct:task_manager_lib::StartTaskResponse_
+StartTaskResponse_	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  StartTaskResponse_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::StartTaskResponse_
+StartTaskResponse_	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^struct StartTaskResponse_ {$/;"	s	namespace:task_manager_lib
 StatusMap	include/task_manager_lib/TaskClient.h	/^				TaskState, std::less<TaskScheduler::TaskId> > StatusMap;$/;"	t	class:TaskClient
-TASK_BACKGROUND	include/task_manager_lib/TaskScheduler.h	13;"	d
+StopTask	src/task_manager_lib/srv/_StopTask.py	/^class StopTask(object):$/;"	c
+StopTask	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct StopTask$/;"	s	namespace:task_manager_lib
+StopTask-request	srv_gen/lisp/StopTask.lisp	/^(cl:defclass StopTask-request (<StopTask-request>)$/;"	f
+StopTask-response	srv_gen/lisp/StopTask.lisp	/^(cl:defclass StopTask-response (<StopTask-response>)$/;"	f
+StopTaskRequest	src/task_manager_lib/srv/_StopTask.py	/^class StopTaskRequest(genpy.Message):$/;"	c
+StopTaskRequest	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef  ::task_manager_lib::StopTaskRequest_<std::allocator<void> > StopTaskRequest;$/;"	t	namespace:task_manager_lib
+StopTaskRequestConstPtr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StopTaskRequest const> StopTaskRequestConstPtr;$/;"	t	namespace:task_manager_lib
+StopTaskRequestPtr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StopTaskRequest> StopTaskRequestPtr;$/;"	t	namespace:task_manager_lib
+StopTaskRequest_	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  StopTaskRequest_()$/;"	f	struct:task_manager_lib::StopTaskRequest_
+StopTaskRequest_	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  StopTaskRequest_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::StopTaskRequest_
+StopTaskRequest_	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct StopTaskRequest_ {$/;"	s	namespace:task_manager_lib
+StopTaskResponse	src/task_manager_lib/srv/_StopTask.py	/^class StopTaskResponse(genpy.Message):$/;"	c
+StopTaskResponse	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef  ::task_manager_lib::StopTaskResponse_<std::allocator<void> > StopTaskResponse;$/;"	t	namespace:task_manager_lib
+StopTaskResponseConstPtr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StopTaskResponse const> StopTaskResponseConstPtr;$/;"	t	namespace:task_manager_lib
+StopTaskResponsePtr	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^typedef boost::shared_ptr< ::task_manager_lib::StopTaskResponse> StopTaskResponsePtr;$/;"	t	namespace:task_manager_lib
+StopTaskResponse_	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  StopTaskResponse_()$/;"	f	struct:task_manager_lib::StopTaskResponse_
+StopTaskResponse_	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  StopTaskResponse_(const ContainerAllocator& _alloc)$/;"	f	struct:task_manager_lib::StopTaskResponse_
+StopTaskResponse_	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^struct StopTaskResponse_ {$/;"	s	namespace:task_manager_lib
+TASK_BACKGROUND	include/task_manager_lib/TaskScheduler.h	18;"	d
 TASK_CLIENT_H	include/task_manager_lib/TaskClient.h	2;"	d
 TASK_DEFINITION_H	include/task_manager_lib/TaskDefinition.h	2;"	d
-TASK_FOREGROUND	include/task_manager_lib/TaskScheduler.h	12;"	d
+TASK_FOREGROUND	include/task_manager_lib/TaskScheduler.h	17;"	d
+TASK_IDLE_H	include/task_manager_lib/TaskIdleDefault.h	2;"	d
+TASK_MANAGER_LIB_SERVICE_GETALLTASKSTATUS_H	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	3;"	d
+TASK_MANAGER_LIB_SERVICE_GETTASKLIST_H	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	3;"	d
+TASK_MANAGER_LIB_SERVICE_STARTTASK_H	srv_gen/cpp/include/task_manager_lib/StartTask.h	3;"	d
+TASK_MANAGER_LIB_SERVICE_STOPTASK_H	srv_gen/cpp/include/task_manager_lib/StopTask.h	3;"	d
 TASK_SCHEDULER_H	include/task_manager_lib/TaskScheduler.h	2;"	d
-TASK_SERVER_H	include/task_manager_lib/TaskServer.h	2;"	d
-TASK_STATUS_MASK	include/task_manager_lib/TaskScheduler.h	11;"	d
+TASK_STATUS_MASK	include/task_manager_lib/TaskScheduler.h	16;"	d
 TaskClient	include/task_manager_lib/TaskClient.h	/^class TaskClient {$/;"	c
-TaskClient	src/TaskClient.cpp	/^TaskClient::TaskClient(const std::string & hostname) : host(hostname)$/;"	f	class:TaskClient
+TaskClient	src/TaskClient.cpp	/^TaskClient::TaskClient(const std::string & node, ros::NodeHandle & nh) : spinner(1)$/;"	f	class:TaskClient
+TaskClient	src/task_manager_lib/TaskClient.py	/^class TaskClient:$/;"	c
 TaskDefinition	include/task_manager_lib/TaskDefinition.h	/^		TaskDefinition(const std::string & tname, const std::string & thelp, $/;"	f	class:TaskDefinition
 TaskDefinition	include/task_manager_lib/TaskDefinition.h	/^class TaskDefinition$/;"	c
-TaskDescriptor	include/task_manager_lib/TaskClient.h	/^		struct TaskDescriptor {$/;"	s	class:TaskClient
+TaskDefinition	src/task_manager_lib/TaskClient.py	/^	class TaskDefinition:$/;"	c	class:TaskClient
+TaskDefinitionWithConfig	include/task_manager_lib/TaskDefinition.h	/^		TaskDefinitionWithConfig(const std::string & tname, const std::string & thelp, $/;"	f	class:TaskDefinitionWithConfig
+TaskDefinitionWithConfig	include/task_manager_lib/TaskDefinition.h	/^class TaskDefinitionWithConfig : public TaskDefinition {$/;"	c
 TaskDirectory	include/task_manager_lib/TaskScheduler.h	/^		typedef std::map<std::string,TaskDefinition*,std::less<std::string> > TaskDirectory;$/;"	t	class:TaskScheduler
 TaskEnvironment	include/task_manager_lib/TaskDefinition.h	/^		TaskEnvironment() {}$/;"	f	class:TaskEnvironment
 TaskEnvironment	include/task_manager_lib/TaskDefinition.h	/^class TaskEnvironment {$/;"	c
 TaskFactory	include/task_manager_lib/TaskDefinition.h	/^typedef TaskDefinition* (*TaskFactory)(TaskEnvironment *);$/;"	t
 TaskId	include/task_manager_lib/TaskScheduler.h	/^		typedef unsigned int TaskId;$/;"	t	class:TaskScheduler
+TaskIdle	include/task_manager_lib/TaskIdleDefault.h	/^            TaskIdle(TaskEnvironment *env) $/;"	f	class:task_manager_test::TaskIdle
+TaskIdle	include/task_manager_lib/TaskIdleDefault.h	/^    class TaskIdle : public TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig>$/;"	c	namespace:task_manager_test
+TaskIdleDefault	src/TaskIdleDefault.cpp	/^DYNAMIC_TASK(TaskIdleDefault);$/;"	v
+TaskIndicator	include/task_manager_lib/TaskDefinition.h	/^typedef unsigned int TaskIndicator;$/;"	t
+TaskParameterGenerator	src/task_manager_lib/parameter_generator.py	/^def TaskParameterGenerator():$/;"	f
+TaskParameters	include/task_manager_lib/TaskDefinition.h	/^        TaskParameters() $/;"	f	class:TaskParameters
+TaskParameters	include/task_manager_lib/TaskDefinition.h	/^        TaskParameters(const TaskParameters & cfg) $/;"	f	class:TaskParameters
+TaskParameters	include/task_manager_lib/TaskDefinition.h	/^        TaskParameters(const dynamic_reconfigure::Config & cfg) $/;"	f	class:TaskParameters
+TaskParameters	include/task_manager_lib/TaskDefinition.h	/^class TaskParameters: public dynamic_reconfigure::Config {$/;"	c
 TaskScheduler	include/task_manager_lib/TaskScheduler.h	/^class TaskScheduler$/;"	c
 TaskScheduler	src/TaskScheduler.cpp	/^TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double deftPeriod)$/;"	f	class:TaskScheduler
-TaskServer	include/task_manager_lib/TaskServer.h	/^class TaskServer$/;"	c
-TaskServer	src/TaskServer.cpp	/^TaskServer::TaskServer(TaskScheduler & ts) :$/;"	f	class:TaskServer
 TaskSet	include/task_manager_lib/TaskScheduler.h	/^		typedef std::map<unsigned int, ThreadParameters*, std::less<unsigned int> > TaskSet;$/;"	t	class:TaskScheduler
 TaskSetItem	include/task_manager_lib/TaskScheduler.h	/^		typedef std::pair<unsigned int, ThreadParameters*> TaskSetItem;$/;"	t	class:TaskScheduler
 TaskState	include/task_manager_lib/TaskClient.h	/^		struct TaskState {$/;"	s	class:TaskClient
-TaskStatus	include/task_manager_lib/TaskDefinition.h	/^typedef unsigned int TaskStatus;$/;"	t
+TaskStatus	src/task_manager_lib/TaskClient.py	/^	class TaskStatus:$/;"	c	class:TaskClient
 ThreadAction	include/task_manager_lib/TaskScheduler.h	/^		struct ThreadAction {$/;"	s	class:TaskScheduler
 ThreadParameters	include/task_manager_lib/TaskScheduler.h	/^		struct ThreadParameters {$/;"	s	class:TaskScheduler
 ThreadParameters	src/TaskScheduler.cpp	/^TaskScheduler::ThreadParameters::ThreadParameters($/;"	f	class:TaskScheduler::ThreadParameters
-ThreadParameters	src/TaskScheduler.cpp	/^TaskScheduler::ThreadParameters::ThreadParameters(TaskScheduler *ts, $/;"	f	class:TaskScheduler::ThreadParameters
+ThreadParameters	src/TaskScheduler.cpp	/^TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskScheduler *ts, $/;"	f	class:TaskScheduler::ThreadParameters
+Type	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef GetAllTaskStatusRequest_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::GetAllTaskStatusRequest_
+Type	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef GetAllTaskStatusResponse_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::GetAllTaskStatusResponse_
+Type	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef GetTaskListRequest_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::GetTaskListRequest_
+Type	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef GetTaskListResponse_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::GetTaskListResponse_
+Type	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef StartTaskRequest_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::StartTaskRequest_
+Type	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef StartTaskResponse_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::StartTaskResponse_
+Type	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef StopTaskRequest_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::StopTaskRequest_
+Type	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef StopTaskResponse_<ContainerAllocator> Type;$/;"	t	struct:task_manager_lib::StopTaskResponse_
 WAIT_CANCELLED	include/task_manager_lib/TaskScheduler.h	/^			WAIT_CANCELLED$/;"	e	enum:TaskScheduler::__anon1
+__call__	src/task_manager_lib/TaskClient.py	/^		def __call__(self,**paramdict):$/;"	m	class:TaskClient.TaskDefinition	file:
+__clamp__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    void __clamp__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__connection_header	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::GetAllTaskStatusRequest_
+__connection_header	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::GetAllTaskStatusResponse_
+__connection_header	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::GetTaskListRequest_
+__connection_header	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::GetTaskListResponse_
+__connection_header	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::StartTaskRequest_
+__connection_header	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::StartTaskResponse_
+__connection_header	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::StopTaskRequest_
+__connection_header	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  boost::shared_ptr<std::map<std::string, std::string> > __connection_header;$/;"	m	struct:task_manager_lib::StopTaskResponse_
+__default__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    MinimalTaskConfig __default__;$/;"	m	class:task_manager_lib::MinimalTaskConfigStatics
+__del__	src/task_manager_lib/TaskClient.py	/^	def __del__(self):$/;"	m	class:TaskClient	file:
+__description_message__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    dynamic_reconfigure::ConfigDescription __description_message__;$/;"	m	class:task_manager_lib::MinimalTaskConfigStatics
+__fromMessage__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    bool __fromMessage__(dynamic_reconfigure::Config &msg)$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__fromServer__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    void __fromServer__(const ros::NodeHandle &nh)$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getDefault__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const MinimalTaskConfig &MinimalTaskConfig::__getDefault__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getDescriptionMessage__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const dynamic_reconfigure::ConfigDescription &MinimalTaskConfig::__getDescriptionMessage__() $/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getGroupDescriptions__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const std::vector<MinimalTaskConfig::AbstractGroupDescriptionConstPtr> &MinimalTaskConfig::__getGroupDescriptions__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getMax__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const MinimalTaskConfig &MinimalTaskConfig::__getMax__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getMin__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const MinimalTaskConfig &MinimalTaskConfig::__getMin__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getParamDescriptions__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const std::vector<MinimalTaskConfig::AbstractParamDescriptionConstPtr> &MinimalTaskConfig::__getParamDescriptions__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__get_statics__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline const MinimalTaskConfigStatics *MinimalTaskConfig::__get_statics__()$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__getattr__	src/task_manager_lib/TaskClient.py	/^	def __getattr__(self,name):$/;"	m	class:TaskClient	file:
+__group_descriptions__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    std::vector<MinimalTaskConfig::AbstractGroupDescriptionConstPtr> __group_descriptions__;$/;"	m	class:task_manager_lib::MinimalTaskConfigStatics
+__init__	src/task_manager_lib/TaskClient.py	/^		def __init__(self,name,help,client):$/;"	m	class:TaskClient.TaskDefinition
+__init__	src/task_manager_lib/TaskClient.py	/^	def __init__(self,server_node):$/;"	m	class:TaskClient
+__init__	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  def __init__(self, *args, **kwds):$/;"	f
+__init__	src/task_manager_lib/srv/_GetTaskList.py	/^  def __init__(self, *args, **kwds):$/;"	f
+__init__	src/task_manager_lib/srv/_StartTask.py	/^  def __init__(self, *args, **kwds):$/;"	f
+__init__	src/task_manager_lib/srv/_StopTask.py	/^  def __init__(self, *args, **kwds):$/;"	f
+__level__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    uint32_t __level__(const MinimalTaskConfig &config) const$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__max__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    MinimalTaskConfig __max__;$/;"	m	class:task_manager_lib::MinimalTaskConfigStatics
+__min__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    MinimalTaskConfig __min__;$/;"	m	class:task_manager_lib::MinimalTaskConfigStatics
+__param_descriptions__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    std::vector<MinimalTaskConfig::AbstractParamDescriptionConstPtr> __param_descriptions__;$/;"	m	class:task_manager_lib::MinimalTaskConfigStatics
+__slots__	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  __slots__ = ['running_tasks','zombie_tasks']$/;"	v
+__slots__	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  __slots__ = []$/;"	v
+__slots__	src/task_manager_lib/srv/_GetTaskList.py	/^  __slots__ = ['tlist']$/;"	v
+__slots__	src/task_manager_lib/srv/_GetTaskList.py	/^  __slots__ = []$/;"	v
+__slots__	src/task_manager_lib/srv/_StartTask.py	/^  __slots__ = ['id']$/;"	v
+__slots__	src/task_manager_lib/srv/_StartTask.py	/^  __slots__ = ['name','config']$/;"	v
+__slots__	src/task_manager_lib/srv/_StopTask.py	/^  __slots__ = ['id']$/;"	v
+__str__	src/task_manager_lib/TaskClient.py	/^		def __str__(self):$/;"	m	class:TaskClient.TaskStatus	file:
+__task_manager_lib__MINIMALTASKCONFIG_H__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	48;"	d
+__toMessage__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    void __toMessage__(dynamic_reconfigure::Config &msg) const$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__toMessage__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    void __toMessage__(dynamic_reconfigure::Config &msg, const std::vector<AbstractParamDescriptionConstPtr> &__param_descriptions__, const std::vector<AbstractGroupDescriptionConstPtr> &__group_descriptions__) const$/;"	f	class:task_manager_lib::MinimalTaskConfig
+__toServer__	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    void __toServer__(const ros::NodeHandle &nh) const$/;"	f	class:task_manager_lib::MinimalTaskConfig
+_config_type	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef  ::dynamic_reconfigure::Config_<ContainerAllocator>  _config_type;$/;"	t	struct:task_manager_lib::StartTaskRequest_
+_get_types	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  def _get_types(self):$/;"	f
+_get_types	src/task_manager_lib/srv/_GetTaskList.py	/^  def _get_types(self):$/;"	f
+_get_types	src/task_manager_lib/srv/_StartTask.py	/^  def _get_types(self):$/;"	f
+_get_types	src/task_manager_lib/srv/_StopTask.py	/^  def _get_types(self):$/;"	f
+_has_header	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:GetAllTaskStatusRequest
+_has_header	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:GetAllTaskStatusResponse
+_has_header	src/task_manager_lib/srv/_GetTaskList.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:GetTaskListRequest
+_has_header	src/task_manager_lib/srv/_GetTaskList.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:GetTaskListResponse
+_has_header	src/task_manager_lib/srv/_StartTask.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:StartTaskRequest
+_has_header	src/task_manager_lib/srv/_StartTask.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:StartTaskResponse
+_has_header	src/task_manager_lib/srv/_StopTask.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:StopTaskRequest
+_has_header	src/task_manager_lib/srv/_StopTask.py	/^  _has_header = False #flag to mark the presence of a Header object$/;"	v	class:StopTaskResponse
+_id_type	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef int32_t _id_type;$/;"	t	struct:task_manager_lib::StartTaskResponse_
+_id_type	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef int32_t _id_type;$/;"	t	struct:task_manager_lib::StopTaskRequest_
+_id_type	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  typedef int32_t _id_type;$/;"	t	struct:task_manager_lib::StopTaskResponse_
+_md5sum	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _md5sum = "d41d8cd98f00b204e9800998ecf8427e"$/;"	v	class:GetAllTaskStatusRequest
+_md5sum	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _md5sum = "e5c9999b622907d9c8f8219ae0229ca0"$/;"	v	class:GetAllTaskStatusResponse
+_md5sum	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _md5sum = 'e5c9999b622907d9c8f8219ae0229ca0'$/;"	v	class:GetAllTaskStatus
+_md5sum	src/task_manager_lib/srv/_GetTaskList.py	/^  _md5sum = "09f7ca8b46d7cd91fe1c115581fd8896"$/;"	v	class:GetTaskListResponse
+_md5sum	src/task_manager_lib/srv/_GetTaskList.py	/^  _md5sum = "d41d8cd98f00b204e9800998ecf8427e"$/;"	v	class:GetTaskListRequest
+_md5sum	src/task_manager_lib/srv/_GetTaskList.py	/^  _md5sum = '09f7ca8b46d7cd91fe1c115581fd8896'$/;"	v	class:GetTaskList
+_md5sum	src/task_manager_lib/srv/_StartTask.py	/^  _md5sum = "5644175681f8156e9017a8cde48600f0"$/;"	v	class:StartTaskRequest
+_md5sum	src/task_manager_lib/srv/_StartTask.py	/^  _md5sum = "c5e4a7d59c68f74eabcec876a00216aa"$/;"	v	class:StartTaskResponse
+_md5sum	src/task_manager_lib/srv/_StartTask.py	/^  _md5sum = 'b2f8ff7cfa5ca924d1a5c821ae61b59d'$/;"	v	class:StartTask
+_md5sum	src/task_manager_lib/srv/_StopTask.py	/^  _md5sum = "c5e4a7d59c68f74eabcec876a00216aa"$/;"	v	class:StopTaskRequest
+_md5sum	src/task_manager_lib/srv/_StopTask.py	/^  _md5sum = "c5e4a7d59c68f74eabcec876a00216aa"$/;"	v	class:StopTaskResponse
+_md5sum	src/task_manager_lib/srv/_StopTask.py	/^  _md5sum = '4db44f53774725e29cc65c3c9cacc6c3'$/;"	v	class:StopTask
+_name_type	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _name_type;$/;"	t	struct:task_manager_lib::StartTaskRequest_
+_request_class	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _request_class  = GetAllTaskStatusRequest$/;"	v	class:GetAllTaskStatus
+_request_class	src/task_manager_lib/srv/_GetTaskList.py	/^  _request_class  = GetTaskListRequest$/;"	v	class:GetTaskList
+_request_class	src/task_manager_lib/srv/_StartTask.py	/^  _request_class  = StartTaskRequest$/;"	v	class:StartTask
+_request_class	src/task_manager_lib/srv/_StopTask.py	/^  _request_class  = StopTaskRequest$/;"	v	class:StopTask
+_response_class	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _response_class = GetAllTaskStatusResponse$/;"	v	class:GetAllTaskStatus
+_response_class	src/task_manager_lib/srv/_GetTaskList.py	/^  _response_class = GetTaskListResponse$/;"	v	class:GetTaskList
+_response_class	src/task_manager_lib/srv/_StartTask.py	/^  _response_class = StartTaskResponse$/;"	v	class:StartTask
+_response_class	src/task_manager_lib/srv/_StopTask.py	/^  _response_class = StopTaskResponse$/;"	v	class:StopTask
+_running_tasks_type	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef std::vector< ::task_manager_msgs::TaskStatus_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::task_manager_msgs::TaskStatus_<ContainerAllocator> >::other >  _running_tasks_type;$/;"	t	struct:task_manager_lib::GetAllTaskStatusResponse_
+_slot_types	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _slot_types = ['task_manager_msgs\/TaskStatus[]','task_manager_msgs\/TaskStatus[]']$/;"	v
+_slot_types	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _slot_types = []$/;"	v
+_slot_types	src/task_manager_lib/srv/_GetTaskList.py	/^  _slot_types = ['task_manager_msgs\/TaskDescription[]']$/;"	v
+_slot_types	src/task_manager_lib/srv/_GetTaskList.py	/^  _slot_types = []$/;"	v
+_slot_types	src/task_manager_lib/srv/_StartTask.py	/^  _slot_types = ['int32']$/;"	v
+_slot_types	src/task_manager_lib/srv/_StartTask.py	/^  _slot_types = ['string','dynamic_reconfigure\/Config']$/;"	v
+_slot_types	src/task_manager_lib/srv/_StopTask.py	/^  _slot_types = ['int32']$/;"	v
+_struct_2I	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^_struct_2I = struct.Struct("<2I")$/;"	v
+_struct_2i	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_2i = struct.Struct("<2i")$/;"	v
+_struct_B	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^_struct_B = struct.Struct("<B")$/;"	v
+_struct_B	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_B = struct.Struct("<B")$/;"	v
+_struct_B	src/task_manager_lib/srv/_StartTask.py	/^_struct_B = struct.Struct("<B")$/;"	v
+_struct_B2i	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^_struct_B2i = struct.Struct("<B2i")$/;"	v
+_struct_B2i	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_B2i = struct.Struct("<B2i")$/;"	v
+_struct_B2i	src/task_manager_lib/srv/_StartTask.py	/^_struct_B2i = struct.Struct("<B2i")$/;"	v
+_struct_Bf	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_Bf = struct.Struct("<Bf")$/;"	v
+_struct_I	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^_struct_I = genpy.struct_I$/;"	v
+_struct_I	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_I = genpy.struct_I$/;"	v
+_struct_I	src/task_manager_lib/srv/_StartTask.py	/^_struct_I = genpy.struct_I$/;"	v
+_struct_I	src/task_manager_lib/srv/_StopTask.py	/^_struct_I = genpy.struct_I$/;"	v
+_struct_d	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^_struct_d = struct.Struct("<d")$/;"	v
+_struct_d	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_d = struct.Struct("<d")$/;"	v
+_struct_d	src/task_manager_lib/srv/_StartTask.py	/^_struct_d = struct.Struct("<d")$/;"	v
+_struct_i	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^_struct_i = struct.Struct("<i")$/;"	v
+_struct_i	src/task_manager_lib/srv/_GetTaskList.py	/^_struct_i = struct.Struct("<i")$/;"	v
+_struct_i	src/task_manager_lib/srv/_StartTask.py	/^_struct_i = struct.Struct("<i")$/;"	v
+_struct_i	src/task_manager_lib/srv/_StopTask.py	/^_struct_i = struct.Struct("<i")$/;"	v
+_tlist_type	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  typedef std::vector< ::task_manager_msgs::TaskDescription_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::task_manager_msgs::TaskDescription_<ContainerAllocator> >::other >  _tlist_type;$/;"	t	struct:task_manager_lib::GetTaskListResponse_
+_type	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _type          = 'task_manager_lib\/GetAllTaskStatus'$/;"	v	class:GetAllTaskStatus
+_type	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _type = "task_manager_lib\/GetAllTaskStatusRequest"$/;"	v	class:GetAllTaskStatusRequest
+_type	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  _type = "task_manager_lib\/GetAllTaskStatusResponse"$/;"	v	class:GetAllTaskStatusResponse
+_type	src/task_manager_lib/srv/_GetTaskList.py	/^  _type          = 'task_manager_lib\/GetTaskList'$/;"	v	class:GetTaskList
+_type	src/task_manager_lib/srv/_GetTaskList.py	/^  _type = "task_manager_lib\/GetTaskListRequest"$/;"	v	class:GetTaskListRequest
+_type	src/task_manager_lib/srv/_GetTaskList.py	/^  _type = "task_manager_lib\/GetTaskListResponse"$/;"	v	class:GetTaskListResponse
+_type	src/task_manager_lib/srv/_StartTask.py	/^  _type          = 'task_manager_lib\/StartTask'$/;"	v	class:StartTask
+_type	src/task_manager_lib/srv/_StartTask.py	/^  _type = "task_manager_lib\/StartTaskRequest"$/;"	v	class:StartTaskRequest
+_type	src/task_manager_lib/srv/_StartTask.py	/^  _type = "task_manager_lib\/StartTaskResponse"$/;"	v	class:StartTaskResponse
+_type	src/task_manager_lib/srv/_StopTask.py	/^  _type          = 'task_manager_lib\/StopTask'$/;"	v	class:StopTask
+_type	src/task_manager_lib/srv/_StopTask.py	/^  _type = "task_manager_lib\/StopTaskRequest"$/;"	v	class:StopTaskRequest
+_type	src/task_manager_lib/srv/_StopTask.py	/^  _type = "task_manager_lib\/StopTaskResponse"$/;"	v	class:StopTaskResponse
+_zombie_tasks_type	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  typedef std::vector< ::task_manager_msgs::TaskStatus_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::task_manager_msgs::TaskStatus_<ContainerAllocator> >::other >  _zombie_tasks_type;$/;"	t	struct:task_manager_lib::GetAllTaskStatusResponse_
+abstract_parameters	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      std::vector<AbstractParamDescriptionConstPtr> abstract_parameters;$/;"	m	class:task_manager_lib::MinimalTaskConfig::AbstractGroupDescription
 actionQueue	include/task_manager_lib/TaskScheduler.h	/^		ActionQueue actionQueue;$/;"	m	class:TaskScheduler
 actionString	src/TaskScheduler.cpp	/^const char *TaskScheduler::actionString(ActionType at)$/;"	f	class:TaskScheduler
 addTask	src/TaskScheduler.cpp	/^void TaskScheduler::addTask(TaskDefinition *td) $/;"	f	class:TaskScheduler
+allInOne	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)$/;"	f	struct:ros::serialization::Serializer
+allInOne	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)$/;"	f	struct:ros::serialization::Serializer
+allInOne	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)$/;"	f	struct:ros::serialization::Serializer
+allInOne	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)$/;"	f	struct:ros::serialization::Serializer
+all_level	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^    all_level = all_level | param['level']$/;"	v
+all_level	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^all_level = 0$/;"	v
+all_level	src/task_manager_lib/cfg/TaskLongConfig.py	/^    all_level = all_level | param['level']$/;"	v
+all_level	src/task_manager_lib/cfg/TaskLongConfig.py	/^all_level = 0$/;"	v
+all_level	src/task_manager_lib/cfg/TaskTestConfig.py	/^    all_level = all_level | param['level']$/;"	v
+all_level	src/task_manager_lib/cfg/TaskTestConfig.py	/^all_level = 0$/;"	v
 aperiodic_task_condition	include/task_manager_lib/TaskScheduler.h	/^			pthread_cond_t aperiodic_task_condition;$/;"	m	struct:TaskScheduler::ThreadParameters
 aperiodic_task_mutex	include/task_manager_lib/TaskScheduler.h	/^			pthread_mutex_t aperiodic_task_mutex;$/;"	m	struct:TaskScheduler::ThreadParameters
 aqCond	include/task_manager_lib/TaskScheduler.h	/^		pthread_cond_t aqCond;$/;"	m	class:TaskScheduler
 aqMutex	include/task_manager_lib/TaskScheduler.h	/^		pthread_mutex_t aqMutex;$/;"	m	class:TaskScheduler
 aqid	include/task_manager_lib/TaskScheduler.h	/^		pthread_t aqid;$/;"	m	class:TaskScheduler
-channel	include/task_manager_lib/TaskClient.h	/^		SBChannel channel;$/;"	m	class:TaskClient
+calcLevel	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void calcLevel(uint32_t &comb_level, const MinimalTaskConfig &config1, const MinimalTaskConfig &config2) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+cl:initialize-instance	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <GetAllTaskStatus-request>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <GetAllTaskStatus-response>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <GetTaskList-request>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <GetTaskList-response>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <StartTask-request>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <StartTask-response>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <StopTask-request>) cl:&rest args)$/;"	f
+cl:initialize-instance	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod cl:initialize-instance :after ((m <StopTask-response>) cl:&rest args)$/;"	f
+clamp	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void clamp(MinimalTaskConfig &config, const MinimalTaskConfig &max, const MinimalTaskConfig &min) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+clamp	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^  inline void MinimalTaskConfig::ParamDescription<std::string>::clamp(MinimalTaskConfig &config, const MinimalTaskConfig &max, const MinimalTaskConfig &min) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
 cleanitup	src/TaskScheduler.cpp	/^void TaskScheduler::cleanitup(void * arg)$/;"	f	class:TaskScheduler
 cleanupTask	src/TaskScheduler.cpp	/^int TaskScheduler::cleanupTask(ThreadParameters * tp)$/;"	f	class:TaskScheduler
 cleanup_action	src/TaskScheduler.cpp	/^void TaskScheduler::cleanup_action(void *arg) {$/;"	f	class:TaskScheduler
-close	src/TaskClient.cpp	/^int TaskClient::close()$/;"	f	class:TaskClient
-config	include/task_manager_lib/TaskDefinition.h	/^        dynamic_reconfigure::Config config;$/;"	m	class:TaskDefinition
-configure	include/task_manager_lib/DynamicTask.h	/^		virtual TaskStatus configure(const TaskParameters & parameters) throw (InvalidParameter) {$/;"	f	class:DynamicTask
-configureTasks	src/TaskScheduler.cpp	/^void TaskScheduler::configureTasks(const std::string & dirname, const std::string & extension)$/;"	f	class:TaskScheduler
+client	src/task_manager_lib/TaskClient.py	/^		client = None$/;"	v	class:TaskClient.TaskDefinition
+config	include/task_manager_lib/TaskDefinition.h	/^        TaskParameters config;$/;"	m	class:TaskDefinition
+config	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^   ::dynamic_reconfigure::Config_<ContainerAllocator>  config;$/;"	m	struct:task_manager_lib::StartTaskRequest_
+config-val	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod config-val ((m <StartTask-request>))$/;"	f
+config_description	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^config_description = {'upper': 'DEFAULT', 'lower': 'groups', 'srcline': 233, 'name': 'Default', 'parent': 0, 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'cstate': 'true', 'parentname': 'Default', 'class': 'DEFAULT', 'field': 'default', 'state': True, 'parentclass': '', 'groups': [], 'parameters': [{'srcline': 259, 'description': 'Task renaming at run-time', 'max': '', 'cconsttype': 'const char * const', 'ctype': 'std::string', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_rename', 'edit_method': '', 'default': '', 'level': 0, 'min': '', 'type': 'str'}, {'srcline': 259, 'description': 'Task running in foreground', 'max': True, 'cconsttype': 'const bool', 'ctype': 'bool', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'main_task', 'edit_method': '', 'default': True, 'level': 0, 'min': False, 'type': 'bool'}, {'srcline': 259, 'description': 'Task period', 'max': inf, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_period', 'edit_method': '', 'default': -1.0, 'level': 0, 'min': -inf, 'type': 'double'}, {'srcline': 259, 'description': 'Task timeout', 'max': inf, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_timeout', 'edit_method': '', 'default': -1.0, 'level': 0, 'min': -inf, 'type': 'double'}], 'type': '', 'id': 0}$/;"	v
+config_description	src/task_manager_lib/cfg/TaskLongConfig.py	/^config_description = {'upper': 'DEFAULT', 'lower': 'groups', 'srcline': 233, 'name': 'Default', 'parent': 0, 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'cstate': 'true', 'parentname': 'Default', 'class': 'DEFAULT', 'field': 'default', 'state': True, 'parentclass': '', 'groups': [], 'parameters': [{'srcline': 259, 'description': 'Task renaming at run-time', 'max': '', 'cconsttype': 'const char * const', 'ctype': 'std::string', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_rename', 'edit_method': '', 'default': '', 'level': 0, 'min': '', 'type': 'str'}, {'srcline': 259, 'description': 'Task running in foreground', 'max': True, 'cconsttype': 'const bool', 'ctype': 'bool', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'main_task', 'edit_method': '', 'default': True, 'level': 0, 'min': False, 'type': 'bool'}, {'srcline': 259, 'description': 'Task period', 'max': inf, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_period', 'edit_method': '', 'default': -1.0, 'level': 0, 'min': -inf, 'type': 'double'}, {'srcline': 259, 'description': 'Task timeout', 'max': inf, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_timeout', 'edit_method': '', 'default': -1.0, 'level': 0, 'min': -inf, 'type': 'double'}, {'srcline': 259, 'description': 'Duration of the task', 'max': 100.0, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_duration', 'edit_method': '', 'default': 3.0, 'level': 0, 'min': 0.0, 'type': 'double'}], 'type': '', 'id': 0}$/;"	v
+config_description	src/task_manager_lib/cfg/TaskTestConfig.py	/^config_description = {'upper': 'DEFAULT', 'lower': 'groups', 'srcline': 233, 'name': 'Default', 'parent': 0, 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'cstate': 'true', 'parentname': 'Default', 'class': 'DEFAULT', 'field': 'default', 'state': True, 'parentclass': '', 'groups': [], 'parameters': [{'srcline': 259, 'description': 'Task renaming at run-time', 'max': '', 'cconsttype': 'const char * const', 'ctype': 'std::string', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_rename', 'edit_method': '', 'default': '', 'level': 0, 'min': '', 'type': 'str'}, {'srcline': 259, 'description': 'Task running in foreground', 'max': True, 'cconsttype': 'const bool', 'ctype': 'bool', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'main_task', 'edit_method': '', 'default': True, 'level': 0, 'min': False, 'type': 'bool'}, {'srcline': 259, 'description': 'Task period', 'max': inf, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_period', 'edit_method': '', 'default': -1.0, 'level': 0, 'min': -inf, 'type': 'double'}, {'srcline': 259, 'description': 'Task timeout', 'max': inf, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_timeout', 'edit_method': '', 'default': -1.0, 'level': 0, 'min': -inf, 'type': 'double'}, {'srcline': 259, 'description': 'Duration of the task', 'max': 100.0, 'cconsttype': 'const double', 'ctype': 'double', 'srcfile': '\/opt\/ros\/fuerte\/stacks\/dynamic_reconfigure\/src\/dynamic_reconfigure\/parameter_generator.py', 'name': 'task_duration', 'edit_method': '', 'default': 3.0, 'level': 0, 'min': 0.0, 'type': 'double'}], 'type': '', 'id': 0}$/;"	v
+configure	include/task_manager_lib/DynamicTask.h	/^		virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) {$/;"	f	class:DynamicTask
+configure	src/TaskIdleDefault.cpp	/^TaskIndicator TaskIdleDefault::configure(const TaskParameters & parameters) throw (InvalidParameter)$/;"	f	class:TaskIdleDefault
+configureTasks	src/TaskScheduler.cpp	/^void TaskScheduler::configureTasks(\/*const std::string & dirname, const std::string & extension*\/)$/;"	f	class:TaskScheduler
+convertParams	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      void convertParams()$/;"	f	class:task_manager_lib::MinimalTaskConfig::AbstractGroupDescription
 debug	include/task_manager_lib/TaskScheduler.h	/^		static unsigned int debug;$/;"	m	class:TaskScheduler
 debug	src/TaskDefinition.cpp	/^void TaskDefinition::debug(const char *stemplate,...) const {$/;"	f	class:TaskDefinition
 debug	src/TaskScheduler.cpp	/^unsigned int TaskScheduler::debug = 0;$/;"	m	class:TaskScheduler	file:
 defaultPeriod	include/task_manager_lib/TaskScheduler.h	/^		double defaultPeriod;$/;"	m	class:TaskScheduler
-defaultTimeout	include/task_manager_lib/TaskDefinition.h	/^		double defaultTimeout;$/;"	m	class:TaskDefinition
+defaults	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^defaults = {}$/;"	v
+defaults	src/task_manager_lib/cfg/TaskLongConfig.py	/^defaults = {}$/;"	v
+defaults	src/task_manager_lib/cfg/TaskTestConfig.py	/^defaults = {}$/;"	v
 deleteTask	src/TaskScheduler.cpp	/^int TaskScheduler::deleteTask(ThreadParameters *tp)$/;"	f	class:TaskScheduler
+deserialize	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  def deserialize(self, str):$/;"	f
+deserialize	src/task_manager_lib/srv/_GetTaskList.py	/^  def deserialize(self, str):$/;"	f
+deserialize	src/task_manager_lib/srv/_StartTask.py	/^  def deserialize(self, str):$/;"	f
+deserialize	src/task_manager_lib/srv/_StopTask.py	/^  def deserialize(self, str):$/;"	f
+deserialize_numpy	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  def deserialize_numpy(self, str, numpy):$/;"	f
+deserialize_numpy	src/task_manager_lib/srv/_GetTaskList.py	/^  def deserialize_numpy(self, str, numpy):$/;"	f
+deserialize_numpy	src/task_manager_lib/srv/_StartTask.py	/^  def deserialize_numpy(self, str, numpy):$/;"	f
+deserialize_numpy	src/task_manager_lib/srv/_StopTask.py	/^  def deserialize_numpy(self, str, numpy):$/;"	f
 dllfilter	src/TaskScheduler.cpp	/^static int dllfilter(const struct dirent * d) {$/;"	f	file:
-doConfigure	src/TaskDefinition.cpp	/^void TaskDefinition::doConfigure(const dynamic_reconfigure::Config & parameters)$/;"	f	class:TaskDefinition
-doInitialise	src/TaskDefinition.cpp	/^void TaskDefinition::doInitialise(const dynamic_reconfigure::Config & parameters)$/;"	f	class:TaskDefinition
+doConfigure	src/TaskDefinition.cpp	/^void TaskDefinition::doConfigure(const TaskParameters & parameters)$/;"	f	class:TaskDefinition
+doInitialise	src/TaskDefinition.cpp	/^void TaskDefinition::doInitialise(const TaskParameters & parameters)$/;"	f	class:TaskDefinition
 doIterate	src/TaskDefinition.cpp	/^void TaskDefinition::doIterate()$/;"	f	class:TaskDefinition
 doTerminate	src/TaskDefinition.cpp	/^void TaskDefinition::doTerminate()$/;"	f	class:TaskDefinition
 enqueueAction	src/TaskScheduler.cpp	/^void TaskScheduler::enqueueAction(ActionType type,ThreadParameters *tp)$/;"	f	class:TaskScheduler
-enqueueAction	src/TaskScheduler.cpp	/^void TaskScheduler::enqueueAction(double when, ActionType type,ThreadParameters *tp)$/;"	f	class:TaskScheduler
+enqueueAction	src/TaskScheduler.cpp	/^void TaskScheduler::enqueueAction(const ros::Time & when, ActionType type,ThreadParameters *tp)$/;"	f	class:TaskScheduler
 filename	include/task_manager_lib/DynamicTask.h	/^		std::string filename;$/;"	m	class:DynamicTask
 foreground	include/task_manager_lib/TaskClient.h	/^			bool foreground;$/;"	m	struct:TaskClient::TaskState
 foreground	include/task_manager_lib/TaskScheduler.h	/^			bool foreground,running;$/;"	m	struct:TaskScheduler::ThreadParameters
+foreground	src/task_manager_lib/TaskClient.py	/^		foreground = True$/;"	v	class:TaskClient.TaskStatus
+fromMessage	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual bool fromMessage(const dynamic_reconfigure::Config &msg, MinimalTaskConfig &config) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+fromMessage	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual bool fromMessage(const dynamic_reconfigure::Config &msg, boost::any &cfg) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::GroupDescription
+fromServer	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void fromServer(const ros::NodeHandle &nh, MinimalTaskConfig &config) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+gen	cfg/MinimalTask.cfg	/^gen = TaskParameterGenerator()$/;"	v
 generateTaskList	src/TaskScheduler.cpp	/^void TaskScheduler::generateTaskList(std::vector<task_manager_msgs::TaskDescription> & tlist) const$/;"	f	class:TaskScheduler
 generateTaskStatus	src/TaskScheduler.cpp	/^void TaskScheduler::generateTaskStatus(std::vector<task_manager_msgs::TaskStatus> & running,$/;"	f	class:TaskScheduler
-getAllTaskStatus	src/TaskScheduler.cpp	/^bool TaskScheduler::getAllTaskStatus(task_manager_lib::GetTaskList::Request  &req,$/;"	f	class:TaskScheduler
-getAllTaskStatus	src/TaskServer.cpp	/^bool TaskServer::getAllTaskStatus(task_manager_lib::GetTaskList::Request  &req,$/;"	f	class:TaskServer
+getAllTaskStatus	src/TaskScheduler.cpp	/^bool TaskScheduler::getAllTaskStatus(task_manager_lib::GetAllTaskStatus::Request  &req,$/;"	f	class:TaskScheduler
+getAllTaskStatusClt	include/task_manager_lib/TaskClient.h	/^        ros::ServiceClient getAllTaskStatusClt;$/;"	m	class:TaskClient
 getAllTaskStatusSrv	include/task_manager_lib/TaskScheduler.h	/^        ros::ServiceServer getAllTaskStatusSrv;$/;"	m	class:TaskScheduler
-getAllTaskStatusSrv	include/task_manager_lib/TaskServer.h	/^        ros::ServiceServer getAllTaskStatusSrv;$/;"	m	class:TaskServer
+getConfig	include/task_manager_lib/DynamicTask.h	/^		virtual const TaskParameters & getConfig() const {return task->getConfig();}$/;"	f	class:DynamicTask
+getConfig	src/TaskDefinition.cpp	/^const TaskParameters & TaskDefinition::getConfig() const {$/;"	f	class:TaskDefinition
+getDefaultParameters	include/task_manager_lib/DynamicTask.h	/^        virtual TaskParameters getDefaultParameters() const {$/;"	f	class:DynamicTask
+getDefaultParameters	include/task_manager_lib/TaskDefinition.h	/^        virtual TaskParameters getDefaultParameters() const {$/;"	f	class:TaskDefinitionWithConfig
 getDescription	src/TaskDefinition.cpp	/^task_manager_msgs::TaskDescription TaskDefinition::getDescription() const {$/;"	f	class:TaskDefinition
 getDirectory	include/task_manager_lib/TaskScheduler.h	/^		const TaskDirectory & getDirectory() const {return tasks;}$/;"	f	class:TaskScheduler
 getHelp	include/task_manager_lib/DynamicTask.h	/^		virtual const std::string & getHelp() const {return task->getHelp();}$/;"	f	class:DynamicTask
@@ -100,114 +622,334 @@ getHelp	src/TaskDefinition.cpp	/^const std::string & TaskDefinition::getHelp() c
 getName	include/task_manager_lib/DynamicTask.h	/^		virtual const std::string & getName() const {return task->getName();}$/;"	f	class:DynamicTask
 getName	src/TaskDefinition.cpp	/^const std::string & TaskDefinition::getName() const {$/;"	f	class:TaskDefinition
 getNextAction	src/TaskScheduler.cpp	/^TaskScheduler::ThreadAction TaskScheduler::getNextAction()$/;"	f	class:TaskScheduler
+getParameter	include/task_manager_lib/TaskDefinition.h	/^            bool getParameter(const std::string &name, T &val) const$/;"	f	class:TaskParameters
+getParameterDescription	include/task_manager_lib/DynamicTask.h	/^        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {$/;"	f	class:DynamicTask
+getParameterDescription	include/task_manager_lib/TaskDefinition.h	/^        virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {$/;"	f	class:TaskDefinitionWithConfig
+getParametersFromServer	include/task_manager_lib/DynamicTask.h	/^        virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {$/;"	f	class:DynamicTask
+getParametersFromServer	include/task_manager_lib/TaskDefinition.h	/^        virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {$/;"	f	class:TaskDefinitionWithConfig
+getRosStatus	include/task_manager_lib/TaskScheduler.h	/^            task_manager_msgs::TaskStatus getRosStatus() const {$/;"	f	struct:TaskScheduler::ThreadParameters
 getRosStatus	src/TaskDefinition.cpp	/^task_manager_msgs::TaskStatus TaskDefinition::getRosStatus() const {$/;"	f	class:TaskDefinition
-getStatus	include/task_manager_lib/DynamicTask.h	/^		virtual TaskStatus getStatus() const {$/;"	f	class:DynamicTask
-getStatus	src/TaskClient.cpp	/^const TaskClient::StatusMap & TaskClient::getStatus()$/;"	f	class:TaskClient
-getStatus	src/TaskDefinition.cpp	/^TaskStatus TaskDefinition::getStatus() const {$/;"	f	class:TaskDefinition
+getStatus	include/task_manager_lib/DynamicTask.h	/^		virtual TaskIndicator getStatus() const {$/;"	f	class:DynamicTask
+getStatus	src/TaskDefinition.cpp	/^TaskIndicator TaskDefinition::getStatus() const {$/;"	f	class:TaskDefinition
+getStatusMap	include/task_manager_lib/TaskClient.h	/^		const StatusMap & getStatusMap() const {$/;"	f	class:TaskClient
 getStatusString	include/task_manager_lib/DynamicTask.h	/^		virtual const std::string & getStatusString() const {$/;"	f	class:DynamicTask
 getStatusString	src/TaskDefinition.cpp	/^const std::string & TaskDefinition::getStatusString() const {$/;"	f	class:TaskDefinition
-getTaskList	src/TaskClient.cpp	/^const std::vector<TaskClient::TaskDescriptor> & TaskClient::getTaskList() const$/;"	f	class:TaskClient
+getTaskList	src/TaskClient.cpp	/^const std::vector<task_manager_msgs::TaskDescription> & TaskClient::getTaskList() const$/;"	f	class:TaskClient
 getTaskList	src/TaskScheduler.cpp	/^bool TaskScheduler::getTaskList(task_manager_lib::GetTaskList::Request  &req,$/;"	f	class:TaskScheduler
-getTaskList	src/TaskServer.cpp	/^bool TaskServer::getTaskList(task_manager_lib::GetTaskList::Request  &req,$/;"	f	class:TaskServer
+getTaskListClt	include/task_manager_lib/TaskClient.h	/^        ros::ServiceClient getTaskListClt;$/;"	m	class:TaskClient
 getTaskListSrv	include/task_manager_lib/TaskScheduler.h	/^        ros::ServiceServer getTaskListSrv;$/;"	m	class:TaskScheduler
-getTaskListSrv	include/task_manager_lib/TaskServer.h	/^        ros::ServiceServer getTaskListSrv;$/;"	m	class:TaskServer
 getTimeout	include/task_manager_lib/DynamicTask.h	/^		virtual double getTimeout() const {return task->getTimeout();}$/;"	f	class:DynamicTask
 getTimeout	src/TaskDefinition.cpp	/^double TaskDefinition::getTimeout() const {$/;"	f	class:TaskDefinition
+getValue	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void getValue(const MinimalTaskConfig &config, boost::any &val) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+get_instance	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    static const MinimalTaskConfigStatics *get_instance()$/;"	f	class:task_manager_lib::MinimalTaskConfigStatics
+groups	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      std::vector<MinimalTaskConfig::AbstractGroupDescriptionConstPtr> groups;$/;"	m	class:task_manager_lib::MinimalTaskConfig::GroupDescription
+groups	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^}groups;$/;"	m	class:task_manager_lib::MinimalTaskConfig	typeref:class:task_manager_lib::MinimalTaskConfig::DEFAULT
 gtpid	include/task_manager_lib/TaskScheduler.h	/^			static unsigned int gtpid;$/;"	m	struct:TaskScheduler::ThreadParameters
 gtpid	src/TaskScheduler.cpp	/^unsigned int TaskScheduler::ThreadParameters::gtpid = 0;$/;"	m	class:TaskScheduler::ThreadParameters	file:
 handle	include/task_manager_lib/DynamicTask.h	/^		void * handle;$/;"	m	class:DynamicTask
-help	include/task_manager_lib/TaskClient.h	/^			std::string help;$/;"	m	struct:TaskClient::TaskDescriptor
 help	include/task_manager_lib/TaskDefinition.h	/^		std::string help;$/;"	m	class:TaskDefinition
-host	include/task_manager_lib/TaskClient.h	/^		std::string host;$/;"	m	class:TaskClient
+help	src/task_manager_lib/TaskClient.py	/^		help = ""$/;"	v	class:TaskClient.TaskDefinition
 id	include/task_manager_lib/TaskClient.h	/^			TaskScheduler::TaskId id;$/;"	m	struct:TaskClient::TaskState
+id	src/task_manager_lib/TaskClient.py	/^		id = 0$/;"	v	class:TaskClient.TaskStatus
+id	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  int32_t id;$/;"	m	struct:task_manager_lib::StartTaskResponse_
+id	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  int32_t id;$/;"	m	struct:task_manager_lib::StopTaskRequest_
+id	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  int32_t id;$/;"	m	struct:task_manager_lib::StopTaskResponse_
+id-val	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod id-val ((m <StartTask-response>))$/;"	f
+id-val	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod id-val ((m <StopTask-request>))$/;"	f
+id-val	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod id-val ((m <StopTask-response>))$/;"	f
 idle	include/task_manager_lib/TaskScheduler.h	/^		TaskDefinition *idle;$/;"	m	class:TaskScheduler
 idle	src/TaskClient.cpp	/^int TaskClient::idle()$/;"	f	class:TaskClient
+idle	src/task_manager_lib/TaskClient.py	/^	def idle(self):$/;"	m	class:TaskClient
 idleTimeout	include/task_manager_lib/TaskScheduler.h	/^		double idleTimeout;$/;"	m	class:TaskScheduler
-initialise	include/task_manager_lib/DynamicTask.h	/^		virtual TaskStatus initialise(const TaskParameters & parameters) throw (InvalidParameter) {$/;"	f	class:DynamicTask
+inf	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^inf = float('inf')$/;"	v
+inf	src/task_manager_lib/cfg/TaskLongConfig.py	/^inf = float('inf')$/;"	v
+inf	src/task_manager_lib/cfg/TaskTestConfig.py	/^inf = float('inf')$/;"	v
+info_arch	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	/^char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";$/;"	v
+info_arch	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";$/;"	v
+info_compiler	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	/^char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";$/;"	v
+info_compiler	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";$/;"	v
+info_platform	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	/^char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";$/;"	v
+info_platform	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";$/;"	v
+initialise	include/task_manager_lib/DynamicTask.h	/^		virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter) {$/;"	f	class:DynamicTask
+initialise	src/TaskIdleDefault.cpp	/^TaskIndicator TaskIdleDefault::initialise(const TaskParameters & parameters) throw (InvalidParameter)$/;"	f	class:TaskIdleDefault
 isPeriodic	include/task_manager_lib/DynamicTask.h	/^		virtual bool isPeriodic() const {return task->isPeriodic();}$/;"	f	class:DynamicTask
 isPeriodic	src/TaskDefinition.cpp	/^bool TaskDefinition::isPeriodic() const {$/;"	f	class:TaskDefinition
-iterate	include/task_manager_lib/DynamicTask.h	/^		virtual TaskStatus iterate() {$/;"	f	class:DynamicTask
+iterate	include/task_manager_lib/DynamicTask.h	/^		virtual TaskIndicator iterate() {$/;"	f	class:DynamicTask
+iterate	src/TaskIdleDefault.cpp	/^TaskIndicator TaskIdleDefault::iterate()$/;"	f	class:TaskIdleDefault
 launchIdleTask	src/TaskScheduler.cpp	/^TaskScheduler::TaskId TaskScheduler::launchIdleTask()$/;"	f	class:TaskScheduler
 launchTask	src/TaskScheduler.cpp	/^TaskScheduler::TaskId TaskScheduler::launchTask(ThreadParameters *tp)$/;"	f	class:TaskScheduler
 launchTask	src/TaskScheduler.cpp	/^TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname, $/;"	f	class:TaskScheduler
+level	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^level = {}$/;"	v
+level	src/task_manager_lib/cfg/TaskLongConfig.py	/^level = {}$/;"	v
+level	src/task_manager_lib/cfg/TaskTestConfig.py	/^level = {}$/;"	v
 loadAllTasks	src/TaskScheduler.cpp	/^void TaskScheduler::loadAllTasks(const std::string & dirname, $/;"	f	class:TaskScheduler
 loadTask	src/TaskScheduler.cpp	/^void TaskScheduler::loadTask(const std::string & filename, TaskEnvironment *env)$/;"	f	class:TaskScheduler
 lockScheduler	src/TaskScheduler.cpp	/^void TaskScheduler::lockScheduler()$/;"	f	class:TaskScheduler
+main	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	/^int main(int argc, char* argv[])$/;"	f
+main	build/CMakeFiles/CompilerIdC/CMakeCCompilerId.c	/^void main() {}$/;"	f
+main	build/CMakeFiles/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^int main(int argc, char* argv[])$/;"	f
 mainThread	include/task_manager_lib/TaskScheduler.h	/^		ThreadParameters *mainThread;$/;"	m	class:TaskScheduler
+main_task	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      bool main_task;$/;"	m	class:task_manager_lib::MinimalTaskConfig
+main_task	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^bool main_task;$/;"	m	class:task_manager_lib::MinimalTaskConfig::DEFAULT
+max	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^max = {}$/;"	v
+max	src/task_manager_lib/cfg/TaskLongConfig.py	/^max = {}$/;"	v
+max	src/task_manager_lib/cfg/TaskTestConfig.py	/^max = {}$/;"	v
+message_traits	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^namespace message_traits$/;"	n	namespace:ros
+message_traits	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^namespace message_traits$/;"	n	namespace:ros
+message_traits	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^namespace message_traits$/;"	n	namespace:ros
+message_traits	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^namespace message_traits$/;"	n	namespace:ros
 messageid	include/task_manager_lib/TaskClient.h	/^		unsigned int messageid;$/;"	m	class:TaskClient
-name	include/task_manager_lib/TaskClient.h	/^			std::string name;$/;"	m	struct:TaskClient::TaskDescriptor
+messageid	src/task_manager_lib/TaskClient.py	/^	messageid = 0$/;"	v	class:TaskClient
+min	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^min = {}$/;"	v
+min	src/task_manager_lib/cfg/TaskLongConfig.py	/^min = {}$/;"	v
+min	src/task_manager_lib/cfg/TaskTestConfig.py	/^min = {}$/;"	v
+mutex	include/task_manager_lib/TaskClient.h	/^        mutable pthread_mutex_t mutex;$/;"	m	class:TaskClient
+n	include/task_manager_lib/TaskScheduler.h	/^        ros::NodeHandle n;$/;"	m	class:TaskScheduler
+name	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    std::string name;$/;"	m	class:task_manager_lib::MinimalTaskConfig::DEFAULT
 name	include/task_manager_lib/TaskClient.h	/^			std::string name;$/;"	m	struct:TaskClient::TaskState
 name	include/task_manager_lib/TaskDefinition.h	/^		std::string name;$/;"	m	class:TaskDefinition
-now	src/TaskScheduler.cpp	/^double TaskScheduler::now()$/;"	f	class:TaskScheduler
-open	src/TaskClient.cpp	/^int TaskClient::open()$/;"	f	class:TaskClient
-opened	include/task_manager_lib/TaskClient.h	/^		bool opened;$/;"	m	class:TaskClient
+name	src/task_manager_lib/TaskClient.py	/^		name = ""$/;"	v	class:TaskClient.TaskDefinition
+name	src/task_manager_lib/TaskClient.py	/^		name = ""$/;"	v	class:TaskClient.TaskStatus
+name	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  name;$/;"	m	struct:task_manager_lib::StartTaskRequest_
+name-val	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod name-val ((m <StartTask-request>))$/;"	f
+now	include/task_manager_lib/TaskScheduler.h	/^        ros::Time now() { return ros::Time::now();}$/;"	f	class:TaskScheduler
 operator <	include/task_manager_lib/TaskScheduler.h	/^			bool operator<(const ThreadParameters & tp) {$/;"	f	struct:TaskScheduler::ThreadParameters
-parameterDescription	include/task_manager_lib/TaskDefinition.h	/^        dynamic_reconfigure::ConfigDescription parameterDescription;$/;"	m	class:TaskDefinition
-params	include/task_manager_lib/TaskScheduler.h	/^			TaskParameters params;$/;"	m	struct:TaskScheduler::ThreadParameters
+params	include/task_manager_lib/TaskScheduler.h	/^            TaskParameters params;$/;"	m	struct:TaskScheduler::ThreadParameters
 period	include/task_manager_lib/TaskScheduler.h	/^			double period;$/;"	m	struct:TaskScheduler::ThreadParameters
 periodic	include/task_manager_lib/TaskDefinition.h	/^		bool periodic;$/;"	m	class:TaskDefinition
+print	include/task_manager_lib/TaskDefinition.h	/^        void print(FILE * fp=stdout) const {$/;"	f	class:TaskParameters
 printStatusMap	src/TaskClient.cpp	/^void TaskClient::printStatusMap() const$/;"	f	class:TaskClient
 printTaskDirectory	src/TaskScheduler.cpp	/^void TaskScheduler::printTaskDirectory() const$/;"	f	class:TaskScheduler
 printTaskList	src/TaskClient.cpp	/^void TaskClient::printTaskList() const$/;"	f	class:TaskClient
+printTaskList	src/task_manager_lib/TaskClient.py	/^	def printTaskList(self):$/;"	m	class:TaskClient
 printTaskSet	src/TaskScheduler.cpp	/^void TaskScheduler::printTaskSet(const std::string & name, const TaskScheduler::TaskSet & ts)$/;"	f	class:TaskScheduler
+printTaskStatus	src/task_manager_lib/TaskClient.py	/^	def printTaskStatus(self):$/;"	m	class:TaskClient
+python3	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^python3 = True if sys.hexversion > 0x03000000 else False$/;"	v
+python3	src/task_manager_lib/srv/_GetTaskList.py	/^python3 = True if sys.hexversion > 0x03000000 else False$/;"	v
+python3	src/task_manager_lib/srv/_StartTask.py	/^python3 = True if sys.hexversion > 0x03000000 else False$/;"	v
+python3	src/task_manager_lib/srv/_StopTask.py	/^python3 = True if sys.hexversion > 0x03000000 else False$/;"	v
 removeConditionalIdle	src/TaskScheduler.cpp	/^void TaskScheduler::removeConditionalIdle()$/;"	f	class:TaskScheduler
+request	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^Request request;$/;"	m	struct:task_manager_lib::GetAllTaskStatus
+request	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^Request request;$/;"	m	struct:task_manager_lib::GetTaskList
+request	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^Request request;$/;"	m	struct:task_manager_lib::StartTask
+request	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^Request request;$/;"	m	struct:task_manager_lib::StopTask
 resetStatus	include/task_manager_lib/DynamicTask.h	/^		virtual void resetStatus() {$/;"	f	class:DynamicTask
 resetStatus	src/TaskDefinition.cpp	/^void TaskDefinition::resetStatus() {$/;"	f	class:TaskDefinition
+response	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^Response response;$/;"	m	struct:task_manager_lib::GetAllTaskStatus
+response	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^Response response;$/;"	m	struct:task_manager_lib::GetTaskList
+response	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^Response response;$/;"	m	struct:task_manager_lib::StartTask
+response	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^Response response;$/;"	m	struct:task_manager_lib::StopTask
+ros	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^namespace ros$/;"	n
+ros	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^namespace ros$/;"	n
+ros	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^namespace ros$/;"	n
+ros	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^namespace ros$/;"	n
+roslisp-msg-protocol:deserialize	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <GetAllTaskStatus-request>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <GetAllTaskStatus-response>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <GetTaskList-request>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <GetTaskList-response>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <StartTask-request>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <StartTask-response>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <StopTask-request>) istream)$/;"	f
+roslisp-msg-protocol:deserialize	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:deserialize ((msg <StopTask-response>) istream)$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<GetAllTaskStatus-request>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<GetAllTaskStatus-response>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'GetAllTaskStatus-request)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'GetAllTaskStatus-response)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<GetTaskList-request>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<GetTaskList-response>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'GetTaskList-request)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'GetTaskList-response)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<StartTask-request>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<StartTask-response>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'StartTask-request)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'StartTask-response)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<StopTask-request>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<StopTask-response>)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'StopTask-request)))$/;"	f
+roslisp-msg-protocol:md5sum	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'StopTask-response)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<GetAllTaskStatus-request>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<GetAllTaskStatus-response>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'GetAllTaskStatus-request)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'GetAllTaskStatus-response)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<GetTaskList-request>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<GetTaskList-response>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'GetTaskList-request)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'GetTaskList-response)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<StartTask-request>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<StartTask-response>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'StartTask-request)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'StartTask-response)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<StopTask-request>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<StopTask-response>)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'StopTask-request)))$/;"	f
+roslisp-msg-protocol:message-definition	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'StopTask-response)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<GetAllTaskStatus-request>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<GetAllTaskStatus-response>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'GetAllTaskStatus)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'GetAllTaskStatus-request)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'GetAllTaskStatus-response)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<GetTaskList-request>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<GetTaskList-response>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'GetTaskList)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'GetTaskList-request)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'GetTaskList-response)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<StartTask-request>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<StartTask-response>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'StartTask)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'StartTask-request)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'StartTask-response)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<StopTask-request>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<StopTask-response>)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'StopTask)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'StopTask-request)))$/;"	f
+roslisp-msg-protocol:ros-datatype	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql 'StopTask-response)))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <GetAllTaskStatus-request>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <GetAllTaskStatus-response>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <GetTaskList-request>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <GetTaskList-response>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <StartTask-request>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <StartTask-response>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <StopTask-request>))$/;"	f
+roslisp-msg-protocol:ros-message-to-list	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <StopTask-response>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <GetAllTaskStatus-request>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <GetAllTaskStatus-response>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <GetTaskList-request>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <GetTaskList-response>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <StartTask-request>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <StartTask-response>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <StopTask-request>))$/;"	f
+roslisp-msg-protocol:serialization-length	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialization-length ((msg <StopTask-response>))$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <GetAllTaskStatus-request>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <GetAllTaskStatus-response>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <GetTaskList-request>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <GetTaskList-response>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <StartTask-request>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <StartTask-response>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <StopTask-request>) ostream)$/;"	f
+roslisp-msg-protocol:serialize	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:serialize ((msg <StopTask-response>) ostream)$/;"	f
+roslisp-msg-protocol:service-request-type	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:service-request-type ((msg (cl:eql 'GetAllTaskStatus)))$/;"	f
+roslisp-msg-protocol:service-request-type	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:service-request-type ((msg (cl:eql 'GetTaskList)))$/;"	f
+roslisp-msg-protocol:service-request-type	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:service-request-type ((msg (cl:eql 'StartTask)))$/;"	f
+roslisp-msg-protocol:service-request-type	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:service-request-type ((msg (cl:eql 'StopTask)))$/;"	f
+roslisp-msg-protocol:service-response-type	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod roslisp-msg-protocol:service-response-type ((msg (cl:eql 'GetAllTaskStatus)))$/;"	f
+roslisp-msg-protocol:service-response-type	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod roslisp-msg-protocol:service-response-type ((msg (cl:eql 'GetTaskList)))$/;"	f
+roslisp-msg-protocol:service-response-type	srv_gen/lisp/StartTask.lisp	/^(cl:defmethod roslisp-msg-protocol:service-response-type ((msg (cl:eql 'StartTask)))$/;"	f
+roslisp-msg-protocol:service-response-type	srv_gen/lisp/StopTask.lisp	/^(cl:defmethod roslisp-msg-protocol:service-response-type ((msg (cl:eql 'StopTask)))$/;"	f
 runAperiodicTask	src/TaskScheduler.cpp	/^void * TaskScheduler::runAperiodicTask(void *arg)$/;"	f	class:TaskScheduler
 runScheduler	include/task_manager_lib/TaskScheduler.h	/^		bool runScheduler;$/;"	m	class:TaskScheduler
 runSchedulerLoop	src/TaskScheduler.cpp	/^int TaskScheduler::runSchedulerLoop()$/;"	f	class:TaskScheduler
-runServerLoop	src/TaskServer.cpp	/^int TaskServer::runServerLoop()$/;"	f	class:TaskServer
 runTask	src/TaskScheduler.cpp	/^int TaskScheduler::runTask(ThreadParameters * tp)$/;"	f	class:TaskScheduler
 running	include/task_manager_lib/TaskScheduler.h	/^			bool foreground,running;$/;"	m	struct:TaskScheduler::ThreadParameters
 runningThreads	include/task_manager_lib/TaskScheduler.h	/^		TaskSet runningThreads,zombieThreads;$/;"	m	class:TaskScheduler
-scheduler	include/task_manager_lib/TaskServer.h	/^		TaskScheduler & scheduler;$/;"	m	class:TaskServer
+running_tasks	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  std::vector< ::task_manager_msgs::TaskStatus_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::task_manager_msgs::TaskStatus_<ContainerAllocator> >::other >  running_tasks;$/;"	m	struct:task_manager_lib::GetAllTaskStatusResponse_
+running_tasks-val	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod running_tasks-val ((m <GetAllTaskStatus-response>))$/;"	f
 scheduler_condition	include/task_manager_lib/TaskScheduler.h	/^		pthread_cond_t scheduler_condition;$/;"	m	class:TaskScheduler
 scheduler_mutex	include/task_manager_lib/TaskScheduler.h	/^		pthread_mutex_t scheduler_mutex;$/;"	m	class:TaskScheduler
 scheduler_thread	src/TaskScheduler.cpp	/^void * TaskScheduler::scheduler_thread(void *arg)$/;"	f	class:TaskScheduler
-sendMessageAndWait	src/TaskClient.cpp	/^int TaskClient::sendMessageAndWait(const std::string & text, TaskParameters & tp)$/;"	f	class:TaskClient
-sendReply	src/TaskServer.cpp	/^int TaskServer::sendReply(const std::string & message)$/;"	f	class:TaskServer
-sendRequest	src/TaskClient.cpp	/^int TaskClient::sendRequest(const std::string & message)$/;"	f	class:TaskClient
+serialization	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^namespace serialization$/;"	n	namespace:ros
+serialization	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^namespace serialization$/;"	n	namespace:ros
+serialization	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^namespace serialization$/;"	n	namespace:ros
+serialization	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^namespace serialization$/;"	n	namespace:ros
+serialize	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  def serialize(self, buff):$/;"	f
+serialize	src/task_manager_lib/srv/_GetTaskList.py	/^  def serialize(self, buff):$/;"	f
+serialize	src/task_manager_lib/srv/_StartTask.py	/^  def serialize(self, buff):$/;"	f
+serialize	src/task_manager_lib/srv/_StopTask.py	/^  def serialize(self, buff):$/;"	f
+serialize_numpy	src/task_manager_lib/srv/_GetAllTaskStatus.py	/^  def serialize_numpy(self, buff, numpy):$/;"	f
+serialize_numpy	src/task_manager_lib/srv/_GetTaskList.py	/^  def serialize_numpy(self, buff, numpy):$/;"	f
+serialize_numpy	src/task_manager_lib/srv/_StartTask.py	/^  def serialize_numpy(self, buff, numpy):$/;"	f
+serialize_numpy	src/task_manager_lib/srv/_StopTask.py	/^  def serialize_numpy(self, buff, numpy):$/;"	f
+service_traits	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^namespace service_traits$/;"	n	namespace:ros
+service_traits	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^namespace service_traits$/;"	n	namespace:ros
+service_traits	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^namespace service_traits$/;"	n	namespace:ros
+service_traits	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^namespace service_traits$/;"	n	namespace:ros
+setDefaultParameters	include/task_manager_lib/TaskDefinition.h	/^        void setDefaultParameters() {$/;"	f	class:TaskParameters
 setHelp	include/task_manager_lib/TaskDefinition.h	/^		void setHelp(const std::string & h) {help = h;}$/;"	f	class:TaskDefinition
+setInitialState	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void setInitialState(boost::any &cfg) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::GroupDescription
 setName	include/task_manager_lib/DynamicTask.h	/^		virtual void setName(const std::string & n) {task->setName(n);}$/;"	f	class:DynamicTask
 setName	src/TaskDefinition.cpp	/^void TaskDefinition::setName(const std::string & n) {$/;"	f	class:TaskDefinition
+setParameter	include/task_manager_lib/TaskDefinition.h	/^            bool setParameter(std::vector<VT> &vec, const std::string &name, const T &val)$/;"	f	class:TaskParameters
+setParameter	include/task_manager_lib/TaskDefinition.h	/^            void setParameter(const std::string &name, const T &val)$/;"	f	class:TaskParameters
+setParams	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    void setParams(MinimalTaskConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)$/;"	f	class:task_manager_lib::MinimalTaskConfig::DEFAULT
 setPeriodic	include/task_manager_lib/TaskDefinition.h	/^		void setPeriodic(bool p) {periodic = p;}$/;"	f	class:TaskDefinition
-setStatus	include/task_manager_lib/TaskScheduler.h	/^			void setStatus(TaskStatus newstatus, const std::string & text, double tnow) {$/;"	f	struct:TaskScheduler::ThreadParameters
+setStatus	include/task_manager_lib/TaskScheduler.h	/^			void setStatus(TaskIndicator newstatus, const std::string & text, const ros::Time & tnow) {$/;"	f	struct:TaskScheduler::ThreadParameters
 setStatusString	include/task_manager_lib/TaskDefinition.h	/^		void setStatusString(const std::string & s) {$/;"	f	class:TaskDefinition
 setTimeout	include/task_manager_lib/TaskDefinition.h	/^		void setTimeout(double tout) {timeout = tout;}$/;"	f	class:TaskDefinition
+sock	src/task_manager_lib/TaskClient.py	/^	sock = None$/;"	v	class:TaskClient
+spinner	include/task_manager_lib/TaskClient.h	/^        ros::AsyncSpinner spinner;$/;"	m	class:TaskClient
 startScheduler	src/TaskScheduler.cpp	/^int TaskScheduler::startScheduler() $/;"	f	class:TaskScheduler
-startTask	src/TaskClient.cpp	/^TaskScheduler::TaskId TaskClient::startTask(const TaskParameters & tprm)$/;"	f	class:TaskClient
 startTask	src/TaskClient.cpp	/^TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname, $/;"	f	class:TaskClient
 startTask	src/TaskScheduler.cpp	/^bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,$/;"	f	class:TaskScheduler
-startTask	src/TaskServer.cpp	/^bool TaskServer::startTask(task_manager_lib::StartTask::Request  &req,$/;"	f	class:TaskServer
-startTaskAndWait	src/TaskClient.cpp	/^bool TaskClient::startTaskAndWait(const TaskParameters & tp)$/;"	f	class:TaskClient
+startTask	src/task_manager_lib/TaskClient.py	/^	def startTask(self,paramdict,name="",foreground=True,period=-1):$/;"	m	class:TaskClient
 startTaskAndWait	src/TaskClient.cpp	/^bool TaskClient::startTaskAndWait(const std::string & taskname, $/;"	f	class:TaskClient
+startTaskAndWait	src/task_manager_lib/TaskClient.py	/^	def startTaskAndWait(self,paramdict,name="",foreground=True,period=0):$/;"	m	class:TaskClient
+startTaskClt	include/task_manager_lib/TaskClient.h	/^        ros::ServiceClient startTaskClt;$/;"	m	class:TaskClient
 startTaskSrv	include/task_manager_lib/TaskScheduler.h	/^        ros::ServiceServer startTaskSrv;$/;"	m	class:TaskScheduler
-startTaskSrv	include/task_manager_lib/TaskServer.h	/^        ros::ServiceServer startTaskSrv;$/;"	m	class:TaskServer
 startingTime	include/task_manager_lib/TaskScheduler.h	/^		double startingTime;$/;"	m	class:TaskScheduler
-status	include/task_manager_lib/TaskClient.h	/^			TaskStatus status;$/;"	m	struct:TaskClient::TaskState
-status	include/task_manager_lib/TaskScheduler.h	/^			TaskStatus status;$/;"	m	struct:TaskScheduler::ThreadParameters
+state	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      bool state;$/;"	m	class:task_manager_lib::MinimalTaskConfig::AbstractGroupDescription
+state	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    bool state;$/;"	m	class:task_manager_lib::MinimalTaskConfig::DEFAULT
+static_value1	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const uint64_t static_value1 = 0xd41d8cd98f00b204ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value1	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const uint64_t static_value1 = 0xe5c9999b622907d9ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value1	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const uint64_t static_value1 = 0x09f7ca8b46d7cd91ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value1	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const uint64_t static_value1 = 0xd41d8cd98f00b204ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value1	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const uint64_t static_value1 = 0x5644175681f8156eULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value1	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const uint64_t static_value1 = 0xc5e4a7d59c68f74eULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value1	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const uint64_t static_value1 = 0xc5e4a7d59c68f74eULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const uint64_t static_value2 = 0xc8f8219ae0229ca0ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const uint64_t static_value2 = 0xe9800998ecf8427eULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const uint64_t static_value2 = 0xe9800998ecf8427eULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const uint64_t static_value2 = 0xfe1c115581fd8896ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const uint64_t static_value2 = 0x9017a8cde48600f0ULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const uint64_t static_value2 = 0xabcec876a00216aaULL;$/;"	m	struct:ros::message_traits::MD5Sum
+static_value2	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const uint64_t static_value2 = 0xabcec876a00216aaULL;$/;"	m	struct:ros::message_traits::MD5Sum
+status	include/task_manager_lib/TaskClient.h	/^			TaskIndicator status;$/;"	m	struct:TaskClient::TaskState
+status	include/task_manager_lib/TaskScheduler.h	/^			TaskIndicator status;$/;"	m	struct:TaskScheduler::ThreadParameters
+status	src/task_manager_lib/TaskClient.py	/^		status = 0$/;"	v	class:TaskClient.TaskStatus
+statusCallback	src/TaskClient.cpp	/^void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& msg) $/;"	f	class:TaskClient
+statusPub	include/task_manager_lib/TaskScheduler.h	/^            ros::Publisher statusPub;$/;"	m	struct:TaskScheduler::ThreadParameters
 statusPub	include/task_manager_lib/TaskScheduler.h	/^        ros::Publisher statusPub;$/;"	m	class:TaskScheduler
 statusString	include/task_manager_lib/TaskClient.h	/^			std::string statusString;$/;"	m	struct:TaskClient::TaskState
 statusString	include/task_manager_lib/TaskDefinition.h	/^		std::string statusString;$/;"	m	class:TaskDefinition
 statusString	include/task_manager_lib/TaskScheduler.h	/^			std::string statusString;$/;"	m	struct:TaskScheduler::ThreadParameters
-statusTime	include/task_manager_lib/TaskClient.h	/^			double statusTime;$/;"	m	struct:TaskClient::TaskState
-statusTime	include/task_manager_lib/TaskScheduler.h	/^			double statusTime;$/;"	m	struct:TaskScheduler::ThreadParameters
+statusString	src/task_manager_lib/TaskClient.py	/^		statusString = ""$/;"	v	class:TaskClient.TaskStatus
+statusSub	include/task_manager_lib/TaskClient.h	/^        ros::Subscriber statusSub;$/;"	m	class:TaskClient
+statusTime	include/task_manager_lib/TaskClient.h	/^            ros::Time statusTime;$/;"	m	struct:TaskClient::TaskState
+statusTime	include/task_manager_lib/TaskScheduler.h	/^            ros::Time statusTime;$/;"	m	struct:TaskScheduler::ThreadParameters
+statusTime	src/task_manager_lib/TaskClient.py	/^		statusTime = 0.0$/;"	v	class:TaskClient.TaskStatus
+status_callback	src/task_manager_lib/TaskClient.py	/^    def status_callback(self,t):$/;"	f	function:TaskClient.idle
 stopScheduler	src/TaskScheduler.cpp	/^int TaskScheduler::stopScheduler()$/;"	f	class:TaskScheduler
 stopTask	src/TaskScheduler.cpp	/^bool TaskScheduler::stopTask(task_manager_lib::StopTask::Request  &req,$/;"	f	class:TaskScheduler
-stopTask	src/TaskServer.cpp	/^bool TaskServer::stopTask(task_manager_lib::StopTask::Request  &req,$/;"	f	class:TaskServer
+stopTaskClt	include/task_manager_lib/TaskClient.h	/^        ros::ServiceClient stopTaskClt;$/;"	m	class:TaskClient
 stopTaskSrv	include/task_manager_lib/TaskScheduler.h	/^        ros::ServiceServer stopTaskSrv;$/;"	m	class:TaskScheduler
-stopTaskSrv	include/task_manager_lib/TaskServer.h	/^        ros::ServiceServer stopTaskSrv;$/;"	m	class:TaskServer
 task	include/task_manager_lib/DynamicTask.h	/^		TaskDefinition *task;$/;"	m	class:DynamicTask
 task	include/task_manager_lib/TaskScheduler.h	/^			TaskDefinition *task;$/;"	m	struct:TaskScheduler::ThreadParameters
-taskList	include/task_manager_lib/TaskClient.h	/^		std::vector<TaskDescriptor> taskList; $/;"	m	class:TaskClient
+taskList	include/task_manager_lib/TaskClient.h	/^		std::vector<task_manager_msgs::TaskDescription> taskList; $/;"	m	class:TaskClient
 taskStatus	include/task_manager_lib/TaskClient.h	/^		StatusMap taskStatus;$/;"	m	class:TaskClient
-taskStatus	include/task_manager_lib/TaskDefinition.h	/^		TaskStatus taskStatus;$/;"	m	class:TaskDefinition
-taskStatusToString	src/TaskDefinition.cpp	/^const char * taskStatusToString(TaskStatus ts)$/;"	f
+taskStatus	include/task_manager_lib/TaskDefinition.h	/^		TaskIndicator taskStatus;$/;"	m	class:TaskDefinition
+taskStatusId	src/task_manager_lib/TaskClient.py	/^	taskStatusId = dict([(v,k) for k,v in taskStatusStrings.iteritems()])$/;"	v	class:TaskClient
+taskStatusList	src/task_manager_lib/TaskClient.py	/^	'TASK_INITIALISATION_FAILED']$/;"	v	class:TaskClient
+taskStatusStrings	src/task_manager_lib/TaskClient.py	/^	taskStatusStrings = dict(enumerate(taskStatusList))$/;"	v	class:TaskClient
+taskStatusToString	src/TaskDefinition.cpp	/^const char * taskStatusToString(TaskIndicator ts)$/;"	f
 task_condition	include/task_manager_lib/TaskScheduler.h	/^			pthread_cond_t task_condition;$/;"	m	struct:TaskScheduler::ThreadParameters
+task_manager_lib	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^namespace task_manager_lib$/;"	n
+task_manager_lib	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^namespace task_manager_lib$/;"	n
+task_manager_lib	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^namespace task_manager_lib$/;"	n
+task_manager_lib	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^namespace task_manager_lib$/;"	n
+task_manager_lib	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^namespace task_manager_lib$/;"	n
+task_manager_lib-srv	srv_gen/lisp/_package.lisp	/^(cl:defpackage task_manager_lib-srv$/;"	f
+task_manager_test	include/task_manager_lib/TaskIdleDefault.h	/^namespace task_manager_test {$/;"	n
 task_mutex	include/task_manager_lib/TaskScheduler.h	/^			pthread_mutex_t task_mutex;$/;"	m	struct:TaskScheduler::ThreadParameters
+task_period	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      double task_period;$/;"	m	class:task_manager_lib::MinimalTaskConfig
+task_period	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^double task_period;$/;"	m	class:task_manager_lib::MinimalTaskConfig::DEFAULT
+task_rename	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      std::string task_rename;$/;"	m	class:task_manager_lib::MinimalTaskConfig
+task_rename	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^    std::string task_rename;$/;"	m	class:task_manager_lib::MinimalTaskConfig::DEFAULT
+task_timeout	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      double task_timeout;$/;"	m	class:task_manager_lib::MinimalTaskConfig
+task_timeout	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^double task_timeout;$/;"	m	class:task_manager_lib::MinimalTaskConfig::DEFAULT
+tasklist	src/task_manager_lib/TaskClient.py	/^	tasklist = {}$/;"	v	class:TaskClient
 tasks	include/task_manager_lib/TaskScheduler.h	/^		TaskDirectory tasks;$/;"	m	class:TaskScheduler
+taskstatus	src/task_manager_lib/TaskClient.py	/^	taskstatus = {}$/;"	v	class:TaskClient
 tc	node/tasklist.py	/^tc = TaskClient.TaskClient('localhost')$/;"	v
-terminate	include/task_manager_lib/DynamicTask.h	/^		virtual TaskStatus terminate() {$/;"	f	class:DynamicTask
+terminate	include/task_manager_lib/DynamicTask.h	/^		virtual TaskIndicator terminate() {$/;"	f	class:DynamicTask
+terminate	src/TaskIdleDefault.cpp	/^TaskIndicator TaskIdleDefault::terminate()$/;"	f	class:TaskIdleDefault
 terminateAllTasks	src/TaskScheduler.cpp	/^int TaskScheduler::terminateAllTasks()$/;"	f	class:TaskScheduler
 terminateTask	src/TaskScheduler.cpp	/^int TaskScheduler::terminateTask(ThreadParameters *tp)$/;"	f	class:TaskScheduler
 text	include/task_manager_lib/DynamicTask.h	/^			std::string text;$/;"	m	struct:DynamicTask::DLLoadError
@@ -216,24 +958,109 @@ that	include/task_manager_lib/TaskScheduler.h	/^			TaskScheduler *that;$/;"	m	st
 thread_func	src/TaskScheduler.cpp	/^void * TaskScheduler::thread_func(void * arg)$/;"	f	class:TaskScheduler
 tid	include/task_manager_lib/TaskScheduler.h	/^			pthread_t tid;$/;"	m	struct:TaskScheduler::ThreadParameters
 timeout	include/task_manager_lib/TaskDefinition.h	/^		double timeout;$/;"	m	class:TaskDefinition
+tlist	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  std::vector< ::task_manager_msgs::TaskDescription_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::task_manager_msgs::TaskDescription_<ContainerAllocator> >::other >  tlist;$/;"	m	struct:task_manager_lib::GetTaskListResponse_
+tlist-val	srv_gen/lisp/GetTaskList.lisp	/^(cl:defmethod tlist-val ((m <GetTaskList-response>))$/;"	f
+toMessage	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void toMessage(dynamic_reconfigure::Config &msg, const MinimalTaskConfig &config) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
+toMessage	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void toMessage(dynamic_reconfigure::Config &msg, const boost::any &cfg) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::GroupDescription
+toServer	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void toServer(const ros::NodeHandle &nh, const MinimalTaskConfig &config) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::ParamDescription
 tp	include/task_manager_lib/TaskScheduler.h	/^			ThreadParameters *tp;$/;"	m	struct:TaskScheduler::ThreadAction
 tpid	include/task_manager_lib/TaskScheduler.h	/^			unsigned int tpid;$/;"	m	struct:TaskScheduler::ThreadParameters
 type	include/task_manager_lib/TaskScheduler.h	/^			ActionType type;$/;"	m	struct:TaskScheduler::ThreadAction
+type	src/task_manager_lib/cfg/MinimalTaskConfig.py	/^type = {}$/;"	v
+type	src/task_manager_lib/cfg/TaskLongConfig.py	/^type = {}$/;"	v
+type	src/task_manager_lib/cfg/TaskTestConfig.py	/^type = {}$/;"	v
 unlockScheduler	src/TaskScheduler.cpp	/^void TaskScheduler::unlockScheduler()$/;"	f	class:TaskScheduler
-updateStatus	include/task_manager_lib/TaskScheduler.h	/^			void updateStatus(double tnow) {$/;"	f	struct:TaskScheduler::ThreadParameters
+update	include/task_manager_lib/TaskDefinition.h	/^        void update(const TaskParameters & tnew) {$/;"	f	class:TaskParameters
+updateAllStatus	src/TaskClient.cpp	/^void TaskClient::updateAllStatus()$/;"	f	class:TaskClient
+updateParams	cfg/cpp/task_manager_lib/MinimalTaskConfig.h	/^      virtual void updateParams(boost::any &cfg, MinimalTaskConfig &top) const$/;"	f	class:task_manager_lib::MinimalTaskConfig::GroupDescription
+updateStatus	include/task_manager_lib/TaskScheduler.h	/^			void updateStatus(const ros::Time & tnow) {$/;"	f	struct:TaskScheduler::ThreadParameters
 updateTaskList	src/TaskClient.cpp	/^int TaskClient::updateTaskList()$/;"	f	class:TaskClient
-waitReply	src/TaskClient.cpp	/^int TaskClient::waitReply(std::string & message, double timeout_s)$/;"	f	class:TaskClient
+updateTaskList	src/task_manager_lib/TaskClient.py	/^	def updateTaskList(self):$/;"	m	class:TaskClient
+updateTaskStatus	src/task_manager_lib/TaskClient.py	/^	def updateTaskStatus(self):$/;"	m	class:TaskClient
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const  ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const  ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const  ::task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const  ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const  ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const  ::task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const task_manager_lib::GetAllTaskStatus&) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const task_manager_lib::GetAllTaskStatus&) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const task_manager_lib::GetAllTaskStatusRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  static const char* value(const task_manager_lib::GetAllTaskStatusResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const  ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const  ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const  ::task_manager_lib::GetTaskListRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const  ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const  ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const  ::task_manager_lib::GetTaskListResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const task_manager_lib::GetTaskList&) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const task_manager_lib::GetTaskList&) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const task_manager_lib::GetTaskListRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const task_manager_lib::GetTaskListRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const task_manager_lib::GetTaskListResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/GetTaskList.h	/^  static const char* value(const task_manager_lib::GetTaskListResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const  ::task_manager_lib::StartTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const  ::task_manager_lib::StartTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const  ::task_manager_lib::StartTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const  ::task_manager_lib::StartTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const  ::task_manager_lib::StartTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const  ::task_manager_lib::StartTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const task_manager_lib::StartTask&) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const task_manager_lib::StartTask&) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const task_manager_lib::StartTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const task_manager_lib::StartTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const task_manager_lib::StartTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StartTask.h	/^  static const char* value(const task_manager_lib::StartTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value() $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value() $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const  ::task_manager_lib::StopTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const  ::task_manager_lib::StopTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const  ::task_manager_lib::StopTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const  ::task_manager_lib::StopTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const  ::task_manager_lib::StopTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::Definition
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const  ::task_manager_lib::StopTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::message_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const task_manager_lib::StopTask&) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const task_manager_lib::StopTask&) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const task_manager_lib::StopTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const task_manager_lib::StopTaskRequest_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const task_manager_lib::StopTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::DataType
+value	srv_gen/cpp/include/task_manager_lib/StopTask.h	/^  static const char* value(const task_manager_lib::StopTaskResponse_<ContainerAllocator> &) { return value(); } $/;"	f	struct:ros::service_traits::MD5Sum
+verbose	src/task_manager_lib/TaskClient.py	/^	verbose = 0$/;"	v	class:TaskClient
 waitTask	src/TaskClient.cpp	/^bool TaskClient::waitTask(TaskScheduler::TaskId tid)$/;"	f	class:TaskClient
+waitTask	src/task_manager_lib/TaskClient.py	/^	def waitTask(self,id):$/;"	m	class:TaskClient
 waitTaskCompletion	src/TaskScheduler.cpp	/^int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)$/;"	f	class:TaskScheduler
 what	include/task_manager_lib/DynamicTask.h	/^			virtual const char *what() const throw () {$/;"	f	struct:DynamicTask::DLLoadError
 what	include/task_manager_lib/TaskDefinition.h	/^			virtual const char * what() const throw () {$/;"	f	struct:TaskDefinition::InvalidParameter
 zombieThreads	include/task_manager_lib/TaskScheduler.h	/^		TaskSet runningThreads,zombieThreads;$/;"	m	class:TaskScheduler
+zombie_tasks	srv_gen/cpp/include/task_manager_lib/GetAllTaskStatus.h	/^  std::vector< ::task_manager_msgs::TaskStatus_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::task_manager_msgs::TaskStatus_<ContainerAllocator> >::other >  zombie_tasks;$/;"	m	struct:task_manager_lib::GetAllTaskStatusResponse_
+zombie_tasks-val	srv_gen/lisp/GetAllTaskStatus.lisp	/^(cl:defmethod zombie_tasks-val ((m <GetAllTaskStatus-response>))$/;"	f
 ~DLLoadError	include/task_manager_lib/DynamicTask.h	/^			virtual ~DLLoadError() throw () {}$/;"	f	struct:DynamicTask::DLLoadError
 ~DynamicTask	src/DynamicTask.cpp	/^DynamicTask::~DynamicTask()$/;"	f	class:DynamicTask
 ~InvalidParameter	include/task_manager_lib/TaskDefinition.h	/^			virtual ~InvalidParameter() throw () {}$/;"	f	struct:TaskDefinition::InvalidParameter
 ~TaskClient	src/TaskClient.cpp	/^TaskClient::~TaskClient()$/;"	f	class:TaskClient
 ~TaskDefinition	include/task_manager_lib/TaskDefinition.h	/^		virtual ~TaskDefinition() {$/;"	f	class:TaskDefinition
+~TaskDefinitionWithConfig	include/task_manager_lib/TaskDefinition.h	/^        virtual ~TaskDefinitionWithConfig() {}$/;"	f	class:TaskDefinitionWithConfig
 ~TaskEnvironment	include/task_manager_lib/TaskDefinition.h	/^		virtual ~TaskEnvironment() {}$/;"	f	class:TaskEnvironment
+~TaskIdle	include/task_manager_lib/TaskIdleDefault.h	/^            virtual ~TaskIdle() {};$/;"	f	class:task_manager_test::TaskIdle
 ~TaskScheduler	src/TaskScheduler.cpp	/^TaskScheduler::~TaskScheduler()$/;"	f	class:TaskScheduler
-~TaskServer	src/TaskServer.cpp	/^TaskServer::~TaskServer()$/;"	f	class:TaskServer
 ~ThreadParameters	src/TaskScheduler.cpp	/^TaskScheduler::ThreadParameters::~ThreadParameters()$/;"	f	class:TaskScheduler::ThreadParameters

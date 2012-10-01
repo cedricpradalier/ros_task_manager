@@ -73,7 +73,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, TaskDefinition *tidle, double
 
 	tasks["idle"] = idle;
 	defaultPeriod = deftPeriod;
-	startingTime = time(NULL);
+	startingTime = ros::Time::now().toSec();
 
 
 	mainThread = NULL;
@@ -337,7 +337,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
 
 	// See if some runtime period has been defined in the parameters
     if (!tp.getParameter("task_period",period)) {
-		fprintf(stderr, "Invalid conversion for parameter task_period\n");
+		fprintf(stderr, "Missing required parameter task_period\n");
 		return -1;
 	}
     tp.getParameter("main_task",mainTask); // ignore return
@@ -380,7 +380,6 @@ void * TaskScheduler::runAperiodicTask(void *arg)
 int TaskScheduler::runTask(ThreadParameters * tp)
 {
     double tstart = ros::Time::now().toSec();
-	PRINTF(0,"Runnning task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 	pthread_cond_broadcast(&tp->task_condition);
 	pthread_mutex_unlock(&tp->task_mutex);
     tp->updateStatus(ros::Time::now());
@@ -395,6 +394,7 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 		return -1;
 	}
 	tp->running = true;
+	PRINTF(0,"Running task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 
 	if (tp->task->isPeriodic()) {
 		PRINTF(2,"Initialisation done\n");
@@ -442,8 +442,8 @@ int TaskScheduler::runTask(ThreadParameters * tp)
 				break;
 			}
 
-			double ttimeout = startingTime + (ros::Time::now().toSec() +
-				std::max(1e-3,(tp->period - (t1-t0))));
+			double ttimeout = ros::Time::now().toSec() +
+				std::max(1e-3,(tp->period - (t1-t0)));
 			ts.tv_sec = (unsigned long)floor(ttimeout);
 			ts.tv_nsec = (unsigned long)floor((ttimeout - ts.tv_sec)*1e9);
 			pthread_cond_timedwait(&tp->aperiodic_task_condition,
@@ -540,7 +540,7 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
 {
 	int cwres;
 	struct timespec ts;
-	double ttimeout = startingTime + ros::Time::now().toSec() + timeout;
+	double ttimeout = ros::Time::now().toSec() + timeout;
 	TaskSet::iterator it;
 	lockScheduler();
 	if (debug>=3) printTaskSet("Zombies when waiting",zombieThreads);
@@ -639,7 +639,7 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
 			} else {
 				// wait for the right time or another action to be inserted
 				struct timespec ts;
-				double ttimeout = startingTime + it->first;
+				double ttimeout = it->first;
 				ts.tv_sec = (unsigned long)floor(ttimeout);
 				ts.tv_nsec = (unsigned long)floor((ttimeout - ts.tv_sec)*1e9);
 				PRINTF(3,"gna:Cond TWait\n");
@@ -673,12 +673,13 @@ void TaskScheduler::enqueueAction(ActionType type,ThreadParameters *tp)
 	pthread_mutex_lock(&aqMutex);
 	PRINTF(3,"ea:Locked\n");
 	// if (!runScheduler) return;
-	PRINTF(2,"Enqueing action %s -- %s\n",actionString(type),
+    double when = ros::Time::now().toSec();
+	PRINTF(2,"Enqueueing action %.3f %s -- %s\n",when,actionString(type),
 			tp?(tp->task->getName().c_str()):"none");
 
 	ta.type = type;
 	ta.tp = tp;
-	actionQueue[ros::Time::now().toSec()] = ta;
+	actionQueue[when] = ta;
 	PRINTF(3,"ea:Signalling\n");
 	pthread_cond_signal(&aqCond);
 	PRINTF(3,"ea:Unlocking\n");
@@ -692,7 +693,7 @@ void TaskScheduler::enqueueAction(const ros::Time & when, ActionType type,Thread
 	pthread_mutex_lock(&aqMutex);
 	PRINTF(3,"ea:Locked\n");
 	// if (!runScheduler) return;
-	PRINTF(2,"Enqueing action %s -- %s\n",actionString(type),
+	PRINTF(2,"Enqueing action %.3f %s -- %s\n",when.toSec(),actionString(type),
 			tp?(tp->task->getName().c_str()):"none");
 
 	ta.type = type;

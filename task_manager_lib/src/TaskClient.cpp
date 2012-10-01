@@ -20,7 +20,7 @@ TaskClient::TaskClient(const std::string & node, ros::NodeHandle & nh) : spinner
     updateTaskList();
     updateAllStatus();
     spinner.start();
-    ros::Duration(1.0).sleep();
+    ros::Duration(0.5).sleep();
 }
 
 TaskClient::~TaskClient()
@@ -45,7 +45,7 @@ void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& m
     std::vector<unsigned int> to_delete;
     for (StatusMap::iterator it=taskStatus.begin();it!=taskStatus.end();it++) {
         if (it->second.status < task_manager_msgs::TaskStatus::TASK_TERMINATED) continue;
-        if ((ts.status_time - it->second.statusTime).toSec() > 5.0) {
+        if ((ts.status_time - it->second.statusTime).toSec() > 2.0) {
             to_delete.push_back(it->first);
         }
     }
