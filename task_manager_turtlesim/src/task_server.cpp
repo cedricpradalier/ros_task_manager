@@ -23,15 +23,17 @@ int main(int argc, char *argv[])
 {
     ros::init(argc,argv,"turtlesim_tasks");
     ros::NodeHandle nh("~");
+    std::string lib_path = "./lib";
+    nh.getParam("lib_path",lib_path);
 
     boost::shared_ptr<TaskEnvironment> env(new TurtleSimEnv(nh,1));
     boost::shared_ptr<TaskDefinition> idle(new task_manager_lib::TaskIdleDefault(env));
     boost::shared_ptr<TaskDefinition> wait(new task_manager_lib::TaskWaitDefault(env));
 	TaskScheduler ts(nh, idle, 0.5);
     ts.addTask(wait);
-	ts.loadAllTasks("./lib",env);
+	ts.loadAllTasks(lib_path,env);
 	ts.configureTasks();
-	ts.printTaskDirectory();
+	ts.printTaskDirectory(true);
 	ts.startScheduler();
 
     ros::spin();

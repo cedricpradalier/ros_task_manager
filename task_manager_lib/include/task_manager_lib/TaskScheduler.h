@@ -195,7 +195,7 @@ class TaskScheduler
         // Cleanup all the task
 		int terminateAllTasks();
         // Print the task directory (added task plus dynamic tasks)
-		void printTaskDirectory() const;
+		void printTaskDirectory(bool with_ros=true) const;
         // Return the task directory
 		const TaskDirectory & getDirectory() const {return tasks;}
 

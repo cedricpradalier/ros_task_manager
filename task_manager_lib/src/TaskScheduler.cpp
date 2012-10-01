@@ -391,7 +391,7 @@ int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 		return -1;
 	}
 	tp->running = true;
-	ROS_INFO("Running task '%s' at period %f main %d timeout %f\n",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
+	ROS_INFO("Running task '%s' at period %f main %d timeout %f",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 
 	if (tp->task->isPeriodic()) {
 		PRINTF(2,"Initialisation done\n");
@@ -576,18 +576,28 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
 }
 
 
-void TaskScheduler::printTaskDirectory() const
+void TaskScheduler::printTaskDirectory(bool with_ros) const
 {
 	unsigned int i = 0;
 	TaskDirectory::const_iterator tit;
-	printf("Task Directory:\n");
-	for (tit = tasks.begin();tit!=tasks.end();tit++) {
-		printf("%d -- %s: %s\n",i,
-				tit->second->getName().c_str(),
-				tit->second->getHelp().c_str());
-		i++;
-	}
-	printf("---------------\n");
+    if (with_ros) {
+        ROS_INFO("Task Directory:");
+        for (tit = tasks.begin();tit!=tasks.end();tit++) {
+            ROS_INFO("%d -- %s: %s",i,
+                    tit->second->getName().c_str(),
+                    tit->second->getHelp().c_str());
+            i++;
+        }
+    } else {
+        printf("Task Directory:\n");
+        for (tit = tasks.begin();tit!=tasks.end();tit++) {
+            printf("%d -- %s: %s\n",i,
+                    tit->second->getName().c_str(),
+                    tit->second->getHelp().c_str());
+            i++;
+        }
+        printf("---------------\n");
+    }
 }
 
 void TaskScheduler::cleanup_action(void *arg) {

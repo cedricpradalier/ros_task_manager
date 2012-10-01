@@ -74,8 +74,9 @@ class TaskClient:
 
     def __init__(self,server_node,defaultPeriod):
         rospy.init_node('task_client')
-        self.server_node = server_node
-        self.defaultPeriod = defaultPeriod
+        self.server_node = rospy.get_param("~server",server_node)
+        self.defaultPeriod = rospy.get_param("~period",defaultPeriod)
+        rospy.loginfo("Creating link to services on node " + self.server_node)
         try:
             rospy.wait_for_service(self.server_node + '/get_all_tasks')
             self.get_task_list = rospy.ServiceProxy(self.server_node + '/get_all_tasks', GetTaskList)
@@ -141,7 +142,7 @@ class TaskClient:
                 paramdict['task_period'] = float(period)
             config = encode_config(paramdict)
             # print config
-            rospy.loginfo("Starting task %s" % name)
+            # rospy.loginfo("Starting task %s" % name)
             resp = self.start_task(name,config)
             return resp.id
         except rospy.ServiceException, e:

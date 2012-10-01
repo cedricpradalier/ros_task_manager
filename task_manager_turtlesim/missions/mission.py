@@ -5,7 +5,7 @@ import rospy
 from math import *
 from task_manager_lib.TaskClient import *
 
-tc = TaskClient("/turtlesim_tasks",0.1)
+tc = TaskClient("/turtlesim_task",0.1)
 # tc.printTaskList()
 # tc.printTaskStatus()
 
@@ -30,5 +30,6 @@ tc.ReachAngle(target=pi/2)
 
 
 
+rospy.loginfo("Mission completed")
 
 
