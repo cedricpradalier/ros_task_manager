@@ -5,9 +5,10 @@ import rospy
 from math import *
 from task_manager_lib.TaskClient import *
 
-tc = TaskClient("/turtlesim_task",0.1)
-# tc.printTaskList()
-# tc.printTaskStatus()
+rospy.init_node('task_client')
+server_node = rospy.get_param("~server","/turtlesim_tasks")
+default_period = rospy.get_param("~period",0.2)
+tc = TaskClient(server_node,default_period)
 
 wp = [ [1., 9., 0, 0, 255],
     [9., 9., 0, 255, 255],

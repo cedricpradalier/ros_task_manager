@@ -72,10 +72,9 @@ class TaskClient:
             output += ":" + self.statusString
             return output
 
-    def __init__(self,server_node,defaultPeriod):
-        rospy.init_node('task_client')
-        self.server_node = rospy.get_param("~server",server_node)
-        self.defaultPeriod = rospy.get_param("~period",defaultPeriod)
+    def __init__(self,server_node,default_period):
+        self.server_node = server_node
+        self.default_period = default_period
         rospy.loginfo("Creating link to services on node " + self.server_node)
         try:
             rospy.wait_for_service(self.server_node + '/get_all_tasks')
@@ -129,7 +128,7 @@ class TaskClient:
 
     def startTask(self,paramdict,name="",foreground=True,period=-1):
         if period < 0:
-            period = self.defaultPeriod
+            period = self.default_period
         try:
             if ('task_name' in paramdict):
                 name=paramdict['task_name']
