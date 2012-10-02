@@ -15,21 +15,22 @@ wp = [ [1., 9., pi/2, 0, 0, 255],
     [9., 1., -pi/2, 0, 255, 0],
     [1., 1., -pi, 255, 255, 0]]
 
-tc.Wait(duration=1.)
-tc.Clear()
-tc.SetPen(on=False)
-tc.GoTo(goal_x=1.0,goal_y=1.0)
+while True:
+    tc.Wait(duration=1.)
+    tc.SetPen(on=False)
+    tc.GoTo(goal_x=1.0,goal_y=1.0)
+    tc.Clear()
 
-for p in wp:
-    tc.Wait(duration=0.2)
-    tc.ReachAngle(target=p[2])
-    tc.SetPen(on=True,r=p[3],g=p[4],b=p[5])
-    tc.GoTo(goal_x=p[0],goal_y=p[1])
+    for p in wp:
+        tc.Wait(duration=0.2)
+        tc.ReachAngle(target=p[2])
+        tc.SetPen(on=True,r=p[3],g=p[4],b=p[5])
+        tc.GoTo(goal_x=p[0],goal_y=p[1])
 
-tc.Wait(duration=2.)
-tc.SetPen(on=False)
-tc.GoTo(goal_x=5.0,goal_y=5.0)
-tc.ReachAngle(target=pi/2)
+    tc.Wait(duration=2.)
+    tc.SetPen(on=False)
+    tc.GoTo(goal_x=5.0,goal_y=5.0)
+    tc.ReachAngle(target=pi/2)
 
 
 
