@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include "task_manager_lib/TaskDefinition.h"
+#include "std_srvs/Empty.h"
 #include "turtlesim/SetPen.h"
 #include "turtlesim/Velocity.h"
 #include "turtlesim/Pose.h"
@@ -16,6 +17,7 @@ namespace task_manager_turtlesim {
             ros::Subscriber poseSub;
             ros::Publisher velPub;
             ros::ServiceClient setPenClt;
+            ros::ServiceClient clearClt;
 
             void poseCallback(const turtlesim::Pose::ConstPtr& msg) {
                 tpose = *msg;
@@ -36,6 +38,8 @@ namespace task_manager_turtlesim {
             }
 
             void setPen(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
+
+            void clear();
     };
 
 };

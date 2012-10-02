@@ -154,6 +154,14 @@ class TaskClient:
             rospy.logdebug( "Waiting task %d" % tid)
         return self.waitTask(tid)
 
+    def stopTask(self,id):
+        try:
+            resp = self.stop_task(id)
+            return 0
+        except rospy.ServiceException, e:
+            rospy.logerr( "Service call failed: %s"%e)
+            raise
+
     def idle(self):
         try:
             resp = self.stop_task(-1)
@@ -217,6 +225,66 @@ class TaskClient:
                 if (self.verbose):
                     rospy.logwarn( "Task %d failed" % id)
                 raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
+        if rospy.core.is_shutdown():
+            raise TaskException("Aborting due to ROS shutdown");
+        return False
+
+    def waitAnyTasks(self,ids,stop_others=True):
+        statusTerminated = self.taskStatusId['TASK_TERMINATED']
+        t0 = rospy.Time.now().to_sec()
+        completed = dict([(id,False) for id in ids])
+        while not rospy.core.is_shutdown():
+            rospy.sleep(0.020)
+            t1 = rospy.Time.now().to_sec()
+            for id in ids:
+                if ((t1-t0) > 1.0) and (id not in self.taskstatus):
+                    if (self.verbose):
+                        rospy.logerr("Id %d not in taskstatus" % id)
+                    raise TaskException("Task %d did not appear in task status" % id);
+                if (self.taskstatus[id].status == statusTerminated):
+                    if (self.verbose):
+                        rospy.loginfo("Task %d terminated" % id)
+                    completed[id] = True
+                if (self.taskstatus[id].status > statusTerminated):
+                    if (self.verbose):
+                        rospy.logwarn( "Task %d failed" % id)
+                    raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
+                    # instead of raise?
+                    # completed[id] = True
+            if reduce(completed.values, lambda x,y:x or y):
+                if stop_others:
+                    for k,v in completed.iteritems():
+                        if not v:
+                            self.stopTask(k)
+                return True
+        if rospy.core.is_shutdown():
+            raise TaskException("Aborting due to ROS shutdown");
+        return False
+
+    def waitAllTasks(self,ids):
+        statusTerminated = self.taskStatusId['TASK_TERMINATED']
+        t0 = rospy.Time.now().to_sec()
+        completed = dict([(id,False) for id in ids])
+        while not rospy.core.is_shutdown():
+            rospy.sleep(0.020)
+            t1 = rospy.Time.now().to_sec()
+            for id in ids:
+                if ((t1-t0) > 1.0) and (id not in self.taskstatus):
+                    if (self.verbose):
+                        rospy.logerr("Id %d not in taskstatus" % id)
+                    raise TaskException("Task %d did not appear in task status" % id);
+                if (self.taskstatus[id].status == statusTerminated):
+                    if (self.verbose):
+                        rospy.loginfo("Task %d terminated" % id)
+                    completed[id] = True
+                if (self.taskstatus[id].status > statusTerminated):
+                    if (self.verbose):
+                        rospy.logwarn( "Task %d failed" % id)
+                    raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
+                    # instead of raise?
+                    # completed[id] = True
+            if reduce(completed.values, lambda x,y:x and y):
+                return True
         if rospy.core.is_shutdown():
             raise TaskException("Aborting due to ROS shutdown");
         return False

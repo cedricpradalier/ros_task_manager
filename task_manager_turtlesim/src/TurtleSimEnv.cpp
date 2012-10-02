@@ -8,6 +8,7 @@ TurtleSimEnv::TurtleSimEnv(ros::NodeHandle & n, unsigned int id) :
 {
     char buffer[128]; sprintf(buffer,"/turtle%d",id);
     std::string tname(buffer);
+    clearClt = nh.serviceClient<std_srvs::Empty>("/clear");
     setPenClt = nh.serviceClient<turtlesim::SetPen>(tname+"/set_pen");
 
     poseSub = nh.subscribe(tname+"/pose",1,&TurtleSimEnv::poseCallback,this);
@@ -24,6 +25,14 @@ void TurtleSimEnv::setPen(bool on, unsigned int r, unsigned int g, unsigned int 
     setpen.request.width = width;
     if (!setPenClt.call(setpen)) {
         ROS_ERROR("Failed to call service set_pen");
+    }
+}
+
+void TurtleSimEnv::clear()
+{
+    std_srvs::Empty nothing;
+    if (!clearClt.call(nothing)) {
+        ROS_ERROR("Failed to call service clear");
     }
 }
 
