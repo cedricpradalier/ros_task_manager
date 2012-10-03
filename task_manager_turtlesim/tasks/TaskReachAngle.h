@@ -4,6 +4,7 @@
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 #include "task_manager_turtlesim/TaskReachAngleConfig.h"
+using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
     class TaskReachAngle : public TaskDefinitionWithConfig<TaskReachAngleConfig>

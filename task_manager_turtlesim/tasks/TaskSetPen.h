@@ -4,6 +4,7 @@
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 #include "task_manager_turtlesim/TaskSetPenConfig.h"
+using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
     class TaskSetPen : public TaskDefinitionWithConfig<TaskSetPenConfig>

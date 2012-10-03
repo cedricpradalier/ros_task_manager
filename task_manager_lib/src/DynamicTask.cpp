@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 
 #include "task_manager_lib/DynamicTask.h"
+using namespace task_manager_lib;
 
 
 DynamicTask::DynamicTask(const std::string & fname, boost::shared_ptr<TaskEnvironment> env) :

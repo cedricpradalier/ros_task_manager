@@ -15,6 +15,7 @@ void sighdl(int n) {
 	end ++;
 }
 
+using namespace task_manager_lib;
 int main(int argc, char * argv[])
 {
     ros::init(argc,argv,"client");

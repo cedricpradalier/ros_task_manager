@@ -1,6 +1,8 @@
 
 #include <dynamic_reconfigure/config_tools.h>
 #include "task_manager_lib/TaskDefinition.h"
+using namespace task_manager_lib;
+using namespace task_manager_lib;
 
 void TaskDefinition::setName(const std::string & n) {
 	name = n;
@@ -110,7 +112,7 @@ void TaskDefinition::doTerminate()
 	taskStatus = this->terminate();
 }
 
-const char * taskStatusToString(TaskIndicator ts)
+const char * task_manager_lib::taskStatusToString(TaskIndicator ts)
 {
 	switch (ts) {
         case task_manager_msgs::TaskStatus::TASK_NEWBORN: return "NEWBORN"; 

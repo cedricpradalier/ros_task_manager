@@ -3,6 +3,7 @@
 
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_test/TaskLongConfig.h"
+using namespace task_manager_lib;
 
 namespace task_manager_test {
     class TaskLong : public TaskDefinitionWithConfig<TaskLongConfig>

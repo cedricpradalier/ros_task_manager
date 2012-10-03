@@ -3,14 +3,15 @@
 
 #include "task_manager_lib/MinimalTaskConfig.h"
 #include "task_manager_lib/TaskDefinition.h"
+using namespace task_manager_lib;
 
 namespace task_manager_test {
-    class TaskIdle : public TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig>
+    class TaskIdle : public TaskDefinitionWithConfig<MinimalTaskConfig>
     {
         protected:
         public:
             TaskIdle(boost::shared_ptr<TaskEnvironment> env) 
-                : TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig>("Idle","Do nothing",true,-1) {}
+                : TaskDefinitionWithConfig<MinimalTaskConfig>("Idle","Do nothing",true,-1) {}
             virtual ~TaskIdle() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);

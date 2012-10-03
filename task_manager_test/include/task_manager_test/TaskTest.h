@@ -3,6 +3,7 @@
 
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_test/TaskTestConfig.h"
+using namespace task_manager_lib;
 
 namespace task_manager_test {
     class TaskTest : public TaskDefinitionWithConfig<TaskTestConfig>

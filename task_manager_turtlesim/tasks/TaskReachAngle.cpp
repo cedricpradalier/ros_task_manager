@@ -2,6 +2,7 @@
 #include "TaskReachAngle.h"
 #include "task_manager_turtlesim/TaskReachAngleConfig.h"
 using namespace task_manager_msgs;
+using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 TaskReachAngle::TaskReachAngle(boost::shared_ptr<TaskEnvironment> tenv) 

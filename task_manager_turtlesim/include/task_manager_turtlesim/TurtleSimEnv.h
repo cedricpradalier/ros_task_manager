@@ -9,7 +9,7 @@
 #include "turtlesim/Pose.h"
 
 namespace task_manager_turtlesim {
-    class TurtleSimEnv: public TaskEnvironment
+    class TurtleSimEnv: public task_manager_lib::TaskEnvironment
     {
         protected:
             unsigned int turtleId;

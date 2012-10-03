@@ -8,6 +8,8 @@
 #include "task_manager_msgs/TaskStatus.h"
 #include <dynamic_reconfigure/config_tools.h>
 
+using namespace task_manager_lib;
+
 TaskClient::TaskClient(const std::string & node, ros::NodeHandle & nh) : spinner(1)
 {
     startTaskClt = nh.serviceClient<task_manager_lib::StartTask>(node+"/start_task");

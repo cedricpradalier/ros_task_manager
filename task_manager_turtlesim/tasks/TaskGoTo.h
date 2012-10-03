@@ -5,9 +5,12 @@
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 #include "task_manager_turtlesim/TaskGoToConfig.h"
 
+using namespace task_manager_lib;
+
 namespace task_manager_turtlesim {
     class TaskGoTo : public TaskDefinitionWithConfig<TaskGoToConfig>
     {
+
         protected:
             boost::shared_ptr<TurtleSimEnv> env;
             TaskGoToConfig cfg;

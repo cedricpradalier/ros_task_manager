@@ -2,6 +2,7 @@
 #include "TaskGoTo.h"
 #include "task_manager_turtlesim/TaskGoToConfig.h"
 using namespace task_manager_msgs;
+using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 TaskGoTo::TaskGoTo(boost::shared_ptr<TaskEnvironment> tenv) 

@@ -10,6 +10,7 @@
 #include "task_manager_lib/TaskScheduler.h"
 #include <dynamic_reconfigure/config_tools.h>
 
+using namespace task_manager_lib;
 
 #define PRINTF(level,X...) if (level <= (signed)debug) printf(X)
 

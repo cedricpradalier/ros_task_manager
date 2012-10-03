@@ -1,6 +1,7 @@
 #include <math.h>
 #include "TaskClear.h"
 using namespace task_manager_msgs;
+using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 TaskClear::TaskClear(boost::shared_ptr<TaskEnvironment> tenv)
