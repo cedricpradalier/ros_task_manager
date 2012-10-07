@@ -18,13 +18,59 @@ class TaskException(Exception):
     def __str__(self):
         return repr(self.value)
 
+class TaskConditionException(Exception):
+    def __init__(self, value, conds):
+        self.value = value
+        self.conditions = conds
+    def __str__(self):
+        return repr(self.value)
+
+class Condition:
+    def __init__(self,name):
+        self.name = name
+        test = self.isVerified()
+
+    def __str__(self):
+        return self.name
+
+class NegatedCondition(Condition):
+    def __init__(self,cond):
+        self.name = "not " + cond.name
+        self.cond = cond
+    def isVerified(self):
+        return not self.cond.isVerified()
+
+class ConditionIsCompleted(Condition):
+    def __init__(self, name, tc, taskId):
+        self.name = name
+        self.tc = tc
+        self.taskId = taskId
+
+    def isVerified(self):
+        if not self.tc.isKnown(self.taskId):
+            return False
+        return self.tc.isCompleted(self.taskId) 
+
+class ConditionIsRunning(Condition):
+    def __init__(self, name, tc, taskId):
+        self.name = name
+        self.tc = tc
+        self.taskId = taskId
+
+    def isVerified(self):
+        if not self.tc.isKnown(self.taskId):
+            return False
+        return not self.tc.isCompleted(self.taskId)
+
 
 class TaskClient:
     sock = None
     verbose = 0
     messageid = 0
+    keepAlive = False
     tasklist = {}
     taskstatus = {}
+    conditions = []
 
     taskStatusList = [	'TASK_NEWBORN', 'TASK_CONFIGURED', 'TASK_INITIALISED',\
             'TASK_RUNNING', 'TASK_COMPLETED', 'TASK_TERMINATED', 'TASK_INTERRUPTED',\
@@ -32,6 +78,25 @@ class TaskClient:
             'TASK_INITIALISATION_FAILED']
     taskStatusStrings = dict(enumerate(taskStatusList))
     taskStatusId = dict([(v,k) for k,v in taskStatusStrings.iteritems()])
+
+    def addCondition(self,cond):
+        self.conditions.append(cond)
+
+    def clearConditions(self):
+        self.conditions = []
+
+    def anyConditionVerified(self):
+        return reduce(lambda x,y:x or y,[x.isVerified() for x in self.conditions],False)
+
+    def allConditionsVerified(self):
+        return reduce(lambda x,y:x and y,[x.isVerified() for x in self.conditions],False)
+
+    def getVerifiedConditions(self):
+        v = []
+        for x in self.conditions:
+            if x.isVerified():
+                v.append(x)
+        return v
 
     class TaskDefinition:
         name = ""
@@ -48,11 +113,13 @@ class TaskClient:
             if ('main_task' in paramdict):
                 foreground = bool(paramdict['main_task'])
             if (foreground):
+                res = self.client.startTaskAndWait(paramdict)
                 rospy.loginfo("Starting task %s in foreground" % self.name)
-                return self.client.startTaskAndWait(paramdict)
+                return res
             else:
-                rospy.loginfo("Starting task %s in background" % self.name)
-                return self.client.startTask(paramdict)
+                id = self.client.startTask(paramdict)
+                rospy.loginfo("Starting task %s in background: %d" % (self.name,id))
+                return id
 
     class TaskStatus:
         id = 0
@@ -108,9 +175,10 @@ class TaskClient:
 
 
     def timerCallback(self,timerEvent):
-        header = std_msgs.msg.Header()
-        header.stamp = rospy.Time.now()
-        self.keepAlivePub.publish(header)
+        if self.keepAlive:
+            header = std_msgs.msg.Header()
+            header.stamp = rospy.Time.now()
+            self.keepAlivePub.publish(header)
 
     def updateTaskList(self):
         try:
@@ -143,6 +211,7 @@ class TaskClient:
             # print config
             # rospy.loginfo("Starting task %s" % name)
             resp = self.start_task(name,config)
+            self.keepAlive = True
             return resp.id
         except rospy.ServiceException, e:
             rospy.logerr( "Service call failed: %s"%e)
@@ -184,10 +253,20 @@ class TaskClient:
         t = rospy.Time.now().to_sec()
         to_be_deleted = []
         for k,v in self.taskstatus.iteritems():
-            if (t - v.statusTime) > 2.0:
+            if (t - v.statusTime) > 10.0:
                 to_be_deleted.append(k)
         for k in to_be_deleted:
             del self.taskstatus[k]
+
+    def isKnown(self,taskId):
+        return taskId in self.taskstatus.keys()
+
+    def isCompleted(self,taskId,requireKnown=True):
+        if requireKnown and not self.isKnown(taskId):
+            return False
+        if not self.isKnown(taskId):
+            return True
+        return self.taskstatus[taskId].status >= self.taskStatusId['TASK_TERMINATED']
 
     def updateTaskStatus(self):
         try:
@@ -213,6 +292,12 @@ class TaskClient:
         while not rospy.core.is_shutdown():
             rospy.sleep(0.020)
             t1 = rospy.Time.now().to_sec()
+            if (self.anyConditionVerified()):
+                self.stopTask(id)
+                trueConditions = self.getVerifiedConditions();
+                self.clearConditions()
+                rospy.loginfo("Task %d terminated on condition" % id)
+                raise TaskConditionException("Task %d terminated on condition" % id,trueConditions)
             if ((t1-t0) > 1.0) and (id not in self.taskstatus):
                 if (self.verbose):
                     rospy.logerr("Id %d not in taskstatus" % id)
@@ -236,6 +321,13 @@ class TaskClient:
         while not rospy.core.is_shutdown():
             rospy.sleep(0.020)
             t1 = rospy.Time.now().to_sec()
+            if (self.anyConditionVerified()):
+                for id in ids:
+                    self.stopTask(id)
+                trueConditions = self.getVerifiedConditions();
+                self.clearConditions()
+                rospy.loginfo("Task %s terminated on condition" % str(ids))
+                raise TaskConditionException("Task %d terminated on condition" % id,trueConditions)
             for id in ids:
                 if ((t1-t0) > 1.0) and (id not in self.taskstatus):
                     if (self.verbose):
@@ -251,7 +343,7 @@ class TaskClient:
                     raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
                     # instead of raise?
                     # completed[id] = True
-            if reduce(completed.values, lambda x,y:x or y):
+            if reduce(lambda x,y:x or y,completed.values):
                 if stop_others:
                     for k,v in completed.iteritems():
                         if not v:
@@ -268,6 +360,13 @@ class TaskClient:
         while not rospy.core.is_shutdown():
             rospy.sleep(0.020)
             t1 = rospy.Time.now().to_sec()
+            if (self.anyConditionVerified()):
+                for id in ids:
+                    self.stopTask(id)
+                trueConditions = self.getVerifiedConditions();
+                self.clearConditions()
+                rospy.loginfo("Task %s terminated on condition" % str(ids))
+                raise TaskConditionException("Task %d terminated on condition" % id, trueConditions)
             for id in ids:
                 if ((t1-t0) > 1.0) and (id not in self.taskstatus):
                     if (self.verbose):
@@ -283,7 +382,7 @@ class TaskClient:
                     raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
                     # instead of raise?
                     # completed[id] = True
-            if reduce(completed.values, lambda x,y:x and y):
+            if reduce(lambda x,y:x and y,completed.values):
                 return True
         if rospy.core.is_shutdown():
             raise TaskException("Aborting due to ROS shutdown");

@@ -47,6 +47,7 @@ namespace task_manager_lib {
             // Set of classes to implement a keep-alive connection from the client
             // to the scheduler. If the scheduler does not receive the messages
             // from the client for more than 1s, it stops the current task
+            bool keepAlive;
             ros::Timer keepAliveTimer;
             ros::Publisher keepAlivePub;
             void timerCallback(const ros::TimerEvent&);

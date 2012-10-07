@@ -117,6 +117,7 @@ TaskScheduler::~TaskScheduler()
 bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
          task_manager_lib::StartTask::Response &res )
 {
+    lastKeepAlive = ros::Time::now();
     TaskId id = launchTask(req.name,TaskParameters(req.config));
     res.id = id;
     return true;
@@ -125,6 +126,7 @@ bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
 bool TaskScheduler::stopTask(task_manager_lib::StopTask::Request  &req,
          task_manager_lib::StopTask::Response &res )
 {
+    lastKeepAlive = ros::Time::now();
     if (req.id == -1) {
         TaskId id = launchIdleTask();
         res.id = id;
@@ -141,6 +143,7 @@ bool TaskScheduler::stopTask(task_manager_lib::StopTask::Request  &req,
 bool TaskScheduler::getTaskList(task_manager_lib::GetTaskList::Request  &req,
          task_manager_lib::GetTaskList::Response &res )
 {
+    lastKeepAlive = ros::Time::now();
     generateTaskList(res.tlist);
     return true;
 }
@@ -148,6 +151,7 @@ bool TaskScheduler::getTaskList(task_manager_lib::GetTaskList::Request  &req,
 bool TaskScheduler::getAllTaskStatus(task_manager_lib::GetAllTaskStatus::Request  &req,
          task_manager_lib::GetAllTaskStatus::Response &res )
 {
+    lastKeepAlive = ros::Time::now();
     generateTaskStatus(res.running_tasks,res.zombie_tasks);
     return true;
 }

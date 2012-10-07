@@ -47,6 +47,9 @@ TARGET_LINK_LIBRARIES(TaskSetPen dl)
 ROSBUILD_ADD_LIBRARY( TaskClear SHARED tasks/TaskClear.cpp)
 TARGET_LINK_LIBRARIES(TaskClear dl)
 
+ROSBUILD_ADD_LIBRARY( TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
+TARGET_LINK_LIBRARIES(TaskWaitForROI dl)
+
 ROSBUILD_ADD_EXECUTABLE( task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
 TARGET_LINK_LIBRARIES( task_server dl )
 	

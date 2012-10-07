@@ -24,7 +24,8 @@ TaskClient::TaskClient(const std::string & node, ros::NodeHandle & nh) : spinner
     updateTaskList();
     updateAllStatus();
     spinner.start();
-    keepAliveTimer = nh.createTimer(ros::Duration(0.1), &TaskClient::timerCallback, this);
+    keepAlive = false;
+    keepAliveTimer = nh.createTimer(ros::Duration(0.250), &TaskClient::timerCallback, this);
     ros::Duration(0.5).sleep();
 }
 
@@ -33,9 +34,11 @@ TaskClient::~TaskClient()
 }
 
 void TaskClient::timerCallback(const ros::TimerEvent &) {
-    std_msgs::Header header;
-    header.stamp = ros::Time::now();
-    keepAlivePub.publish(header);
+    if (keepAlive) {
+        std_msgs::Header header;
+        header.stamp = ros::Time::now();
+        keepAlivePub.publish(header);
+    }
 }
 
 void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& msg) 
@@ -123,6 +126,7 @@ TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname,
     srv.request.config = (dynamic_reconfigure::Config)tp;
 
     if (startTaskClt.call(srv)) {
+        keepAlive = true;
         return TaskScheduler::TaskId(srv.response.id);
     } else {
         ROS_ERROR("Failed to call service start_task");
@@ -137,6 +141,7 @@ TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname,
     srv.request.name = taskname;
     srv.request.config = tprm;
     if (startTaskClt.call(srv)) {
+        keepAlive = true;
         return TaskScheduler::TaskId(srv.response.id);
     } else {
         ROS_ERROR("Failed to call service start_task");
@@ -156,6 +161,9 @@ int TaskClient::idle()
     task_manager_lib::StopTask srv;
     srv.request.id = -1;
     if (stopTaskClt.call(srv)) {
+        // Would this make sense? Not sure given that we may idle while a task
+        // is running in the background
+        // keepAlive = false;
         return TaskScheduler::TaskId(srv.response.id);
     } else {
         ROS_ERROR("Failed to call service start_task");
