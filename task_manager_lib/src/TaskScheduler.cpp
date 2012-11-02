@@ -12,7 +12,7 @@
 
 using namespace task_manager_lib;
 
-#define PRINTF(level,X...) if (level <= (signed)debug) printf(X)
+#define PRINTF(level,X...) if (level <= (signed)debug) ROS_DEBUG(X)
 
 unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
 unsigned int TaskScheduler::debug = 0;
@@ -399,6 +399,7 @@ int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 	ROS_INFO("Running task '%s' at period %f main %d timeout %f",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
 
 	if (tp->task->isPeriodic()) {
+        ros::Rate rate(1. / tp->period);
 		PRINTF(2,"Initialisation done\n");
 		while (1) {
             double t0 = ros::Time::now().toSec();
@@ -414,7 +415,6 @@ int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 				break;
 			}
 
-            double t1 = t0;
 			try {
 				// tp->task->debug("Iterating...\n");
 				tp->task->doIterate();
@@ -425,10 +425,10 @@ int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 				return -1;
 			}
 			if (tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
-				PRINTF(2,"Task not running anymore\n");
+				ROS_INFO("Task '%s' not running anymore",tp->task->getName().c_str());
 				break;
 			}
-			usleep((unsigned int)(std::max(1e-3,(tp->period - (t1-t0)))*1e6));
+            rate.sleep();
 		}
 	} else {
 		bool first = true;
@@ -451,7 +451,7 @@ int TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             double t1 = t0;
 			tp->updateStatus(ros::Time::now());
 			if (!first && tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
-				tp->task->debug("Task not running anymore\n");
+				ROS_INFO("Task '%s' not running anymore",tp->task->getName().c_str());
 				break;
 			}
 
@@ -503,7 +503,7 @@ int TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
 	if (tp == NULL) return 0;
 	PRINTF(1,"Cleaning up task %d:%s\n",tp->tpid,tp->task->getName().c_str());
 	tp->task->doTerminate();
-	PRINTF(2,"End of terminate\n");
+	ROS_INFO("Task '%s' terminated",tp->task->getName().c_str());
 	tp->status = task_manager_msgs::TaskStatus::TASK_TERMINATED;
 	tp->statusTime = now();
 	tp->statusString = "terminated";

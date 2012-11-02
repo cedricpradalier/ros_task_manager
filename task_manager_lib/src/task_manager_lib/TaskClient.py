@@ -1,5 +1,6 @@
 # ROS specific imports
 import roslib; roslib.load_manifest('task_manager_lib')
+import threading
 import rospy
 import rospy.core
 import rospy.timer
@@ -140,6 +141,8 @@ class TaskClient:
             return output
 
     def __init__(self,server_node,default_period):
+        self.statusLock = threading.RLock()
+        self.statusCond = threading.Condition(self.statusLock)
         self.server_node = server_node
         self.default_period = default_period
         rospy.loginfo("Creating link to services on node " + self.server_node)
@@ -240,157 +243,128 @@ class TaskClient:
             raise
 
     def status_callback(self,t):
-        ts = self.TaskStatus()
-        ts.id = t.id
-        ts.name = t.name
-        status = t.status
-        ts.status = status & 0xFFL
-        ts.foreground = bool(status & 0x100)
-        ts.statusString = t.status_string
-        ts.statusTime = t.status_time.to_sec()
-        self.taskstatus[ts.id] = ts
+        with self.statusLock:
+            ts = self.TaskStatus()
+            ts.id = t.id
+            ts.name = t.name
+            status = t.status
+            ts.status = status & 0xFFL
+            ts.foreground = bool(status & 0x100)
+            ts.statusString = t.status_string
+            ts.statusTime = t.status_time.to_sec()
+            self.taskstatus[ts.id] = ts
 
-        t = rospy.Time.now().to_sec()
-        to_be_deleted = []
-        for k,v in self.taskstatus.iteritems():
-            if (t - v.statusTime) > 10.0:
-                to_be_deleted.append(k)
-        for k in to_be_deleted:
-            del self.taskstatus[k]
+            t = rospy.Time.now().to_sec()
+            to_be_deleted = []
+            for k,v in self.taskstatus.iteritems():
+                if (t - v.statusTime) > 10.0:
+                    to_be_deleted.append(k)
+            for k in to_be_deleted:
+                del self.taskstatus[k]
+        try:
+            self.statusCond.notify_all()
+        except RuntimeError:
+            # Nobody is waiting
+            pass
+
+
 
     def isKnown(self,taskId):
-        return taskId in self.taskstatus.keys()
+        with self.statusLock:
+            return taskId in self.taskstatus.keys()
 
     def isCompleted(self,taskId,requireKnown=True):
-        if requireKnown and not self.isKnown(taskId):
-            return False
-        if not self.isKnown(taskId):
-            return True
-        return self.taskstatus[taskId].status >= self.taskStatusId['TASK_TERMINATED']
+        with self.statusLock:
+            if requireKnown and not self.isKnown(taskId):
+                return False
+            if not self.isKnown(taskId):
+                return True
+            return self.taskstatus[taskId].status >= self.taskStatusId['TASK_TERMINATED']
 
     def updateTaskStatus(self):
         try:
-            resp = self.get_status()
-            for t in resp.running_tasks + resp.zombie_tasks:
-                ts = self.TaskStatus()
-                ts.id = t.id
-                ts.name = t.name
-                status = t.status
-                ts.status = status & 0xFFL
-                ts.foreground = bool(status & 0x100)
-                ts.statusString = t.status_string
-                ts.statusTime = t.status_time.to_sec()
-                self.taskstatus[ts.id] = ts
+            with self.statusLock:
+                resp = self.get_status()
+                for t in resp.running_tasks + resp.zombie_tasks:
+                    ts = self.TaskStatus()
+                    ts.id = t.id
+                    ts.name = t.name
+                    status = t.status
+                    ts.status = status & 0xFFL
+                    ts.foreground = bool(status & 0x100)
+                    ts.statusString = t.status_string
+                    ts.statusTime = t.status_time.to_sec()
+                    self.taskstatus[ts.id] = ts
+            try:
+                self.statusCond.notify_all()
+            except RuntimeError:
+                # Nobody is waiting
+                pass
         except rospy.ServiceException, e:
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
+    def waitTaskList(self,ids,wait_for_all, stop_others):
+        statusTerminated = self.taskStatusId['TASK_TERMINATED']
+        t0 = rospy.Time.now().to_sec()
+        completed = dict([(id,False) for id in ids])
+        red_fun = lambda x,y: x or y
+        if wait_for_all:
+            red_fun = lambda x,y: x and y
+
+        with self.statusLock:
+            while not rospy.core.is_shutdown():
+                t1 = rospy.Time.now().to_sec()
+                if (self.anyConditionVerified()):
+                    for id in ids:
+                        self.stopTask(id)
+                    trueConditions = self.getVerifiedConditions();
+                    self.clearConditions()
+                    rospy.loginfo("Task %s terminated on condition" % str(ids))
+                    raise TaskConditionException("Task %d terminated on condition" % id,trueConditions)
+                for id in ids:
+                    if id not in self.taskstatus:
+                        if (t1-t0) > 1.0: 
+                            if (self.verbose):
+                                rospy.logerr("Id %d not in taskstatus" % id)
+                            raise TaskException("Task %d did not appear in task status" % id);
+                    else:
+                        if (self.taskstatus[id].status == statusTerminated):
+                            if (self.verbose):
+                                rospy.loginfo("Task %d terminated" % id)
+                            completed[id] = True
+                        if (self.taskstatus[id].status > statusTerminated):
+                            if (self.verbose):
+                                rospy.logwarn( "Task %d failed" % id)
+                            raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
+                            # instead of raise?
+                            # completed[id] = True
+                if reduce(red_fun,completed.values()):
+                    if stop_others:
+                        for k,v in completed.iteritems():
+                            if not v:
+                                self.stopTask(k)
+                    return True
+                # This would be a good idea, except that python is not
+                # receiving the messages while waiting for the condition
+                self.statusCond.wait(0.020)
+            if rospy.core.is_shutdown():
+                raise TaskException("Aborting due to ROS shutdown");
+            return False
 
     def waitTask(self,id):
-        statusTerminated = self.taskStatusId['TASK_TERMINATED']
-        t0 = rospy.Time.now().to_sec()
-        while not rospy.core.is_shutdown():
-            rospy.sleep(0.020)
-            t1 = rospy.Time.now().to_sec()
-            if (self.anyConditionVerified()):
-                self.stopTask(id)
-                trueConditions = self.getVerifiedConditions();
-                self.clearConditions()
-                rospy.loginfo("Task %d terminated on condition" % id)
-                raise TaskConditionException("Task %d terminated on condition" % id,trueConditions)
-            if ((t1-t0) > 1.0) and (id not in self.taskstatus):
-                if (self.verbose):
-                    rospy.logerr("Id %d not in taskstatus" % id)
-                raise TaskException("Task %d did not appear in task status" % id);
-            if (self.taskstatus[id].status == statusTerminated):
-                if (self.verbose):
-                    rospy.loginfo("Task %d terminated" % id)
-                return True
-            if (self.taskstatus[id].status > statusTerminated):
-                if (self.verbose):
-                    rospy.logwarn( "Task %d failed" % id)
-                raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
-        if rospy.core.is_shutdown():
-            raise TaskException("Aborting due to ROS shutdown");
-        return False
+        return self.waitTaskList([id],True,False)
 
     def waitAnyTasks(self,ids,stop_others=True):
-        statusTerminated = self.taskStatusId['TASK_TERMINATED']
-        t0 = rospy.Time.now().to_sec()
-        completed = dict([(id,False) for id in ids])
-        while not rospy.core.is_shutdown():
-            rospy.sleep(0.020)
-            t1 = rospy.Time.now().to_sec()
-            if (self.anyConditionVerified()):
-                for id in ids:
-                    self.stopTask(id)
-                trueConditions = self.getVerifiedConditions();
-                self.clearConditions()
-                rospy.loginfo("Task %s terminated on condition" % str(ids))
-                raise TaskConditionException("Task %d terminated on condition" % id,trueConditions)
-            for id in ids:
-                if ((t1-t0) > 1.0) and (id not in self.taskstatus):
-                    if (self.verbose):
-                        rospy.logerr("Id %d not in taskstatus" % id)
-                    raise TaskException("Task %d did not appear in task status" % id);
-                if (self.taskstatus[id].status == statusTerminated):
-                    if (self.verbose):
-                        rospy.loginfo("Task %d terminated" % id)
-                    completed[id] = True
-                if (self.taskstatus[id].status > statusTerminated):
-                    if (self.verbose):
-                        rospy.logwarn( "Task %d failed" % id)
-                    raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
-                    # instead of raise?
-                    # completed[id] = True
-            if reduce(lambda x,y:x or y,completed.values):
-                if stop_others:
-                    for k,v in completed.iteritems():
-                        if not v:
-                            self.stopTask(k)
-                return True
-        if rospy.core.is_shutdown():
-            raise TaskException("Aborting due to ROS shutdown");
-        return False
+        return self.waitTaskList(ids,False,stop_others)
 
     def waitAllTasks(self,ids):
-        statusTerminated = self.taskStatusId['TASK_TERMINATED']
-        t0 = rospy.Time.now().to_sec()
-        completed = dict([(id,False) for id in ids])
-        while not rospy.core.is_shutdown():
-            rospy.sleep(0.020)
-            t1 = rospy.Time.now().to_sec()
-            if (self.anyConditionVerified()):
-                for id in ids:
-                    self.stopTask(id)
-                trueConditions = self.getVerifiedConditions();
-                self.clearConditions()
-                rospy.loginfo("Task %s terminated on condition" % str(ids))
-                raise TaskConditionException("Task %d terminated on condition" % id, trueConditions)
-            for id in ids:
-                if ((t1-t0) > 1.0) and (id not in self.taskstatus):
-                    if (self.verbose):
-                        rospy.logerr("Id %d not in taskstatus" % id)
-                    raise TaskException("Task %d did not appear in task status" % id);
-                if (self.taskstatus[id].status == statusTerminated):
-                    if (self.verbose):
-                        rospy.loginfo("Task %d terminated" % id)
-                    completed[id] = True
-                if (self.taskstatus[id].status > statusTerminated):
-                    if (self.verbose):
-                        rospy.logwarn( "Task %d failed" % id)
-                    raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
-                    # instead of raise?
-                    # completed[id] = True
-            if reduce(lambda x,y:x and y,completed.values):
-                return True
-        if rospy.core.is_shutdown():
-            raise TaskException("Aborting due to ROS shutdown");
-        return False
+        return self.waitTaskList(ids,True,False)
 
     def printTaskStatus(self):
-        for k,v in self.taskstatus.iteritems():
-            print "Task %d: %s" % (k,str(v))
+        with self.statusLock:
+            for k,v in self.taskstatus.iteritems():
+                print "Task %d: %s" % (k,str(v))
 
 
 
