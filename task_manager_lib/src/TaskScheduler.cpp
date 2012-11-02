@@ -10,6 +10,7 @@
 #include "task_manager_lib/TaskScheduler.h"
 #include <dynamic_reconfigure/config_tools.h>
 
+using namespace std;
 using namespace task_manager_lib;
 
 #define PRINTF(level,X...) if (level <= (signed)debug) printf(X)
@@ -76,7 +77,6 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
 	defaultPeriod = deftPeriod;
 	startingTime = ros::Time::now().toSec();
 
-
 	mainThread.reset();
 	pthread_mutex_init(&scheduler_mutex,NULL);
 	pthread_cond_init(&scheduler_condition,NULL);
@@ -89,8 +89,8 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
     startTaskSrv = nh.advertiseService("start_task", &TaskScheduler::startTask,this);
     stopTaskSrv = nh.advertiseService("stop_task", &TaskScheduler::stopTask,this);
     getTaskListSrv = nh.advertiseService("get_all_tasks", &TaskScheduler::getTaskList,this);
+    getTaskListLightSrv =nh.advertiseService("get_all_tasks_light", &TaskScheduler::getTaskListLight,this);
     getAllTaskStatusSrv = nh.advertiseService("get_all_status", &TaskScheduler::getAllTaskStatus,this);
-
     statusPub = nh.advertise<task_manager_msgs::TaskStatus>("status",20);
     keepAliveSub = nh.subscribe("keep_alive",1,&TaskScheduler::keepAliveCallback,this);
     lastKeepAlive = ros::Time::now();
@@ -147,6 +147,16 @@ bool TaskScheduler::getTaskList(task_manager_lib::GetTaskList::Request  &req,
     generateTaskList(res.tlist);
     return true;
 }
+
+bool TaskScheduler::getTaskListLight(task_manager_lib::GetTaskListLight::Request  &req, task_manager_lib::GetTaskListLight::Response &res )
+{
+	task_manager_lib::GetTaskList::Response res1;
+	generateTaskList(res1.tlist);
+	generateTaskListLight(res1.tlist,res.tlist);
+	return true;
+}
+
+
 
 bool TaskScheduler::getAllTaskStatus(task_manager_lib::GetAllTaskStatus::Request  &req,
          task_manager_lib::GetAllTaskStatus::Response &res )
@@ -570,7 +580,6 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
 		unlockScheduler();
 		return -1;
 	}
-
 	ts.tv_sec = (unsigned long)floor(ttimeout);
 	ts.tv_nsec = (unsigned long)floor((ttimeout - ts.tv_sec)*1e9);
 	// cwres = pthread_cond_timedwait(&scheduler_condition,&scheduler_mutex,&ts);
@@ -585,24 +594,20 @@ void TaskScheduler::printTaskDirectory(bool with_ros) const
 {
 	unsigned int i = 0;
 	TaskDirectory::const_iterator tit;
-    if (with_ros) {
-        ROS_INFO("Task Directory:");
-        for (tit = tasks.begin();tit!=tasks.end();tit++) {
-            ROS_INFO("%d -- %s: %s",i,
-                    tit->second->getName().c_str(),
-                    tit->second->getHelp().c_str());
-            i++;
-        }
-    } else {
-        printf("Task Directory:\n");
-        for (tit = tasks.begin();tit!=tasks.end();tit++) {
-            printf("%d -- %s: %s\n",i,
-                    tit->second->getName().c_str(),
-                    tit->second->getHelp().c_str());
-            i++;
-        }
-        printf("---------------\n");
-    }
+	if (with_ros) {
+		ROS_INFO("Task Directory:");
+		for (tit = tasks.begin();tit!=tasks.end();tit++) {
+			ROS_INFO("%d -- %s: %s",i,tit->second->getName().c_str(),tit->second->getHelp().c_str());
+			i++;
+		}
+	} else {
+		printf("Task Directory:\n");
+		for (tit = tasks.begin();tit!=tasks.end();tit++) {
+			printf("%d -- %s: %s\n",i,tit->second->getName().c_str(),tit->second->getHelp().c_str());
+			i++;
+		}
+		printf("---------------\n");
+	}
 }
 
 void TaskScheduler::cleanup_action(void *arg) {
@@ -709,7 +714,7 @@ void TaskScheduler::enqueueAction(ActionType type,boost::shared_ptr<ThreadParame
 	pthread_mutex_unlock(&aqMutex);
 }
 
-void TaskScheduler::enqueueAction(const ros::Time & when, ActionType type,boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::enqueueAction(const ros::Time & when,  ActionType type,boost::shared_ptr<ThreadParameters> tp)
 {
 	ThreadAction ta;
 	PRINTF(3,"ea:Locking\n");
@@ -840,19 +845,169 @@ void TaskScheduler::generateTaskList(std::vector<task_manager_msgs::TaskDescript
 	}
 }
 
+
 void TaskScheduler::generateTaskStatus(std::vector<task_manager_msgs::TaskStatus> & running,
                 std::vector<task_manager_msgs::TaskStatus> & zombies) 
 {
 	TaskSet::const_iterator it;
 	lockScheduler();
-	for (it=runningThreads.begin();it!=runningThreads.end();it++) {
+	for (it=runningThreads.begin();it!=runningThreads.end();it++) 
+	{
         running.push_back(it->second->getRosStatus());
 	}
-	for (it=zombieThreads.begin();it!=zombieThreads.end();it++) {
+	for (it=zombieThreads.begin();it!=zombieThreads.end();it++) 
+	{
         zombies.push_back(it->second->getRosStatus());
 	}
 	// tp.printToFile(stdout);
 	unlockScheduler();
+}
+
+void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDescription> &input,std::vector<task_manager_msgs::TaskDescriptionLight> &output) const
+{
+	std::vector<task_manager_msgs::TaskDescription> tasklist=input; 
+	for (unsigned int i = 0;i<tasklist.size();i++) 
+	{
+        task_manager_msgs::TaskDescriptionLight current_task;
+        
+        current_task.name=tasklist[i].name;
+        current_task.description=tasklist[i].description;
+        current_task.periodic=tasklist[i].periodic;
+        current_task.timeout_s=tasklist[i].timeout_s;
+        for (unsigned int j = 0;j<tasklist[i].config.parameters.size();j++) 
+        {
+        	if ( (tasklist[i].config.parameters[j].name!= "task_rename") && (tasklist[i].config.parameters[j].name!= "main_task") && (tasklist[i].config.parameters[j].name!= "task_period") && (tasklist[i].config.parameters[j].name!= "task_timeout"))
+        	{
+        		task_manager_msgs::TaskParameter current_parameter;
+        		current_parameter.name=tasklist[i].config.parameters[j].name;
+        		current_parameter.description=tasklist[i].config.parameters[j].description;
+        		current_parameter.type=tasklist[i].config.parameters[j].type;
+        		 
+        		std::ostringstream ostr;
+        		if (current_parameter.type=="double")
+        		{
+        			unsigned int k=0;
+        			while(tasklist[i].config.max.doubles[k].name != current_parameter.name)
+        			{
+    					k++;
+        			}
+        			
+        			//max
+        			ostr.str("");
+        			ostr << tasklist[i].config.max.doubles[k].value;
+        			current_parameter.max=ostr.str();
+        			ostr.str("");
+					
+					//min
+					ostr << tasklist[i].config.min.doubles[k].value;
+        			current_parameter.min=ostr.str();
+					ostr.str("");
+					
+					//default
+					ostr << tasklist[i].config.dflt.doubles[k].value;
+					current_parameter.dflt=ostr.str();
+					ostr.str("");
+        		
+        		}
+        		else if (current_parameter.type=="bool")
+        		{
+        			unsigned int k=0;
+        			while(tasklist[i].config.max.bools[k].name!=current_parameter.name)
+        			{
+    					k++;
+        			}
+        			
+        			//max
+					if (tasklist[i].config.max.bools[k].value==1)
+					{
+						current_parameter.max="True";
+        				
+					}
+					else if (tasklist[i].config.max.bools[k].value==0)
+					{	
+						current_parameter.max="False";
+					}
+        			
+					//min
+					if (tasklist[i].config.min.bools[k].value==1)
+					{
+						current_parameter.min="True";
+					}
+					else if (tasklist[i].config.min.bools[k].value==0)
+					{	
+						current_parameter.min="False";
+					}
+					
+					//default
+					if (tasklist[i].config.dflt.bools[k].value==1)
+					{
+						current_parameter.dflt="True";
+					}
+					else if (tasklist[i].config.dflt.bools[k].value==0)
+					{	
+						current_parameter.dflt="False";
+					}
+        		
+        		}
+        		else if(current_parameter.type=="int")
+        		{
+        			unsigned int k=0;
+        			while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
+        			{
+    					k++;
+        			}
+        			//max
+        			ostr.str("");
+        			ostr << tasklist[i].config.max.ints[k].value;
+					current_parameter.max=ostr.str();
+					ostr.str("");
+					
+					//min
+					ostr << tasklist[i].config.min.ints[k].value;
+					current_parameter.min=ostr.str();
+					ostr.str("");
+					
+					//default
+					ostr <<tasklist[i].config.dflt.ints[k].value;
+					current_parameter.dflt=ostr.str();
+					ostr.str("");
+        		} 
+        		else if (current_parameter.type=="str")
+        		{
+        			unsigned int k=0;
+        			while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
+        			{
+    					k++;
+        			}
+        			
+        			
+        			//max
+					current_parameter.max=tasklist[i].config.max.strs[k].value;
+					//min
+					current_parameter.min=tasklist[i].config.min.strs[k].value;
+					//default
+					current_parameter.dflt=tasklist[i].config.dflt.strs[k].value;
+        		}
+        		else
+        		{
+        			cout<<"ERROR TYPE NOT LEGAL\n";
+        		}
+        		current_task.parameters.push_back(current_parameter);
+	       	}
+	       	
+        }
+        try
+        {
+        	output.push_back(current_task);
+        }
+        catch(...)
+        {
+        	cout<<"Error\n";
+        }
+        
+        
+	}
+
 }
 
 
