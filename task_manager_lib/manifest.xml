@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/task_manager_lib</url>
   <depend package="task_manager_msgs"/>
   <depend package="dynamic_reconfigure"/>
+  <depend package="roslib"/>
   <depend package="roscpp"/>
   <depend package="rospy"/>
   <export>

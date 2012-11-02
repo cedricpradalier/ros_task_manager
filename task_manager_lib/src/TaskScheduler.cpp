@@ -874,127 +874,131 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
         current_task.description=tasklist[i].description;
         current_task.periodic=tasklist[i].periodic;
         current_task.timeout_s=tasklist[i].timeout_s;
-        for (unsigned int j = 0;j<tasklist[i].config.parameters.size();j++) 
-        {
-        	if ( (tasklist[i].config.parameters[j].name!= "task_rename") && (tasklist[i].config.parameters[j].name!= "main_task") && (tasklist[i].config.parameters[j].name!= "task_period") && (tasklist[i].config.parameters[j].name!= "task_timeout"))
-        	{
-        		task_manager_msgs::TaskParameter current_parameter;
-        		current_parameter.name=tasklist[i].config.parameters[j].name;
-        		current_parameter.description=tasklist[i].config.parameters[j].description;
-        		current_parameter.type=tasklist[i].config.parameters[j].type;
-        		 
-        		std::ostringstream ostr;
-        		if (current_parameter.type=="double")
-        		{
-        			unsigned int k=0;
-        			while(tasklist[i].config.max.doubles[k].name != current_parameter.name)
-        			{
-    					k++;
-        			}
-        			
-        			//max
-        			ostr.str("");
-        			ostr << tasklist[i].config.max.doubles[k].value;
-        			current_parameter.max=ostr.str();
-        			ostr.str("");
-					
-					//min
-					ostr << tasklist[i].config.min.doubles[k].value;
-        			current_parameter.min=ostr.str();
-					ostr.str("");
-					
-					//default
-					ostr << tasklist[i].config.dflt.doubles[k].value;
-					current_parameter.dflt=ostr.str();
-					ostr.str("");
-        		
-        		}
-        		else if (current_parameter.type=="bool")
-        		{
-        			unsigned int k=0;
-        			while(tasklist[i].config.max.bools[k].name!=current_parameter.name)
-        			{
-    					k++;
-        			}
-        			
-        			//max
-					if (tasklist[i].config.max.bools[k].value==1)
-					{
-						current_parameter.max="True";
-        				
-					}
-					else if (tasklist[i].config.max.bools[k].value==0)
-					{	
-						current_parameter.max="False";
-					}
-        			
-					//min
-					if (tasklist[i].config.min.bools[k].value==1)
-					{
-						current_parameter.min="True";
-					}
-					else if (tasklist[i].config.min.bools[k].value==0)
-					{	
-						current_parameter.min="False";
-					}
-					
-					//default
-					if (tasklist[i].config.dflt.bools[k].value==1)
-					{
-						current_parameter.dflt="True";
-					}
-					else if (tasklist[i].config.dflt.bools[k].value==0)
-					{	
-						current_parameter.dflt="False";
-					}
-        		
-        		}
-        		else if(current_parameter.type=="int")
-        		{
-        			unsigned int k=0;
-        			while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
-        			{
-    					k++;
-        			}
-        			//max
-        			ostr.str("");
-        			ostr << tasklist[i].config.max.ints[k].value;
-					current_parameter.max=ostr.str();
-					ostr.str("");
-					
-					//min
-					ostr << tasklist[i].config.min.ints[k].value;
-					current_parameter.min=ostr.str();
-					ostr.str("");
-					
-					//default
-					ostr <<tasklist[i].config.dflt.ints[k].value;
-					current_parameter.dflt=ostr.str();
-					ostr.str("");
-        		} 
-        		else if (current_parameter.type=="str")
-        		{
-        			unsigned int k=0;
-        			while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
-        			{
-    					k++;
-        			}
-        			
-        			
-        			//max
-					current_parameter.max=tasklist[i].config.max.strs[k].value;
-					//min
-					current_parameter.min=tasklist[i].config.min.strs[k].value;
-					//default
-					current_parameter.dflt=tasklist[i].config.dflt.strs[k].value;
-        		}
-        		else
-        		{
-        			cout<<"ERROR TYPE NOT LEGAL\n";
-        		}
-        		current_task.parameters.push_back(current_parameter);
-	       	}
-	       	
+        for (unsigned int g=0;g<tasklist[i].config.groups.size();g++) {
+            for (unsigned int j = 0;j<tasklist[i].config.groups[g].parameters.size();j++) {
+                if ( (tasklist[i].config.groups[g].parameters[j].name!= "task_rename") 
+                        && (tasklist[i].config.groups[g].parameters[j].name!= "main_task") 
+                        && (tasklist[i].config.groups[g].parameters[j].name!= "task_period") 
+                        && (tasklist[i].config.groups[g].parameters[j].name!= "task_timeout"))
+                {
+                    task_manager_msgs::TaskParameter current_parameter;
+                    current_parameter.name=tasklist[i].config.groups[g].parameters[j].name;
+                    current_parameter.description=tasklist[i].config.groups[g].parameters[j].description;
+                    current_parameter.type=tasklist[i].config.groups[g].parameters[j].type;
+
+                    std::ostringstream ostr;
+                    if (current_parameter.type=="double")
+                    {
+                        unsigned int k=0;
+                        while(tasklist[i].config.max.doubles[k].name != current_parameter.name)
+                        {
+                            k++;
+                        }
+
+                        //max
+                        ostr.str("");
+                        ostr << tasklist[i].config.max.doubles[k].value;
+                        current_parameter.max=ostr.str();
+                        ostr.str("");
+
+                        //min
+                        ostr << tasklist[i].config.min.doubles[k].value;
+                        current_parameter.min=ostr.str();
+                        ostr.str("");
+
+                        //default
+                        ostr << tasklist[i].config.dflt.doubles[k].value;
+                        current_parameter.dflt=ostr.str();
+                        ostr.str("");
+
+                    }
+                    else if (current_parameter.type=="bool")
+                    {
+                        unsigned int k=0;
+                        while(tasklist[i].config.max.bools[k].name!=current_parameter.name)
+                        {
+                            k++;
+                        }
+
+                        //max
+                        if (tasklist[i].config.max.bools[k].value==1)
+                        {
+                            current_parameter.max="True";
+
+                        }
+                        else if (tasklist[i].config.max.bools[k].value==0)
+                        {	
+                            current_parameter.max="False";
+                        }
+
+                        //min
+                        if (tasklist[i].config.min.bools[k].value==1)
+                        {
+                            current_parameter.min="True";
+                        }
+                        else if (tasklist[i].config.min.bools[k].value==0)
+                        {	
+                            current_parameter.min="False";
+                        }
+
+                        //default
+                        if (tasklist[i].config.dflt.bools[k].value==1)
+                        {
+                            current_parameter.dflt="True";
+                        }
+                        else if (tasklist[i].config.dflt.bools[k].value==0)
+                        {	
+                            current_parameter.dflt="False";
+                        }
+
+                    }
+                    else if(current_parameter.type=="int")
+                    {
+                        unsigned int k=0;
+                        while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
+                        {
+                            k++;
+                        }
+                        //max
+                        ostr.str("");
+                        ostr << tasklist[i].config.max.ints[k].value;
+                        current_parameter.max=ostr.str();
+                        ostr.str("");
+
+                        //min
+                        ostr << tasklist[i].config.min.ints[k].value;
+                        current_parameter.min=ostr.str();
+                        ostr.str("");
+
+                        //default
+                        ostr <<tasklist[i].config.dflt.ints[k].value;
+                        current_parameter.dflt=ostr.str();
+                        ostr.str("");
+                    } 
+                    else if (current_parameter.type=="str")
+                    {
+                        unsigned int k=0;
+                        while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
+                        {
+                            k++;
+                        }
+
+
+                        //max
+                        current_parameter.max=tasklist[i].config.max.strs[k].value;
+                        //min
+                        current_parameter.min=tasklist[i].config.min.strs[k].value;
+                        //default
+                        current_parameter.dflt=tasklist[i].config.dflt.strs[k].value;
+                    }
+                    else
+                    {
+                        cout<<"ERROR TYPE NOT LEGAL\n";
+                    }
+                    current_task.parameters.push_back(current_parameter);
+                }
+
+            }
         }
         try
         {

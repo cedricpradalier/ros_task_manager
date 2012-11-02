@@ -5,7 +5,7 @@
    <node name="task_server" pkg="task_manager_turtlesim" type="task_server"  >
        <param name="lib_path" value="$(find task_manager_turtlesim)/lib"/>
    </node>
-<!--   <node name="mission" pkg="task_manager_turtlesim" type="mission_square.py"  >-->
-<!--       <param name="server" value="/task_server"/>-->
-<!--   </node>-->
+   <node name="mission" pkg="task_manager_turtlesim" type="mission_square.py"  >
+       <param name="server" value="/task_server"/>
+   </node>
 </launch>
