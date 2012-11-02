@@ -1,0 +1,16 @@
+<package>
+  <description brief="button_server">
+
+     button_server
+
+  </description>
+  <author>Cedric Pradalier</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/button_server</url>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+

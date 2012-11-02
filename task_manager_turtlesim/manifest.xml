@@ -12,6 +12,7 @@
   <depend package="task_manager_msgs"/>
   <depend package="turtlesim"/>
   <depend package="roscpp"/>
+  <depend package="std_msgs"/>
 
 </package>
 

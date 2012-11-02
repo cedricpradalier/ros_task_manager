@@ -7,6 +7,8 @@
 #include "turtlesim/SetPen.h"
 #include "turtlesim/Velocity.h"
 #include "turtlesim/Pose.h"
+#include "boost/algorithm/string.hpp"
+#include "std_msgs/String.h"
 
 namespace task_manager_turtlesim {
     class TurtleSimEnv: public task_manager_lib::TaskEnvironment
@@ -14,10 +16,23 @@ namespace task_manager_turtlesim {
         protected:
             unsigned int turtleId;
             ros::NodeHandle nh;
+            ros::Subscriber buttonsSub;
             ros::Subscriber poseSub;
             ros::Publisher velPub;
             ros::ServiceClient setPenClt;
             ros::ServiceClient clearClt;
+            bool paused;
+
+            void buttonCallback(const std_msgs::String::ConstPtr& msg) {
+                if (boost::algorithm::to_lower_copy(msg->data) == "pause") {
+                    paused = !paused;
+                    if (paused) {
+                        ROS_INFO("Mission paused");
+                    } else {
+                        ROS_INFO("Mission resumed");
+                    }
+                }
+            }
 
             void poseCallback(const turtlesim::Pose::ConstPtr& msg) {
                 tpose = *msg;
@@ -28,12 +43,19 @@ namespace task_manager_turtlesim {
             TurtleSimEnv(ros::NodeHandle & nh, unsigned int id=1);
             ~TurtleSimEnv() {};
 
+            ros::NodeHandle & getNodeHandle() {return nh;}
+
             const turtlesim::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {
                 turtlesim::Velocity cmd;
-                cmd.linear = linear;
-                cmd.angular = angular;
+                if (paused) {
+                    cmd.linear = 0.;
+                    cmd.angular = 0.;
+                } else {
+                    cmd.linear = linear;
+                    cmd.angular = angular;
+                }
                 velPub.publish(cmd);
             }
 

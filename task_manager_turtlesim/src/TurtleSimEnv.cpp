@@ -4,13 +4,14 @@
 using namespace task_manager_turtlesim;
 
 TurtleSimEnv::TurtleSimEnv(ros::NodeHandle & n, unsigned int id) :
-    turtleId(id), nh(n) 
+    turtleId(id), nh(n), paused(false)
 {
     char buffer[128]; sprintf(buffer,"/turtle%d",id);
     std::string tname(buffer);
     clearClt = nh.serviceClient<std_srvs::Empty>("/clear");
     setPenClt = nh.serviceClient<turtlesim::SetPen>(tname+"/set_pen");
 
+    buttonsSub = nh.subscribe("/buttons",10,&TurtleSimEnv::buttonCallback,this);
     poseSub = nh.subscribe(tname+"/pose",1,&TurtleSimEnv::poseCallback,this);
     velPub = nh.advertise<turtlesim::Velocity>(tname+"/command_velocity",1);
 }
