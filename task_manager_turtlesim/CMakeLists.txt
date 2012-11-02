@@ -51,6 +51,7 @@ ROSBUILD_ADD_LIBRARY( TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
 TARGET_LINK_LIBRARIES(TaskWaitForROI dl)
 
 ROSBUILD_ADD_EXECUTABLE( task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
-TARGET_LINK_LIBRARIES( task_server dl )
-	
+TARGET_LINK_LIBRARIES(task_server dl )
+
+TARGET_LINK_LIBRARIES(task_server -lboost_system)
 
