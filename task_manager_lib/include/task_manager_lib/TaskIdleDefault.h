@@ -7,7 +7,7 @@
 namespace task_manager_lib {
     // Basic class to implement the idle behaviour.
     // This task does not do anything.
-    class TaskIdleDefault : public TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig>
+    class TaskIdleDefault : public TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig,TaskIdleDefault>
     {
         protected:
         public:
@@ -15,18 +15,16 @@ namespace task_manager_lib {
             // The class is periodic with whatever period the scheduler
             // prefers.
             TaskIdleDefault(boost::shared_ptr<TaskEnvironment> env) 
-                : TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig>("Idle","Do nothing",true,-1) {}
+                : TaskDefinitionWithConfig<task_manager_lib::MinimalTaskConfig,TaskIdleDefault>("Idle","Do nothing",true,-1) {}
             virtual ~TaskIdleDefault() {};
 
-            // All functions below return immediately.
-            
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);
-
-            virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter);
-
+            // Rreturns immediately.
             virtual TaskIndicator iterate();
 
-            virtual TaskIndicator terminate();
+            // OK because there is no private data to this task
+            virtual boost::shared_ptr<TaskDefinition> getInstance() {
+                return shared_from_this();
+            }
 
     };
 };

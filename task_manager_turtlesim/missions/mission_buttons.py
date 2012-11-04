@@ -18,10 +18,12 @@ wp = [ [1., 9., pi/2, 0, 0, 255],
 
 tc.WaitForButton(text="go");
 # Start the wait for button task in the background
-w4b = tc.WaitForButton(main_task=False,text="abort")
+w4abort = tc.WaitForButton(main_task=False,text="abort")
+w4home = tc.WaitForButton(main_task=False,text="home")
 # Prepare a condition so that the following gets executed only until the 
 # a button is pressed
-tc.addCondition(ConditionIsCompleted("Buttons",tc,w4b))
+tc.addCondition(ConditionIsCompleted("Abort",tc,w4abort))
+tc.addCondition(ConditionIsCompleted("Home",tc,w4home))
 
 try:
     while True:
@@ -44,14 +46,20 @@ try:
 
     # Clear the conditions if we reach this point
     tc.clearConditions()
+    rospy.loginfo("Mission completed")
 except TaskConditionException, e:
     rospy.loginfo("Path following interrupted on condition: %s" % \
             " or ".join([str(c) for c in e.conditions]))
     # This means the conditions were triggered. We need to react to it
     # Conditions are cleared on trigger
-    tc.GoTo(goal_x=5.0,goal_y=5.0)
+    if "Home" in [str(c) for c in e.conditions]:
+        rospy.loginfo("Mission aborted: going back home")
+        tc.SetPen(on=False)
+        tc.GoTo(goal_x=5.0,goal_y=5.0)
+        tc.ReachAngle(target=pi/2)
+    else:
+        rospy.loginfo("Mission aborted")
 
 
-rospy.loginfo("Mission completed")
 
 

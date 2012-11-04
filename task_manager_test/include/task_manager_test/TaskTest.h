@@ -6,13 +6,13 @@
 using namespace task_manager_lib;
 
 namespace task_manager_test {
-    class TaskTest : public TaskDefinitionWithConfig<TaskTestConfig>
+    class TaskTest : public TaskDefinitionWithConfig<TaskTestConfig,TaskTest>
     {
         protected:
             double duration;
             unsigned int counter;
         public:
-            TaskTest(boost::shared_ptr<TaskEnvironment> env) : TaskDefinitionWithConfig<TaskTestConfig>("Test","Do nothing",true,-1.), counter(0) {}
+            TaskTest(boost::shared_ptr<TaskEnvironment> env) : Parent("Test","Do nothing",true,-1.), counter(0) {}
             virtual ~TaskTest() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);

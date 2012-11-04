@@ -7,7 +7,7 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskClear : public TaskDefinitionWithConfig<MinimalTaskConfig>
+    class TaskClear : public TaskDefinitionWithConfig<MinimalTaskConfig,TaskClear>
     {
         protected:
             boost::shared_ptr<TurtleSimEnv> env;
@@ -15,14 +15,11 @@ namespace task_manager_turtlesim {
             TaskClear(boost::shared_ptr<TaskEnvironment> env); 
             virtual ~TaskClear() {};
 
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);
-
-            virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter);
-
             virtual TaskIndicator iterate();
 
-            virtual TaskIndicator terminate();
-
+            virtual boost::shared_ptr<TaskDefinition> getInstance() {
+                return shared_from_this();
+            }
     };
 };
 

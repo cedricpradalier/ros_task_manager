@@ -11,7 +11,7 @@ TaskIndicator TaskIdle::configure(const TaskParameters & parameters) throw (Inva
 TaskIndicator TaskIdle::initialise(const TaskParameters & parameters) throw (InvalidParameter)
 {
 	debug("initialising...\n");
-	return TaskStatus::TASK_INITIALISED;
+	return Parent::initialise(parameters);
 }
 
 TaskIndicator TaskIdle::iterate()

@@ -6,21 +6,9 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 TaskGoTo::TaskGoTo(boost::shared_ptr<TaskEnvironment> tenv) 
-    : TaskDefinitionWithConfig<TaskGoToConfig>("GoTo","Reach a desired destination",true,-1.)
+    : TaskDefinitionWithConfig<TaskGoToConfig,TaskGoTo>("GoTo","Reach a desired destination",true,-1.)
 {
     env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
-
-TaskIndicator TaskGoTo::configure(const TaskParameters & parameters) throw (InvalidParameter)
-{
-	return TaskStatus::TASK_CONFIGURED;
-}
-
-TaskIndicator TaskGoTo::initialise(const TaskParameters & parameters) throw (InvalidParameter)
-{
-    printf("Task GOTO initialisation\n");
-    cfg = parameters.toConfig<TaskGoToConfig>();
-	return TaskStatus::TASK_INITIALISED;
 }
 
 TaskIndicator TaskGoTo::iterate()

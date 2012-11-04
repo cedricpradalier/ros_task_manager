@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <ros/ros.h>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <string>
 #include <task_manager_msgs/TaskStatus.h>
@@ -141,7 +142,7 @@ namespace task_manager_lib {
      * Must be inherited. Such a task can be periodic or aperiodic
      * 
      * */
-    class TaskDefinition
+    class TaskDefinition: public boost::enable_shared_from_this<TaskDefinition>
     {
         public:
             /**
@@ -256,6 +257,14 @@ namespace task_manager_lib {
             // Has to be virtual because it is overloaded by the dynamic class proxy.
             virtual const TaskParameters & getConfig() const;
 
+            // Provide an instance of the class (or a derivative of it), with
+            // its own internal variables that can be run multiple time. 
+            // Default implementation could be:
+            // {
+            //     return shared_from_this();
+            // }
+            virtual boost::shared_ptr<TaskDefinition> getInstance() = 0; 
+
         public:
             // All the functions below are intended by the TaskScheduler.
 
@@ -341,8 +350,12 @@ namespace task_manager_lib {
     // Templated class specialising some of the virtual functions of a
     // TaskDefinition based on the data available in a XXXConfig class generated
     // from a .cfg file. This is still a virtual pure class.
-    template <class CFG>
+    template <class CFG, class Instance>
         class TaskDefinitionWithConfig : public TaskDefinition {
+            protected:
+                CFG cfg;
+
+                typedef TaskDefinitionWithConfig<CFG,Instance> Parent;
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskDefinitionWithConfig(const std::string & tname, const std::string & thelp, 
@@ -358,8 +371,8 @@ namespace task_manager_lib {
                 // Return the default parameters from the Config class.
                 virtual TaskParameters getDefaultParameters() const {
                     TaskParameters tp;
-                    CFG cfg = CFG::__getDefault__();
-                    cfg.__toMessage__(tp);
+                    CFG c = CFG::__getDefault__();
+                    c.__toMessage__(tp);
                     return tp;
                 }
 
@@ -367,10 +380,30 @@ namespace task_manager_lib {
                 // Read the parameter from the parameter server using the Config class.
                 virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
                     TaskParameters tp;
-                    CFG cfg = CFG::__getDefault__();
-                    cfg.__fromServer__(nh);
-                    cfg.__toMessage__(tp);
+                    CFG c = CFG::__getDefault__();
+                    c.__fromServer__(nh);
+                    c.__toMessage__(tp);
                     return tp;
+                }
+
+                virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter)
+                {
+                    return task_manager_msgs::TaskStatus::TASK_CONFIGURED;
+                }
+
+                virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter)
+                {
+                    cfg = parameters.toConfig<CFG>();
+                    return task_manager_msgs::TaskStatus::TASK_INITIALISED;
+                }
+
+                virtual TaskIndicator terminate()
+                {
+                    return task_manager_msgs::TaskStatus::TASK_TERMINATED;
+                }
+
+                virtual boost::shared_ptr<TaskDefinition> getInstance() {
+                    return boost::shared_ptr<TaskDefinition>(new Instance(*(Instance*)this));
                 }
         };
 

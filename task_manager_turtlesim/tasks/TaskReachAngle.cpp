@@ -6,21 +6,9 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 TaskReachAngle::TaskReachAngle(boost::shared_ptr<TaskEnvironment> tenv) 
-    : TaskDefinitionWithConfig<TaskReachAngleConfig>("ReachAngle","Reach a desired destination",true,-1.)
+    : Parent("ReachAngle","Reach a desired destination",true,-1.)
 {
     env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
-
-TaskIndicator TaskReachAngle::configure(const TaskParameters & parameters) throw (InvalidParameter)
-{
-	return TaskStatus::TASK_CONFIGURED;
-}
-
-TaskIndicator TaskReachAngle::initialise(const TaskParameters & parameters) throw (InvalidParameter)
-{
-    printf("Task ReachAngle initialisation\n");
-    cfg = parameters.toConfig<TaskReachAngleConfig>();
-	return TaskStatus::TASK_INITIALISED;
 }
 
 TaskIndicator TaskReachAngle::iterate()
@@ -41,7 +29,7 @@ TaskIndicator TaskReachAngle::iterate()
 TaskIndicator TaskReachAngle::terminate()
 {
     env->publishVelocity(0,0);
-	return TaskStatus::TASK_TERMINATED;
+	return Parent::terminate();
 }
 
 DYNAMIC_TASK(TaskReachAngle);

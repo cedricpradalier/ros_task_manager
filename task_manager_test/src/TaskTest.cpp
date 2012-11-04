@@ -12,8 +12,11 @@ TaskIndicator TaskTest::configure(const TaskParameters & parameters) throw (Inva
 
 TaskIndicator TaskTest::initialise(const TaskParameters & parameters) throw (InvalidParameter)
 {
-    duration = 3;
-    dynamic_reconfigure::ConfigTools::getParameter(parameters,"task_duration",duration);
+    TaskIndicator parent = Parent::initialise(parameters);
+    if (parent != TaskStatus::TASK_INITIALISED) {
+        return parent;
+    }
+    duration = cfg.task_duration;
 	counter = 0;
 	debug("Initialising (duration = %.1f)...\n",duration);
 	return TaskStatus::TASK_INITIALISED;

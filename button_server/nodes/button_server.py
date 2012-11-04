@@ -53,7 +53,7 @@ class Button:
         self.name = name.lower()
         self.text = text
         self.color = color
-        self.style = 'width:300px;font:24px Arial;'+style
+        self.style = 'width:300px;height:100px;font:24px Arial;'+style
         if self.color!="":
             self.style=self.style+('background-color:%s;' % self.color)
 

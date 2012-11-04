@@ -43,6 +43,10 @@ namespace task_manager_lib {
             // loaded class.
             //
 
+            virtual boost::shared_ptr<TaskDefinition> getInstance() {
+                return task->getInstance();
+            }
+
             virtual void setName(const std::string & n) {task->setName(n);}
             virtual const std::string & getName() const {return task->getName();}
             virtual const std::string & getHelp() const {return task->getHelp();}

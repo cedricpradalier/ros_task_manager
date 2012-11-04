@@ -6,12 +6,11 @@
 using namespace task_manager_lib;
 
 namespace task_manager_test {
-    class TaskIdle : public TaskDefinitionWithConfig<MinimalTaskConfig>
+    class TaskIdle : public TaskDefinitionWithConfig<MinimalTaskConfig,TaskIdle>
     {
         protected:
         public:
-            TaskIdle(boost::shared_ptr<TaskEnvironment> env) 
-                : TaskDefinitionWithConfig<MinimalTaskConfig>("Idle","Do nothing",true,-1) {}
+            TaskIdle(boost::shared_ptr<TaskEnvironment> env) : Parent("Idle","Do nothing",true,-1) {}
             virtual ~TaskIdle() {};
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);

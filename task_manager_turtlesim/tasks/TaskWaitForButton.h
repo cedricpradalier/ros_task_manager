@@ -10,7 +10,7 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskWaitForButton : public TaskDefinitionWithConfig<TaskWaitForButtonConfig>
+    class TaskWaitForButton : public TaskDefinitionWithConfig<TaskWaitForButtonConfig,TaskWaitForButton>
     {
 
         protected:
@@ -20,24 +20,20 @@ namespace task_manager_turtlesim {
             bool triggered;
 
             void buttonCallback(const std_msgs::String::ConstPtr& msg) {
+                ROS_INFO("%p,Received text %s (%d string in set)",this,msg->data.c_str(),expected_string.size());
                 if (expected_string.find(boost::algorithm::to_lower_copy(msg->data)) != expected_string.end()) {
                     triggered = true;
+                    ROS_INFO("%p: Triggered",this);
                 }
             }
 
-
-            TaskWaitForButtonConfig cfg;
         public:
             TaskWaitForButton(boost::shared_ptr<TaskEnvironment> env); 
             virtual ~TaskWaitForButton() {};
 
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);
-
             virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter);
 
             virtual TaskIndicator iterate();
-
-            virtual TaskIndicator terminate();
 
     };
 };
