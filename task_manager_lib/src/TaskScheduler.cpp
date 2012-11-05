@@ -1021,7 +1021,9 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                             current_task.parameters.push_back(current_parameter);
                         }
 
-#if ROS_VERSION_MINIMUM(1, 8,0)
+
+#if ROS_VERSION_MINIMUM(1, 8, 0)
+
                     }
                 }
 #else
@@ -1038,11 +1040,6 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             }
 
 
-     }
-     cout<<output.size()<<endl;
-     for (unsigned int i=0;i<output.size();i++)
-     {
-     	cout<<output[i].name<<endl;
      }
 
 }
