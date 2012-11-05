@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <boost/version.hpp>
 
 #include <fstream> 
 #include <stdint.h>
@@ -101,7 +102,11 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 					outputFile.close();
 					
 				}
-			filename=output_boost_path.filename().string();
+#if (BOOST_VERSION > 104200)
+                filename=output_boost_path.filename().string();
+#else
+                filename=output_boost_path.filename();
+#endif
 			}
 			else
 			{
@@ -156,7 +161,11 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 					outputFile.close();
 					
 				}
+#if BOOST_VERSION > 104200
 			filename=output_boost_path.filename().string();
+#else
+				filename=output_boost_path.filename();
+#endif
 			}
 			else
 			{
@@ -264,7 +273,11 @@ void TaskServerInterface::parseBasicMissionFile(boost::filesystem::path &mission
 				
 			}
 		}
+#if BOOST_VERSION > 104200
 		mission_elem.name=mission_file_path.filename().string();
+#else
+		mission_elem.name=mission_file_path.filename();
+#endif
 		mission_elem.basic_mission=tasks;
 		basic_missions.push_back(mission_elem);
 	}
@@ -294,7 +307,11 @@ void TaskServerInterface::parseComplexMissionFile(boost::filesystem::path &missi
 				
 			}
 		}
+#if BOOST_VERSION > 104200
 		mission_elem.name=mission_file_path.filename().string();
+#else
+		mission_elem.name=mission_file_path.filename();
+#endif
 		mission_elem.complex_mission= current_complex_mission.str();
 		complex_missions.push_back(mission_elem);
 	}
@@ -318,7 +335,13 @@ void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::B
 				{
 					if ( !boost::filesystem::is_directory( *iter ) )
 					{
+#if BOOST_VERSION > 104200
 						boost::filesystem::path current_path(boost::filesystem::absolute(iter-> path()));
+#else
+							char * cwd = get_current_dir_name();
+							boost::filesystem::path current_path(std::string(cwd) + iter-> path().string());
+							free(cwd);
+#endif
 						
 						if (current_path.extension() ==".py")
 						{
