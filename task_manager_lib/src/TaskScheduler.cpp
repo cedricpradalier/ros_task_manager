@@ -866,8 +866,11 @@ void TaskScheduler::generateTaskStatus(std::vector<task_manager_msgs::TaskStatus
 void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDescription> &input,std::vector<task_manager_msgs::TaskDescriptionLight> &output) const
 {
     std::vector<task_manager_msgs::TaskDescription> tasklist=input; 
+    cout<<input.size()<<endl;
+    cout<<tasklist.size()<<endl;
     for (unsigned int i = 0;i<tasklist.size();i++) 
     {
+        cout<<"in for loop"<<endl;
         task_manager_msgs::TaskDescriptionLight current_task;
 
         current_task.name=tasklist[i].name;
@@ -878,6 +881,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
 #if ROS_VERSION_MINIMUM(1, 8, 0)
 #pragma message("Compiling for ROS Fuerte")
         for (unsigned int g=0;g<tasklist[i].config.groups.size();g++) {
+        	cout<<"fuerte"<<endl;
             for (unsigned int j = 0;j<tasklist[i].config.groups[g].parameters.size();j++) {
                 if ( (tasklist[i].config.groups[g].parameters[j].name!= "task_rename") 
                         && (tasklist[i].config.groups[g].parameters[j].name!= "main_task") 
@@ -890,6 +894,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                     current_parameter.type=tasklist[i].config.groups[g].parameters[j].type;
 #else
 #pragma message("Compiling for ROS Electric Turtle")
+					cout<<"in electric"<<endl;
                     for (unsigned int j = 0;j<tasklist[i].config.parameters.size();j++) {
                         if ( (tasklist[i].config.parameters[j].name!= "task_rename") 
                                 && (tasklist[i].config.parameters[j].name!= "main_task") 
@@ -996,7 +1001,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                             else if (current_parameter.type=="str")
                             {
                                 unsigned int k=0;
-                                while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
+                                while(tasklist[i].config.max.strs[k].name!=current_parameter.name)
                                 {
                                     k++;
                                 }
@@ -1016,7 +1021,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                             current_task.parameters.push_back(current_parameter);
                         }
 
-#if ROS_VERSION_MINIMUM(1, 4, 5)
+#if ROS_VERSION_MINIMUM(1, 8,0)
                     }
                 }
 #else
@@ -1033,8 +1038,14 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             }
 
 
-        }
+     }
+     cout<<output.size()<<endl;
+     for (unsigned int i=0;i<output.size();i++)
+     {
+     	cout<<output[i].name<<endl;
+     }
 
-    }
+}
+
 
 
