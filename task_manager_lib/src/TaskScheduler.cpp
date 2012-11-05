@@ -1016,7 +1016,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                             current_task.parameters.push_back(current_parameter);
                         }
 
-#if ROS_VERSION_MINIMUM(1, 4, 5)
+#if ROS_VERSION_MINIMUM(1, 8, 0)
                     }
                 }
 #else
