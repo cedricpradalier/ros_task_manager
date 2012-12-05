@@ -29,12 +29,16 @@ rosbuild_gensrv()
 #common commands for building c++ executables and libraries
 rosbuild_add_library(${PROJECT_NAME} 
     src/DynamicTask.cpp
+    
     src/TaskClient.cpp
     src/TaskDefinition.cpp
     src/TaskScheduler.cpp
+    src/SequenceTask.cpp
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
     src/TaskServerInterface.cpp
+    src/TaskHistoric.cpp
+    
 )
 target_link_libraries(${PROJECT_NAME} dl)
 #rosbuild_add_boost_directories()

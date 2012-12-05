@@ -3,11 +3,14 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "task_manager_lib/SequenceTask.h"
 #include "task_manager_lib/TaskScheduler.h"
+
 #include "task_manager_lib/DynamicTask.h"
 #include "task_manager_lib/TaskIdleDefault.h"
 #include "task_manager_lib/TaskWaitDefault.h"
 #include "task_manager_lib/TaskServerInterface.h"
+
 
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 
@@ -32,8 +35,6 @@ int main(int argc, char *argv[])
     ts.configureTasks();
     ts.printTaskDirectory(true);
     ts.startScheduler();
-
     ros::spin();
-
     return 0;
 }

@@ -2,7 +2,6 @@
 #include <dynamic_reconfigure/config_tools.h>
 #include "task_manager_lib/TaskDefinition.h"
 using namespace task_manager_lib;
-using namespace task_manager_lib;
 
 void TaskDefinition::setName(const std::string & n) {
 	name = n;

@@ -11,13 +11,17 @@
 using namespace boost::posix_time;
 using namespace std;
 using namespace task_manager_lib;
+
+
+std::string TaskServerInterface::package_name = "task_manager_turtlesim";
+
+
 TaskServerInterface::TaskServerInterface(task_manager_lib::TaskScheduler &ts_ref)
 {
 	saveBasicMissionSrv = ts_ref.n.advertiseService("save_basic_mission", &TaskServerInterface::saveBasicMission,this);
-	
 	saveComplexMissionSrv = ts_ref.n.advertiseService("save_complex_mission", &TaskServerInterface::saveComplexMission,this);
-	
-	
+	executeComplexMissionsSrv= ts_ref.n.advertiseService("execute_complex_mission", &TaskServerInterface::executeComplexMission,this);
+	stopComplexMissionsSrv= ts_ref.n.advertiseService("abord_complex_mission", &TaskServerInterface::stopComplexMission,this);
 	listMissionsSrv=ts_ref.n.advertiseService("list_mission", &TaskServerInterface::listMissions,this);
 }
 
@@ -25,21 +29,31 @@ TaskServerInterface::TaskServerInterface(task_manager_lib::TaskScheduler &ts_ref
 
 bool TaskServerInterface::saveBasicMission(task_manager_lib::SaveBasicMission::Request  &req, task_manager_lib::SaveBasicMission::Response &res )
 {
-	cout<<"in save basic mission";
 	createBasicMissionFile(req.basic_mission,res.filename);
 	return true;
 }
 
 bool TaskServerInterface::saveComplexMission(task_manager_lib::SaveComplexMission::Request  &req, task_manager_lib::SaveComplexMission::Response &res )
 {
-	cout<<"in save complex mission";
 	createComplexMissionFile(req.complex_mission,res.filename);
 	return true;
 }
 
+bool TaskServerInterface::executeComplexMission(task_manager_lib::ExeComplexMission::Request  &req, task_manager_lib::ExeComplexMission::Response &res )
+{
+	launchComplexMission(req.mission_name, res.pid);
+	return true;
+}
+
+bool TaskServerInterface::stopComplexMission(task_manager_lib::StopComplexMission::Request  &req, task_manager_lib::StopComplexMission::Response &res )
+{
+	abordComplexMission(req.pid);
+	return true;
+}
+
+
 bool TaskServerInterface::listMissions(task_manager_lib::ListMissions::Request  &req, task_manager_lib::ListMissions::Response &res )
 {
-	cout<<"in list mission\n";
 	parseMissionDirectory(res.basic_missions,res.complex_missions);
 	return true;
 }
@@ -47,10 +61,10 @@ bool TaskServerInterface::listMissions(task_manager_lib::ListMissions::Request  
 void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::TaskDescriptionLight> &basic_mission, std::string &filename) const
 {
 	std::vector<task_manager_msgs::TaskDescriptionLight> tasklist=basic_mission;
+	
 	try
 	{
-		std::stringstream path(ros::package::getPath("task_manager_turtlesim"));
-		cout<<path.str().c_str()<<"\n"<<endl;
+		std::stringstream path(ros::package::getPath(TaskServerInterface::package_name));
 		if (path.str().length() >0)
 		{
 			boost::filesystem::path mission_path(path.str()+"/missions");
@@ -64,41 +78,31 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 				
 				boost::filesystem::path output_boost_path(pathName.str());
 				
-				if (boost::filesystem::exists(output_boost_path))
+
+				ofstream outputFile (pathName.str().c_str()) ;
+				//write mission file
+				//Mission task
+				for (unsigned int i = 0;i<tasklist.size();i++) 
 				{
-					//replace
-				}
-				else
-				{
-					ofstream outputFile (pathName.str().c_str()) ;
-					//write mission file
-					
-					//Mission task
-					for (unsigned int i = 0;i<tasklist.size();i++) 
+					outputFile<<"---"<<"\n";
+					outputFile<<tasklist[i].name<<"\n";
+
+					if (tasklist[i].parameters.size()==0)
 					{
-						outputFile<<tasklist[i].name;
-						outputFile<<"(";
-						
+						outputFile<<"empty"<<"\n";
+					}
+					else
+					{
 						for (unsigned int j = 0;j<tasklist[i].parameters.size();j++)
 						{
-							if (j==0)
-							{
-								outputFile<<tasklist[i].parameters[j].name;
-								outputFile<<"=";
-								outputFile<<tasklist[i].parameters[j].value;
-							}
-							else
-							{
-								outputFile<<",";
-								outputFile<<tasklist[i].parameters[j].name;
-								outputFile<<"=";
-								outputFile<<tasklist[i].parameters[j].value;
-							}
+							outputFile<<tasklist[i].parameters[j].name;
+							outputFile<<";";
+							outputFile<<tasklist[i].parameters[j].value;
+							outputFile<<"|";
 						}
-						outputFile<<")\n"; 
+						outputFile<<"\n";
 					}
-					outputFile<<"\n";
-										
+					
 					outputFile.close();
 					
 				}
@@ -126,13 +130,12 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 	}
 }
 
-void TaskServerInterface::createComplexMissionFile(std::string &complex_mission, std::string &filename) const
+void TaskServerInterface::createComplexMissionFile(std::string &complex_mission, std::string &filename) 
 {
 	std::string tasklist=complex_mission;
 	try
 	{
-		std::stringstream path(ros::package::getPath("task_manager_turtlesim"));
-		cout<<path.str().c_str()<<"\n"<<endl;
+		std::stringstream path(ros::package::getPath(TaskServerInterface::package_name));
 		if (path.str().length() >0)
 		{
 			boost::filesystem::path mission_path(path.str()+"/missions");
@@ -142,7 +145,7 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 				
 				std::stringstream pathName;
 				pathName.imbue(locale(pathName.getloc(), facet));
-				pathName<<mission_path.string()<<"/mission_"<<second_clock::local_time() << ".mission";
+				pathName<<mission_path.string()<<"/mission_"<<second_clock::local_time() << ".py";
 				
 				boost::filesystem::path output_boost_path(pathName.str());
 				
@@ -152,26 +155,41 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 				}
 				else
 				{
-					ofstream outputFile (pathName.str().c_str()) ;
 					//write mission file
-					
-					//Mission task
-					outputFile<<tasklist<<"\n";
-										
-					outputFile.close();
-					
+					try
+					{
+						ofstream outputFile (pathName.str().c_str()) ;
+						outputFile<<tasklist<<endl;
+						outputFile.close();
+						std::stringstream command_line;
+						command_line<<"chmod 775 "<<pathName.str();
+						int result=system(command_line.str().c_str());
+						if (result!=0)
+						{
+							std::cout<<"Error "<<result<<" setting execution permission to "<<command_line.str()<<std::endl;
+						}
+					}
+					catch(char * str)
+					{
+						std::cout<<str<<std::endl;
+					}
 				}
 #if BOOST_VERSION > 104200
-			filename=output_boost_path.filename().string();
+				filename=output_boost_path.filename().string();
 #else
 				filename=output_boost_path.filename();
 #endif
+				//update list of complex filename
+				task_manager_msgs::ComplexMission current_mission;
+				current_mission.name=filename;
+				current_mission.complex_mission=tasklist;
+				ComplexMissions.push_back(current_mission);
+				
 			}
 			else
 			{
 				cout<<"mission path does not exist\n"<<endl;
 			}
-		
 		}
 		else
 		{
@@ -187,7 +205,7 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 }
 
 
-void TaskServerInterface::parseBasicMissionFile(boost::filesystem::path &mission_file_path, std::vector<task_manager_msgs::BasicMission>& basic_missions) const
+void TaskServerInterface::parseBasicMissionFile(boost::filesystem::path &mission_file_path, std::vector<task_manager_msgs::BasicMission>& basic_missions) 
 {
 	if (boost::filesystem::exists(mission_file_path))
 	{
@@ -200,75 +218,55 @@ void TaskServerInterface::parseBasicMissionFile(boost::filesystem::path &mission
 		
 		if (MisssionFile.is_open())
 		{
-			unsigned j=0;
+			task_manager_msgs::TaskDescriptionLight current_task;
+			std::vector<task_manager_msgs::TaskParameter> parameters;
+			
+			unsigned int current_line(0), task_line(0);
 			while ( getline(MisssionFile,line))
 			{
-				if (j>0)
+				current_line ++;
+				if (line=="---")
 				{
-					task_manager_msgs::TaskDescriptionLight current_task;
-					std::vector<task_manager_msgs::TaskParameter> parameters;
-					j++;
+					task_line=current_line;
+					current_task=task_manager_msgs::TaskDescriptionLight();
+					parameters.clear();
 					
-					string task_name(line.substr(0,line.find( "(" )));
-					string params=line.substr(line.find( "(" )+1);
-					bool one_param=true;
-					params=params.substr(0, params.size()-1); //remove ")"
-					current_task.name=task_name;
-					//check if several params
-					do
+				}
+				else
+				{
+					if (current_line>0)
 					{
-						task_manager_msgs::TaskParameter parameters_element;
-						if (params.find(",")==string::npos)
+						if (current_line==task_line+1)//name
 						{
-							if (params.find( "=" )!=string::npos)
+							current_task.name=line;
+						}
+						else if (current_line==task_line+2)//params
+						{
+							if (line!="empty")
 							{
-								string param=params.substr(0,params.find( "=" ));
-								param.erase( remove( param.begin(), param.end(), ' ' ), param.end() ); //remove space
-								string value=params.substr(params.find( "=" )+1,params.size()-1);
-								value.erase( remove( value.begin(), value.end(), ' ' ), value.end() ); //remove space
-								//put in parameter msg
-								parameters_element.name=param;
-								parameters_element.value=value;
-								//put ini paramters array
-								parameters.push_back(parameters_element);
+								std::vector<std::string> params;
+								split(line,'|',params);
+								for (unsigned int j=0;j<params.size();j++)
+								{
+									std::vector<std::string> name_value;
+									split(params[j],';',name_value);
+									std::cout<<name_value[0]<<name_value[1]<<std::endl;
+									task_manager_msgs::TaskParameter current_param;
+									current_param.name=name_value[0];
+									current_param.value=name_value[1];
+									parameters.push_back(current_param);
+									std::cout<<parameters[0]<<std::endl;
+								}
+								current_task.parameters=parameters;
+								tasks.push_back(current_task);
+								
 							}
 						}
 						else
 						{
-							string part1=params.substr(0,params.find( "," ));
-							string part2=params.substr(params.find( "," )+1,params.size()-1);
-							string param=part1.substr(0,part1.find( "=" ));
-							param.erase( remove( param.begin(), param.end(), ' ' ), param.end() ); //remove space
-							string value=part1.substr(part1.find( "=" )+1,part1.size()-1);
-							value.erase( remove( value.begin(), value.end(), ' ' ), value.end() ); //remove space
-							//put in parameter msg
-							parameters_element.name=param;
-							parameters_element.value=value;
-							//put in paramters array
-							parameters.push_back(parameters_element);
-							params=part2;
-							one_param=false;
+							//error
 						}
-					}while (params.find(",")!=string::npos); 
-					
-					if (!one_param) //in this case first and last element is the same
-					{
-						task_manager_msgs::TaskParameter parameters_element;
-						string param= params.substr (0, params.find( "=" ));
-						param.erase( remove( param.begin(), param.end(), ' ' ), param.end() ); //remove space
-						string value= params.substr (params.find( "=" )+1,params.size()-1);
-						value.erase( remove( value.begin(), value.end(), ' ' ), value.end() ); //remove space
-						//put in parameter msg
-						parameters_element.name=param;
-						parameters_element.value=value;
-						//put in paramters array
-						parameters.push_back(parameters_element);
-
 					}
-					//put in task_manager_msgs/TaskDescriptionLight
-					current_task.parameters=parameters;
-					//put in std::vector<task_manager_msgs/TaskDescriptionLight>
-					tasks.push_back(current_task);
 				}
 				
 			}
@@ -279,11 +277,14 @@ void TaskServerInterface::parseBasicMissionFile(boost::filesystem::path &mission
 		mission_elem.name=mission_file_path.filename();
 #endif
 		mission_elem.basic_mission=tasks;
+		//store in taskserverinterface BasicMissions
+		BasicMissions.push_back(mission_elem);
+		//response
 		basic_missions.push_back(mission_elem);
 	}
 }
 
-void TaskServerInterface::parseComplexMissionFile(boost::filesystem::path &mission_file_path, std::vector<task_manager_msgs::ComplexMission>& complex_missions) const
+void TaskServerInterface::parseComplexMissionFile(boost::filesystem::path &mission_file_path, std::vector<task_manager_msgs::ComplexMission>& complex_missions) 
 {
 	if (boost::filesystem::exists(mission_file_path))
 	{
@@ -291,20 +292,13 @@ void TaskServerInterface::parseComplexMissionFile(boost::filesystem::path &missi
 		ifstream MisssionFile(pathName.str().c_str());
 		std::string line;
 		task_manager_msgs::ComplexMission mission_elem;
-		
-		
 		stringstream current_complex_mission;
 		
 		if (MisssionFile.is_open())
 		{
-			
-			
 			while ( getline(MisssionFile,line))
 			{
-				current_complex_mission<<line;
-				//special char for space and end of line
-				
-				
+				current_complex_mission<<line<<endl;
 			}
 		}
 #if BOOST_VERSION > 104200
@@ -313,16 +307,20 @@ void TaskServerInterface::parseComplexMissionFile(boost::filesystem::path &missi
 		mission_elem.name=mission_file_path.filename();
 #endif
 		mission_elem.complex_mission= current_complex_mission.str();
+		//store
+		ComplexMissions.push_back(mission_elem);
+		//in response
 		complex_missions.push_back(mission_elem);
+		
 	}
 }
 
-void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::BasicMission>& basic_missions,std::vector<task_manager_msgs::ComplexMission>& complex_missions ) const
+void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::BasicMission>& basic_missions,std::vector<task_manager_msgs::ComplexMission>& complex_missions ) 
 {
 	try
 	{
 	//todo for all package
-	std::stringstream path(ros::package::getPath("task_manager_turtlesim"));
+	std::stringstream path(ros::package::getPath(TaskServerInterface::package_name));
 
 		if (path.str().length() >0)
 		{
@@ -351,27 +349,13 @@ void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::B
 						{
 							parseBasicMissionFile(current_path,basic_missions);
 						}
-						else
-						{
-							cout<<"Only .py and .mission extension are handled"<<endl;
-						}
+//						else
+//						{
+//							cout<<"Only .py and .mission extension are handled"<<endl;
+//						}
 
 					}
 				}
-				
-//				for (unsigned int i=0;i<output.size();i++)
-//				{
-//					cout <<"-------" <<endl;
-//					cout <<output[i].name <<endl;
-//					cout <<"Params" <<endl;
-//					for (unsigned int j=0;j<output[i].mission.size();j++)
-//					{
-//						for (unsigned int k=0;k<output[i].mission[j].parameters.size();k++) 
-//						{
-//							cout<< output[i].mission[j].parameters[k].name << " vaut "<<output[i].mission[j].parameters[k].value<<"\n";
-//						}
-//					}
-//				}
 				
 			}
 			else
@@ -386,6 +370,66 @@ void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::B
 	}
 }
 
+void TaskServerInterface::launchComplexMission(std::string & mission_name, int &pid) const
+{
+	
+	int id(-1);
+	for (unsigned int i=0;i<ComplexMissions.size();i++)
+	{
+		if (ComplexMissions[i].name==mission_name)
+		{
+			id=i;
+		}
+	}
+	
+	std::string full_name=saveBasicMissionSrv.getService();
+	size_t pos=full_name.find("save_basic_mission");
+	std::string node_name=full_name.substr(0,pos-1);
+	
+	stringstream parameter;
+	parameter<<" _server:="<<node_name;
+	
+	stringstream rosrun_path;
+	rosrun_path<<getenv("ROS_ROOT")<<"/bin/rosrun";
+	
+	//WARNING adding fork in service 
+	if (id>-1)
+	{
+		int current_pid = fork();
 
+		if (current_pid ==-1)
+		{
+			std::cout<<"Fork failed"<<std::endl;
+		}
+		else if (current_pid ==0)//in child
+		{
+			execl (rosrun_path.str().c_str(),"rosrun", package_name.c_str(), mission_name.c_str(),parameter.str().c_str(),(char *) 0);
+			std::cout<<"Error running the following command :"<<"rosrun "<<package_name.c_str()<<" "<<mission_name.c_str()<<" "<<parameter.str().c_str()<<std::endl;
+		}
+		else //in parent
+		{
+			pid=current_pid;
+		}
+	}
+	else
+	{
+		std::cout<<"Complex Mission "<<mission_name<<" not found "<<std::endl;
+	}
+}
+
+void TaskServerInterface::abordComplexMission(int &pid)
+{
+	kill( pid, SIGKILL );
+}
+
+
+
+void TaskServerInterface::split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
 
 

@@ -32,8 +32,6 @@ while True:
     tc.GoTo(goal_x=5.0,goal_y=5.0)
     tc.ReachAngle(target=pi/2)
 
-
-
 rospy.loginfo("Mission completed")
 
 
