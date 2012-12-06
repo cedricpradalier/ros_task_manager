@@ -18,11 +18,11 @@ std::string TaskServerInterface::package_name = "task_manager_turtlesim";
 
 TaskServerInterface::TaskServerInterface(task_manager_lib::TaskScheduler &ts_ref)
 {
-	saveBasicMissionSrv = ts_ref.n.advertiseService("save_basic_mission", &TaskServerInterface::saveBasicMission,this);
-	saveComplexMissionSrv = ts_ref.n.advertiseService("save_complex_mission", &TaskServerInterface::saveComplexMission,this);
-	executeComplexMissionsSrv= ts_ref.n.advertiseService("execute_complex_mission", &TaskServerInterface::executeComplexMission,this);
-	stopComplexMissionsSrv= ts_ref.n.advertiseService("abord_complex_mission", &TaskServerInterface::stopComplexMission,this);
-	listMissionsSrv=ts_ref.n.advertiseService("list_mission", &TaskServerInterface::listMissions,this);
+	saveBasicMissionSrv = ts_ref.getNodeHandle().advertiseService("save_basic_mission", &TaskServerInterface::saveBasicMission,this);
+	saveComplexMissionSrv = ts_ref.getNodeHandle().advertiseService("save_complex_mission", &TaskServerInterface::saveComplexMission,this);
+	executeComplexMissionsSrv= ts_ref.getNodeHandle().advertiseService("execute_complex_mission", &TaskServerInterface::executeComplexMission,this);
+	stopComplexMissionsSrv= ts_ref.getNodeHandle().advertiseService("abord_complex_mission", &TaskServerInterface::stopComplexMission,this);
+	listMissionsSrv=ts_ref.getNodeHandle().advertiseService("list_mission", &TaskServerInterface::listMissions,this);
 }
 
 //callback
@@ -65,6 +65,7 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 	try
 	{
 		std::stringstream path(ros::package::getPath(TaskServerInterface::package_name));
+		stringstream msg;
 		if (path.str().length() >0)
 		{
 			boost::filesystem::path mission_path(path.str()+"/missions");
@@ -114,25 +115,29 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 			}
 			else
 			{
-				cout<<"mission path does not exist\n"<<endl;
+				msg<<mission_path<< "does not exist\n";
+				PRINTF(1,msg.str().c_str());
 			}
 		
 		}
 		else
 		{
-			cout<<"package not found\n"<<endl;
+			msg<<path<< "does not exist\n";
+			PRINTF(1,msg.str().c_str());
 		}
 		
 	}
 	catch (char * str)
 	{
-		filename="error creating file";
+		PRINTF(1,str);
+		filename="Error creating Basic Mission file";
 	}
 }
 
 void TaskServerInterface::createComplexMissionFile(std::string &complex_mission, std::string &filename) 
 {
 	std::string tasklist=complex_mission;
+	stringstream msg;
 	try
 	{
 		std::stringstream path(ros::package::getPath(TaskServerInterface::package_name));
@@ -166,12 +171,13 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 						int result=system(command_line.str().c_str());
 						if (result!=0)
 						{
-							std::cout<<"Error "<<result<<" setting execution permission to "<<command_line.str()<<std::endl;
+							msg<<"Error "<<result<<" setting execution permission to "<<command_line.str()<<"\n";
+							PRINTF(1,msg.str().c_str());
 						}
 					}
 					catch(char * str)
 					{
-						std::cout<<str<<std::endl;
+						PRINTF(1,str);
 					}
 				}
 #if BOOST_VERSION > 104200
@@ -188,17 +194,20 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 			}
 			else
 			{
-				cout<<"mission path does not exist\n"<<endl;
+				msg<<mission_path<< "does not exist\n";
+				PRINTF(1,msg.str().c_str());
 			}
 		}
 		else
 		{
-			cout<<"package not found\n"<<endl;
+			msg<<path<< "does not exist\n";
+			PRINTF(1,msg.str().c_str());
 		}
 		
 	}
 	catch (char * str)
 	{
+		PRINTF(1,str);
 		filename="error creating file";
 	}
 	
@@ -250,12 +259,10 @@ void TaskServerInterface::parseBasicMissionFile(boost::filesystem::path &mission
 								{
 									std::vector<std::string> name_value;
 									split(params[j],';',name_value);
-									std::cout<<name_value[0]<<name_value[1]<<std::endl;
 									task_manager_msgs::TaskParameter current_param;
 									current_param.name=name_value[0];
 									current_param.value=name_value[1];
 									parameters.push_back(current_param);
-									std::cout<<parameters[0]<<std::endl;
 								}
 								current_task.parameters=parameters;
 								tasks.push_back(current_task);
@@ -349,24 +356,21 @@ void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::B
 						{
 							parseBasicMissionFile(current_path,basic_missions);
 						}
-//						else
-//						{
-//							cout<<"Only .py and .mission extension are handled"<<endl;
-//						}
-
 					}
 				}
 				
 			}
 			else
 			{
-				cout<<"Can't find missions directory in "<<path.str()<<endl;
+				stringstream msg;
+				msg<<"Can't find missions directory in "<<path.str()<<"\n";
+				PRINTF(1,msg.str().c_str());
 			}
 		}
 	}
 	catch(char * str)
 	{
-		cout<<str<<"\n";
+		PRINTF(1,str);
 	}
 }
 
@@ -393,18 +397,20 @@ void TaskServerInterface::launchComplexMission(std::string & mission_name, int &
 	rosrun_path<<getenv("ROS_ROOT")<<"/bin/rosrun";
 	
 	//WARNING adding fork in service 
+	stringstream msg;
 	if (id>-1)
 	{
 		int current_pid = fork();
 
 		if (current_pid ==-1)
 		{
-			std::cout<<"Fork failed"<<std::endl;
+			PRINTF(1,"Fork failed");
 		}
 		else if (current_pid ==0)//in child
 		{
 			execl (rosrun_path.str().c_str(),"rosrun", package_name.c_str(), mission_name.c_str(),parameter.str().c_str(),(char *) 0);
-			std::cout<<"Error running the following command :"<<"rosrun "<<package_name.c_str()<<" "<<mission_name.c_str()<<" "<<parameter.str().c_str()<<std::endl;
+			msg<<"Error running the following command :"<<"rosrun "<<package_name.c_str()<<" "<<mission_name.c_str()<<" "<<parameter.str().c_str()<<"\n";
+			PRINTF(1,msg.str().c_str());
 		}
 		else //in parent
 		{
@@ -413,7 +419,8 @@ void TaskServerInterface::launchComplexMission(std::string & mission_name, int &
 	}
 	else
 	{
-		std::cout<<"Complex Mission "<<mission_name<<" not found "<<std::endl;
+		msg<<"Complex Mission "<<mission_name<<" not found\n";
+		PRINTF(1,msg.str().c_str());
 	}
 }
 

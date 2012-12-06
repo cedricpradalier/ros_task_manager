@@ -15,7 +15,7 @@
 using namespace std;
 using namespace task_manager_lib;
 
-#define PRINTF(level,X...) if (level <= (signed)debug) ROS_DEBUG(X)
+
 
 unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
 unsigned int TaskScheduler::debug = 4;
@@ -1032,7 +1032,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                             }
                             else
                             {
-                                cout<<"ERROR TYPE NOT LEGAL\n";
+                                PRINTF(1,"TYPE NOT LEGAL");
                             }
                             current_task.parameters.push_back(current_parameter);
                         }
@@ -1046,14 +1046,9 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             }
 #endif
 
-            try
-            {
-                output.push_back(current_task);
-            }
-            catch(...)
-            {
-                cout<<"Error\n";
-            }
+
+            output.push_back(current_task);
+
 
 
      }
@@ -1195,5 +1190,10 @@ int TaskScheduler::terminateTask(unsigned int &taskid)
 void TaskScheduler::keepAliveSequence()
 {
 	lastKeepAlive = ros::Time::now();
+}
+
+ros::NodeHandle TaskScheduler::getNodeHandle()
+{
+	return n;
 }
 

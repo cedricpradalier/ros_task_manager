@@ -29,15 +29,13 @@ namespace task_manager_lib {
 #define TASK_STATUS_MASK 0xFFl
 #define TASK_FOREGROUND 0x100l
 #define TASK_BACKGROUND 0x000l
-
+#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_DEBUG(X)
 	// Class that manages the execution of task directly or through ROS services
 	class TaskScheduler
 	{
-		//Define friend for TaskServerInterface
-		friend class TaskServerInterface;
-	
 		public:
 			typedef unsigned int TaskId;
+			static unsigned int debug;
 		protected:
 		
 			struct ThreadParameters {
@@ -174,7 +172,6 @@ namespace task_manager_lib {
 			boost::shared_ptr<ThreadParameters> mainThread;
 
 		protected:
-			static unsigned int debug;
 			static const double IDLE_TIMEOUT;
 			static const double DELETE_TIMEOUT;
 			static const unsigned int historic_size; 
@@ -305,6 +302,8 @@ namespace task_manager_lib {
 			int terminateTask(unsigned int &taskid);
 			
 			void keepAliveSequence();
+			
+			ros::NodeHandle getNodeHandle();
 			
 			
 	};
