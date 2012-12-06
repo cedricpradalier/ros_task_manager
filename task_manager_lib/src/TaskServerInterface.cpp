@@ -64,7 +64,7 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 	
 	try
 	{
-		std::stringstream path(ros::package::getPath(TaskServerInterface::package_name));
+		stringstream path(ros::package::getPath(TaskServerInterface::package_name));
 		stringstream msg;
 		if (path.str().length() >0)
 		{
@@ -73,7 +73,7 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 			{
 				time_facet *facet = new time_facet("%d-%b-%Y-%H_%M_%S");
 				
-				std::stringstream pathName;
+				stringstream pathName;
 				pathName.imbue(locale(pathName.getloc(), facet));
 				pathName<<mission_path.string()<<"/mission_"<<second_clock::local_time() << ".mission";
 				
@@ -343,9 +343,10 @@ void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::B
 #if BOOST_VERSION > 104200
 						boost::filesystem::path current_path(boost::filesystem::absolute(iter-> path()));
 #else
-							char * cwd = get_current_dir_name();
-							boost::filesystem::path current_path(std::string(cwd) + iter-> path().string());
-							free(cwd);
+							//char * cwd = get_current_dir_name();
+							//boost::filesystem::path current_path(std::string(cwd) + iter-> path().string());
+							//free(cwd);
+							boost::filesystem::path current_path(iter-> path().string());
 #endif
 						
 						if (current_path.extension() ==".py")
