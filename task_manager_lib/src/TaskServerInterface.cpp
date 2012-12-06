@@ -115,21 +115,19 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 			}
 			else
 			{
-				msg<<mission_path<< "does not exist\n";
-				PRINTF(1,msg.str().c_str());
+				PRINTF(1,"%s does not exist\n",mission_path.c_str());
 			}
 		
 		}
 		else
 		{
-			msg<<path<< "does not exist\n";
-			PRINTF(1,msg.str().c_str());
+			PRINTF(1,"%s does not exist\n",path.str().c_str());
 		}
 		
 	}
 	catch (char * str)
 	{
-		PRINTF(1,str);
+		PRINTF(1,"%s",str);
 		filename="Error creating Basic Mission file";
 	}
 }
@@ -171,13 +169,12 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 						int result=system(command_line.str().c_str());
 						if (result!=0)
 						{
-							msg<<"Error "<<result<<" setting execution permission to "<<command_line.str()<<"\n";
-							PRINTF(1,msg.str().c_str());
+							PRINTF(1,"Error %d setting execution permission to %s",result,command_line.str().c_str());
 						}
 					}
 					catch(char * str)
 					{
-						PRINTF(1,str);
+						PRINTF(1,"%s",str);
 					}
 				}
 #if BOOST_VERSION > 104200
@@ -194,20 +191,18 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 			}
 			else
 			{
-				msg<<mission_path<< "does not exist\n";
-				PRINTF(1,msg.str().c_str());
+				PRINTF(1,"%s does not exist\n",mission_path.c_str());
 			}
 		}
 		else
 		{
-			msg<<path<< "does not exist\n";
-			PRINTF(1,msg.str().c_str());
+			PRINTF(1," %s does not exist\n",path.str().c_str());
 		}
 		
 	}
 	catch (char * str)
 	{
-		PRINTF(1,str);
+		PRINTF(1,"%s",str);
 		filename="error creating file";
 	}
 	
@@ -363,15 +358,13 @@ void TaskServerInterface::parseMissionDirectory(std::vector<task_manager_msgs::B
 			}
 			else
 			{
-				stringstream msg;
-				msg<<"Can't find missions directory in "<<path.str()<<"\n";
-				PRINTF(1,msg.str().c_str());
+				PRINTF(1,"Can't find missions directory in %s \n",path.str().c_str());
 			}
 		}
 	}
 	catch(char * str)
 	{
-		PRINTF(1,str);
+		PRINTF(1,"%s",str);
 	}
 }
 
@@ -410,8 +403,8 @@ void TaskServerInterface::launchComplexMission(std::string & mission_name, int &
 		else if (current_pid ==0)//in child
 		{
 			execl (rosrun_path.str().c_str(),"rosrun", package_name.c_str(), mission_name.c_str(),parameter.str().c_str(),(char *) 0);
-			msg<<"Error running the following command :"<<"rosrun "<<package_name.c_str()<<" "<<mission_name.c_str()<<" "<<parameter.str().c_str()<<"\n";
-			PRINTF(1,msg.str().c_str());
+			//msg<<"Error running the following command :"<<"rosrun "<<package_name.c_str()<<" "<<mission_name.c_str()<<" "<<parameter.str().c_str()<<"\n";
+			PRINTF(1,"Error running the following command : 'rosrun %s %s %s' \n",package_name.c_str(),mission_name.c_str(),parameter.str().c_str());
 		}
 		else //in parent
 		{
@@ -420,8 +413,7 @@ void TaskServerInterface::launchComplexMission(std::string & mission_name, int &
 	}
 	else
 	{
-		msg<<"Complex Mission "<<mission_name<<" not found\n";
-		PRINTF(1,msg.str().c_str());
+		PRINTF(1,"Complex Mission %s not found\n",mission_name.c_str());
 	}
 }
 
