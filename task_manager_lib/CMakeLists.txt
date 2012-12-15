@@ -38,7 +38,7 @@ rosbuild_add_library(${PROJECT_NAME}
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
     src/TaskServerInterface.cpp
-    src/TaskHistoric.cpp
+    src/TaskHistory.cpp
     
 )
 target_link_libraries(${PROJECT_NAME} dl)

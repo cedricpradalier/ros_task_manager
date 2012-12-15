@@ -1,10 +1,10 @@
-#ifndef TASK_HISTORIC_H
-#define TASK_HISTORIC_H
+#ifndef TASK_HISTORY_H
+#define TASK_HISTORY_H
 
 #include "TaskDefinition.h"
 namespace task_manager_lib {
 
-	class TaskHistoric
+	class TaskHistory
 	{
 		protected:
 			unsigned int thid;
@@ -16,8 +16,8 @@ namespace task_manager_lib {
 		
 		public:
 	
-			TaskHistoric(unsigned int id, const std::string & name, TaskParameters params, const ros::Time & tnow, const unsigned int & statusnb);
-			void updateTaskHistoric(ros::Time tnow, const unsigned int & statusnb );
+			TaskHistory(unsigned int id, const std::string & name, TaskParameters params, const ros::Time & tnow, const unsigned int & statusnb);
+			void updateTaskHistory(ros::Time tnow, const unsigned int & statusnb );
 			//retrieve data
 			unsigned int getid();
 			std::string getname();
@@ -34,4 +34,4 @@ namespace task_manager_lib {
 			void setstatus( const unsigned int & current_status);
 	};
 };
-#endif // TASK_HISTORIC_H
+#endif // TASK_HISTORY_H

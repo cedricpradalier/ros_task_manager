@@ -1,5 +1,6 @@
 #ifndef SEQUENCE_TASK_DEFINITION_H
 #define SEQUENCE_TASK_DEFINITION_H
+#include <vector>
 
 #include "TaskScheduler.h"
 using namespace task_manager_msgs;

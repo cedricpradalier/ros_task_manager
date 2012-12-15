@@ -81,20 +81,21 @@ TaskIndicator SequenceTask::iterate()
 		{
 			return TaskStatus::TASK_FAILED;
 		}
-		else if(current_status>=TaskStatus::TASK_NEWBORN && current_status<TaskStatus::TASK_TERMINATED)
+		else if((current_status>=TaskStatus::TASK_NEWBORN) && (current_status<TaskStatus::TASK_TERMINATED))
 		{
 			return TaskStatus::TASK_RUNNING;
 		}
 		else if(current_status==TaskStatus::TASK_TERMINATED)
 		{
-			if (sequence_id<(sequence.size()-1))
+            sequence_id++;
+			if (sequence_id<(signed)sequence.size())
 			{
-				sequence_id++;
 				task_id=that->launchTask(sequence[sequence_id].first,sequence[sequence_id].second);
 				return TaskStatus::TASK_RUNNING;
 			}
 			else
 			{
+                task_id = 0;
 				return TaskStatus::TASK_COMPLETED;
 			}
 		}
@@ -108,6 +109,9 @@ TaskIndicator SequenceTask::iterate()
 
 TaskIndicator SequenceTask::terminate()
 {
+    if (sequence_id < (signed)sequence.size()) {
+        that->terminateTask(task_id);
+    }
 	return TaskStatus::TASK_TERMINATED ;
 }
 

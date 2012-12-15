@@ -9,7 +9,7 @@
 #include "task_manager_lib/SequenceTask.h"
 #include "task_manager_lib/DynamicTask.h"
 #include "task_manager_lib/TaskScheduler.h"
-#include "task_manager_lib/TaskHistoric.h"
+#include "task_manager_lib/TaskHistory.h"
 #include <dynamic_reconfigure/config_tools.h>
 
 using namespace std;
@@ -21,7 +21,7 @@ unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
 unsigned int TaskScheduler::debug = 1;
 const double TaskScheduler::DELETE_TIMEOUT=2.0;
 const double TaskScheduler::IDLE_TIMEOUT=0.5;
-const unsigned int TaskScheduler::historic_size=10;
+const unsigned int TaskScheduler::history_size=10;
 
 TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskScheduler *ts, 
         boost::shared_ptr<TaskDefinition> td, double tperiod) : statusPub(pub)
@@ -92,7 +92,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
     getTaskListSrv = nh.advertiseService("get_all_tasks", &TaskScheduler::getTaskList,this);
     getTaskListLightSrv =nh.advertiseService("get_all_tasks_light", &TaskScheduler::getTaskListLight,this);
     getAllTaskStatusSrv = nh.advertiseService("get_all_status", &TaskScheduler::getAllTaskStatus,this);
-    getHistoricSrv = nh.advertiseService("get_historic", &TaskScheduler::getHistoric,this);
+    getHistorySrv = nh.advertiseService("get_history", &TaskScheduler::getHistory,this);
     executeSequenceTasksSrv=nh.advertiseService("execute_sequence", &TaskScheduler::executeTaskSequence ,this);
     statusPub = nh.advertise<task_manager_msgs::TaskStatus>("status",20);
     keepAliveSub = nh.subscribe("keep_alive",1,&TaskScheduler::keepAliveCallback,this);
@@ -189,10 +189,10 @@ bool TaskScheduler::executeTaskSequence(task_manager_lib::ExeTaskSequence::Reque
     return true;
 }
 
-bool TaskScheduler::getHistoric(task_manager_lib::GetHistoric::Request  &req, task_manager_lib::GetHistoric::Response &res)
+bool TaskScheduler::getHistory(task_manager_lib::GetHistory::Request  &req, task_manager_lib::GetHistory::Response &res)
 {
     lastKeepAlive = ros::Time::now();
-    generateHistoric(res.historic);
+    generateHistory(res.history);
     return true;
 }
 
@@ -1006,26 +1006,26 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
 
     }
 
-    void TaskScheduler::generateHistoric(std::vector<task_manager_msgs::TaskHistoric> &output) 
+    void TaskScheduler::generateHistory(std::vector<task_manager_msgs::TaskHistory> &output) 
     {
         std::ostringstream ostr;
-        for (unsigned i=0;i<historic.size();i++)
+        for (unsigned i=0;i<history.size();i++)
         {
-            task_manager_msgs::TaskHistoric task;
-            task.tid=historic[i].getid();
-            task.name=historic[i].getname();
-            task.start_time=historic[i].getstartTime();
-            task.end_time=historic[i].getendTime();
-            task.status=historic[i].getstatus();
+            task_manager_msgs::TaskHistory task;
+            task.tid=history[i].getid();
+            task.name=history[i].getname();
+            task.start_time=history[i].getstartTime();
+            task.end_time=history[i].getendTime();
+            task.status=history[i].getstatus();
 
             //bool
-            for (unsigned int j = 0;j<historic[i].getparams().bools.size();j++) 
+            for (unsigned int j = 0;j<history[i].getparams().bools.size();j++) 
             {
-                if (historic[i].getparams().bools[j].name!="main_task" && historic[i].getparams().bools[j].name!="task_rename" && historic[i].getparams().bools[j].name!="task_period" && historic[i].getparams().bools[j].name!="task_period")
+                if (history[i].getparams().bools[j].name!="main_task" && history[i].getparams().bools[j].name!="task_rename" && history[i].getparams().bools[j].name!="task_period" && history[i].getparams().bools[j].name!="task_period")
                 {
                     task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=historic[i].getparams().bools[j].name;
-                    if (historic[i].getparams().bools[j].value==1)
+                    current_parameter.name=history[i].getparams().bools[j].name;
+                    if (history[i].getparams().bools[j].value==1)
                     {
                         current_parameter.value="True";
                     }
@@ -1039,15 +1039,15 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             }
 
             //int
-            for (unsigned int j = 0;j<historic[i].getparams().ints.size();j++) 
+            for (unsigned int j = 0;j<history[i].getparams().ints.size();j++) 
             {
-                if (historic[i].getparams().ints[j].name!="main_task" && historic[i].getparams().ints[j].name!="task_rename" && historic[i].getparams().ints[j].name!="task_period" && historic[i].getparams().ints[j].name!="task_period")
+                if (history[i].getparams().ints[j].name!="main_task" && history[i].getparams().ints[j].name!="task_rename" && history[i].getparams().ints[j].name!="task_period" && history[i].getparams().ints[j].name!="task_period")
                 {
 
                     task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=historic[i].getparams().ints[j].name;
+                    current_parameter.name=history[i].getparams().ints[j].name;
                     ostr.str("");
-                    ostr <<historic[i].getparams().ints[j].value;
+                    ostr <<history[i].getparams().ints[j].value;
                     current_parameter.value=ostr.str();
                     ostr.str("");
                     task.parameters.push_back(current_parameter);
@@ -1056,28 +1056,28 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             }
 
             //strs
-            for (unsigned int j = 0;j<historic[i].getparams().strs.size();j++) 
+            for (unsigned int j = 0;j<history[i].getparams().strs.size();j++) 
             {
-                if (historic[i].getparams().strs[j].name!="main_task" && historic[i].getparams().strs[j].name!="task_rename" && historic[i].getparams().strs[j].name!="task_period" && historic[i].getparams().strs[j].name!="task_period")
+                if (history[i].getparams().strs[j].name!="main_task" && history[i].getparams().strs[j].name!="task_rename" && history[i].getparams().strs[j].name!="task_period" && history[i].getparams().strs[j].name!="task_period")
                 {
                     task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=historic[i].getparams().strs[j].name;
-                    current_parameter.value=historic[i].getparams().strs[j].value;
+                    current_parameter.name=history[i].getparams().strs[j].name;
+                    current_parameter.value=history[i].getparams().strs[j].value;
                     current_parameter.type="str";
                     task.parameters.push_back(current_parameter);
                 }
             }
 
             //double
-            for (unsigned int j = 0;j<historic[i].getparams().doubles.size();j++) 
+            for (unsigned int j = 0;j<history[i].getparams().doubles.size();j++) 
             {
-                if (historic[i].getparams().doubles[j].name!="main_task" && historic[i].getparams().doubles[j].name!="task_rename" && historic[i].getparams().doubles[j].name!="task_period" && historic[i].getparams().doubles[j].name!="task_period")
+                if (history[i].getparams().doubles[j].name!="main_task" && history[i].getparams().doubles[j].name!="task_rename" && history[i].getparams().doubles[j].name!="task_period" && history[i].getparams().doubles[j].name!="task_period")
                 {
 
                     task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=historic[i].getparams().doubles[j].name;
+                    current_parameter.name=history[i].getparams().doubles[j].name;
                     ostr.str("");
-                    ostr <<historic[i].getparams().doubles[j].value;
+                    ostr <<history[i].getparams().doubles[j].value;
                     current_parameter.value=ostr.str();
                     current_parameter.type="double";
                     task.parameters.push_back(current_parameter);
@@ -1126,6 +1126,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             // delete pointer and empty the list of running tasks
             if (it->first==taskid)
             {
+                lock.unlock();
                 terminateTask(it->second);
                 return 0;
             }

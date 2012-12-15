@@ -6,7 +6,7 @@
 #include <map>
 
 #include "TaskDefinition.h"
-#include "TaskHistoric.h"
+#include "TaskHistory.h"
 
 #include <ros/ros.h>
 #include <std_msgs/Header.h>
@@ -15,13 +15,13 @@
 #include "task_manager_lib/GetTaskList.h"
 #include "task_manager_lib/GetTaskListLight.h"
 #include "task_manager_lib/GetAllTaskStatus.h"
-#include "task_manager_lib/GetHistoric.h"
+#include "task_manager_lib/GetHistory.h"
 #include "task_manager_lib/ExeTaskSequence.h"
 
 
 #include "task_manager_msgs/TaskStatus.h"
 #include "task_manager_msgs/TaskDescriptionLight.h"
-#include "task_manager_msgs/TaskHistoric.h"
+#include "task_manager_msgs/TaskHistory.h"
 
 #include <iostream>
 
@@ -33,7 +33,7 @@ namespace task_manager_lib {
 #define TASK_STATUS_MASK 0xFFl
 #define TASK_FOREGROUND 0x100l
 #define TASK_BACKGROUND 0x000l
-#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_INFO(X)
+#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_DEBUG(X)
 	// Class that manages the execution of task directly or through ROS services
 	class TaskScheduler
 	{
@@ -102,9 +102,9 @@ namespace task_manager_lib {
 				{
 					if (status==task_manager_msgs::TaskStatus::TASK_INITIALISED)
 					{
-						std::vector<TaskHistoric>::iterator it_vector;
+						std::vector<TaskHistory>::iterator it_vector;
 						bool task_exist=false;
-						for ( it_vector=that->historic.begin() ; it_vector < that->historic.end(); it_vector++ )
+						for ( it_vector=that->history.begin() ; it_vector < that->history.end(); it_vector++ )
 						{
 							if (it_vector->getid()==tpid)
 							{
@@ -114,27 +114,27 @@ namespace task_manager_lib {
 						}
 						if (task_exist==false)
 						{
-							TaskHistoric current_task(tpid,task->getName().c_str(),task->getConfig(),statusTime,status) ;
-							if (that->historic.size()< historic_size)
+							TaskHistory current_task(tpid,task->getName().c_str(),task->getConfig(),statusTime,status) ;
+							if (that->history.size()< history_size)
 							{
-								that->historic.push_back(current_task);
+								that->history.push_back(current_task);
 							}
 							else
 							{
-								that->historic.erase(that->historic.begin());
-								that->historic.push_back(current_task);
+								that->history.erase(that->history.begin());
+								that->history.push_back(current_task);
 							}
 						}
 					}
 					
 					if (status>=task_manager_msgs::TaskStatus::TASK_RUNNING )
 					{
-						std::vector<TaskHistoric>::iterator it_vector;
-						for ( it_vector=that->historic.begin() ; it_vector < that->historic.end(); it_vector++ )
+						std::vector<TaskHistory>::iterator it_vector;
+						for ( it_vector=that->history.begin() ; it_vector < that->history.end(); it_vector++ )
 						{
 							if (it_vector->getid()==tpid)
 							{
-								it_vector->updateTaskHistoric(statusTime,status);
+								it_vector->updateTaskHistory(statusTime,status);
 								break;
 							}
 						}
@@ -159,7 +159,7 @@ namespace task_manager_lib {
 			ros::ServiceServer getTaskListSrv;
 			ros::ServiceServer getAllTaskStatusSrv;
 			ros::ServiceServer getTaskListLightSrv;
-			ros::ServiceServer getHistoricSrv;
+			ros::ServiceServer getHistorySrv;
 			ros::ServiceServer executeSequenceTasksSrv;
 			void keepAliveCallback(const std_msgs::Header::ConstPtr& msg);
 
@@ -168,7 +168,7 @@ namespace task_manager_lib {
 			typedef std::map<std::string,boost::shared_ptr<TaskDefinition>,std::less<std::string> > TaskDirectory;
 			typedef std::pair<unsigned int, boost::shared_ptr<ThreadParameters> > TaskSetItem;
 			typedef std::map<unsigned int, boost::shared_ptr<ThreadParameters>, std::less<unsigned int> > TaskSet;
-			std::vector<TaskHistoric> historic;
+			std::vector<TaskHistory> history;
 			TaskDirectory tasks;
 			TaskSet runningThreads,zombieThreads;
 			static void printTaskSet(const std::string & name, const TaskSet & ts);
@@ -177,7 +177,7 @@ namespace task_manager_lib {
 		protected:
 			static const double IDLE_TIMEOUT;
 			static const double DELETE_TIMEOUT;
-			static const unsigned int historic_size; 
+			static const unsigned int history_size; 
 			// Action management: create task, terminate task
 			typedef enum {
                 NO_ACTION,
@@ -233,7 +233,7 @@ namespace task_manager_lib {
 			bool getTaskList(task_manager_lib::GetTaskList::Request  &req,
 					task_manager_lib::GetTaskList::Response &res );
 			bool getTaskListLight(task_manager_lib::GetTaskListLight::Request  &req, task_manager_lib::GetTaskListLight::Response &res );
-			bool getHistoric(task_manager_lib::GetHistoric::Request  &req, task_manager_lib::GetHistoric::Response &res );
+			bool getHistory(task_manager_lib::GetHistory::Request  &req, task_manager_lib::GetHistory::Response &res );
 			bool executeTaskSequence(task_manager_lib::ExeTaskSequence::Request  &req,task_manager_lib::ExeTaskSequence::Response &res);
 
 			// Generate a task description list, ready to be published by ROS
@@ -242,7 +242,7 @@ namespace task_manager_lib {
 			void generateTaskStatus(std::vector<task_manager_msgs::TaskStatus> & running,
 					std::vector<task_manager_msgs::TaskStatus> & zombies) ;
 			void generateTaskListLight(std::vector<task_manager_msgs::TaskDescription> &input,std::vector<task_manager_msgs::TaskDescriptionLight> &output) const;
-			void generateHistoric(std::vector<task_manager_msgs::TaskHistoric> &output) ;
+			void generateHistory(std::vector<task_manager_msgs::TaskHistory> &output) ;
 			void launchTaskSequence(std::vector<task_manager_msgs::TaskDescriptionLight> &tasks, int & id);
 
 			// convenience function
