@@ -5,6 +5,8 @@
 #include <string>
 #include <map>
 
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include <ros/ros.h>
 #include <dynamic_reconfigure/Config.h>
 #include "task_manager_lib/TaskScheduler.h"
@@ -30,7 +32,7 @@ namespace task_manager_lib {
             typedef std::map<TaskScheduler::TaskId,
                     TaskState, std::less<TaskScheduler::TaskId> > StatusMap;
         protected:
-            mutable pthread_mutex_t mutex;
+            mutable boost::mutex mutex;
             unsigned int messageid;
             std::vector<task_manager_msgs::TaskDescription> taskList; 
             StatusMap taskStatus;

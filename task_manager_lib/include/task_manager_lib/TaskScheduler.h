@@ -25,11 +25,15 @@
 
 #include <iostream>
 
+#include <boost/thread.hpp>  
+#include <boost/thread/mutex.hpp>  
+#include <boost/thread/condition_variable.hpp>  
+
 namespace task_manager_lib {
 #define TASK_STATUS_MASK 0xFFl
 #define TASK_FOREGROUND 0x100l
 #define TASK_BACKGROUND 0x000l
-#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_DEBUG(X)
+#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_INFO(X)
 	// Class that manages the execution of task directly or through ROS services
 	class TaskScheduler
 	{
@@ -47,12 +51,11 @@ namespace task_manager_lib {
 				TaskParameters params;
 				TaskScheduler *that;
 				double period;
-				pthread_t tid;
-				pthread_cond_t task_condition;
-				pthread_mutex_t task_mutex;
-				
-				pthread_cond_t aperiodic_task_condition;
-				pthread_mutex_t aperiodic_task_mutex;
+                boost::shared_ptr<boost::thread> tid;
+                boost::mutex task_mutex;
+                boost::condition_variable task_condition;
+                boost::mutex aperiodic_task_mutex;
+                boost::condition_variable aperiodic_task_condition;
 
 				ros::Time statusTime;
 				TaskIndicator status;
@@ -177,6 +180,7 @@ namespace task_manager_lib {
 			static const unsigned int historic_size; 
 			// Action management: create task, terminate task
 			typedef enum {
+                NO_ACTION,
 				START_IDLE_TASK, 
 				START_TASK,
 				CONDITIONALLY_IDLE,
@@ -186,6 +190,7 @@ namespace task_manager_lib {
 			struct ThreadAction {
 				ActionType type;
 				boost::shared_ptr<ThreadParameters> tp;
+                ThreadAction() : type(NO_ACTION) {}
 			};
 			static const char * actionString(ActionType at);
 
@@ -198,11 +203,9 @@ namespace task_manager_lib {
 			void enqueueAction(const ros::Time & when, ActionType type,boost::shared_ptr<ThreadParameters> tp);
 			void removeConditionalIdle();
 			bool runScheduler;
-			pthread_t aqid;
-			pthread_mutex_t aqMutex;
-			pthread_cond_t aqCond;
-			static void cleanup_action(void*);
-			static void * scheduler_thread(void*);
+            boost::thread aqid;
+            boost::mutex aqMutex;
+            boost::condition_variable aqCond;
 			int runSchedulerLoop();
 
 
@@ -210,22 +213,15 @@ namespace task_manager_lib {
 			double idleTimeout;
 			double startingTime;
 			double defaultPeriod;
-			pthread_mutex_t scheduler_mutex;
-			pthread_cond_t scheduler_condition;
+            boost::mutex scheduler_mutex;
+            boost::condition_variable scheduler_condition;
 
-			// Basic thread management functions
-			static void * thread_func(void *);
-			static void cleanitup(void * arg);
-			static void* runAperiodicTask(void * arg);
 			TaskId launchTask(boost::shared_ptr<ThreadParameters> tp);
-			int runTask(boost::shared_ptr<ThreadParameters> tp);
-			int terminateTask(boost::shared_ptr<ThreadParameters> tp);
-			int cleanupTask(boost::shared_ptr<ThreadParameters> tp);
-			int deleteTask(boost::shared_ptr<ThreadParameters> tp);
-
-			// Wrapper around pthread_mutex_lock/unlock
-			void lockScheduler();
-			void unlockScheduler();
+			void runTask(boost::shared_ptr<ThreadParameters> tp);
+			void runAperiodicTask(boost::shared_ptr<ThreadParameters> tp);
+			void terminateTask(boost::shared_ptr<ThreadParameters> tp);
+			void cleanupTask(boost::shared_ptr<ThreadParameters> tp);
+			void deleteTask(boost::shared_ptr<ThreadParameters> tp);
 
 			// All ROS callbacks
 			bool startTask(task_manager_lib::StartTask::Request  &req,

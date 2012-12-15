@@ -114,12 +114,12 @@ class TaskClient:
             if ('main_task' in paramdict):
                 foreground = bool(paramdict['main_task'])
             if (foreground):
-                res = self.client.startTaskAndWait(paramdict)
                 rospy.loginfo("Starting task %s in foreground" % self.name)
+                res = self.client.startTaskAndWait(paramdict)
                 return res
             else:
-                id = self.client.startTask(paramdict)
                 rospy.loginfo("Starting task %s in background: %d" % (self.name,id))
+                id = self.client.startTask(paramdict)
                 return id
 
     class TaskStatus:

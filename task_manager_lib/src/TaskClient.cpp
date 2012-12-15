@@ -20,7 +20,6 @@ TaskClient::TaskClient(const std::string & node, ros::NodeHandle & nh) : spinner
 
     keepAlivePub = nh.advertise<std_msgs::Header>(node+"/keep_alive",1);
     statusSub = nh.subscribe(node+"/status",0,&TaskClient::statusCallback,this);
-    pthread_mutex_init(&mutex,NULL);
     updateTaskList();
     updateAllStatus();
     spinner.start();
@@ -52,7 +51,8 @@ void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& m
     td.statusString = ts.status_string;
     td.statusTime = ts.status_time;
     // ROS_INFO("Task %d %s: status %s '%s'",td.id, td.name.c_str(),taskStatusToString(td.status),td.statusString.c_str());
-    pthread_mutex_lock(&mutex);
+
+    boost::unique_lock<boost::mutex> lock(mutex);
     taskStatus[td.id] = td;
 
     std::vector<unsigned int> to_delete;
@@ -66,7 +66,6 @@ void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& m
         // ROS_INFO("Erasing task %d",to_delete[i]);
         taskStatus.erase(to_delete[i]);
     }
-    pthread_mutex_unlock(&mutex);
 }
 
 
@@ -100,7 +99,7 @@ void TaskClient::printTaskList() const
 void TaskClient::printStatusMap() const
 {
 	StatusMap::const_iterator it;
-    pthread_mutex_lock(&mutex);
+    boost::unique_lock<boost::mutex> lock(mutex);
 	for (it = taskStatus.begin();it != taskStatus.end(); it++) {
 		printf("Task % 3d: %f %-12s %c %s:%s\n",
 				it->second.id,
@@ -110,7 +109,6 @@ void TaskClient::printStatusMap() const
 				taskStatusToString(it->second.status),
 				it->second.statusString.c_str());
 	}
-    pthread_mutex_unlock(&mutex);
 }
 
 
@@ -178,18 +176,19 @@ bool TaskClient::waitTask(TaskScheduler::TaskId tid)
     bool result = false;
 	while (ros::ok() && !finished) {
         // TODO: blocking wait
-        pthread_mutex_lock(&mutex);
-		const StatusMap & sm = getStatusMap();
-		it = sm.find(tid);
-		if (it == sm.end()) {
-            finished = true;
-		} else if (it->second.status == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
-            finished = result = true;
-		} else if (it->second.status > task_manager_msgs::TaskStatus::TASK_TERMINATED) {
-            // Anything greater than terminated is a failure situation
-            finished = true;
-		}
-        pthread_mutex_unlock(&mutex);
+        {
+            boost::unique_lock<boost::mutex> lock(mutex);
+            const StatusMap & sm = getStatusMap();
+            it = sm.find(tid);
+            if (it == sm.end()) {
+                finished = true;
+            } else if (it->second.status == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
+                finished = result = true;
+            } else if (it->second.status > task_manager_msgs::TaskStatus::TASK_TERMINATED) {
+                // Anything greater than terminated is a failure situation
+                finished = true;
+            }
+        }
 #ifdef LINUX
 		usleep(50000);
 #endif
@@ -207,7 +206,7 @@ void TaskClient::updateAllStatus()
         ROS_ERROR("Failed to call service get_task_status");
         return;
     }
-    pthread_mutex_lock(&mutex);
+    boost::unique_lock<boost::mutex> lock(mutex);
     taskStatus.clear();
 	for (unsigned int i=0;i<srv.response.running_tasks.size();i++) {
         const task_manager_msgs::TaskStatus & ts = srv.response.running_tasks[i];
@@ -232,6 +231,5 @@ void TaskClient::updateAllStatus()
 		td.statusTime = ts.status_time;
 		taskStatus[td.id] = td;
 	}
-    pthread_mutex_unlock(&mutex);
 }
 
