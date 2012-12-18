@@ -115,7 +115,11 @@ void TaskServerInterface::createBasicMissionFile(std::vector<task_manager_msgs::
 			}
 			else
 			{
-				PRINTF(1,"%s does not exist\n",mission_path.c_str());
+				#if (BOOST_VERSION > 104200)
+					PRINTF(1,"%s does not exist\n",mission_path.c_str());
+				#else
+					PRINTF(1,"%s does not exist\n",mission_path.string().c_str());
+				#endif
 			}
 		
 		}
@@ -191,7 +195,11 @@ void TaskServerInterface::createComplexMissionFile(std::string &complex_mission,
 			}
 			else
 			{
-				PRINTF(1,"%s does not exist\n",mission_path.c_str());
+				#if (BOOST_VERSION > 104200)
+					PRINTF(1,"%s does not exist\n",mission_path.c_str());
+				#else
+					PRINTF(1,"%s does not exist\n",mission_path.string().c_str());
+				#endif
 			}
 		}
 		else
