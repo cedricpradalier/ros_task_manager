@@ -393,10 +393,10 @@ void TaskServerInterface::launchComplexMission(std::string & mission_name, int &
 	std::string node_name=full_name.substr(0,pos-1);
 	
 	stringstream parameter;
-	parameter<<" _server:="<<node_name;
+	parameter<<"_server:="<<node_name;
 	
-	stringstream rosrun_path;
-	rosrun_path<<getenv("ROS_ROOT")<<"/bin/rosrun";
+	stringstream command_line;
+	command_line<<"rosrun "<<package_name<<" "<<mission_name<<" "<<parameter.str();
 	
 	//WARNING adding fork in service 
 	stringstream msg;
@@ -410,9 +410,10 @@ void TaskServerInterface::launchComplexMission(std::string & mission_name, int &
 		}
 		else if (current_pid ==0)//in child
 		{
-			execl (rosrun_path.str().c_str(),"rosrun", package_name.c_str(), mission_name.c_str(),parameter.str().c_str(),(char *) 0);
+			
+			execl ("/bin/bash","bash","-i","-c",command_line.str().c_str(),(char *) 0);
 			//msg<<"Error running the following command :"<<"rosrun "<<package_name.c_str()<<" "<<mission_name.c_str()<<" "<<parameter.str().c_str()<<"\n";
-			PRINTF(1,"Error running the following command : 'rosrun %s %s %s' \n",package_name.c_str(),mission_name.c_str(),parameter.str().c_str());
+			PRINTF(1,"Error running the following command : 'bash -i -c  %s ' \n",command_line.str().c_str());
 		}
 		else //in parent
 		{
