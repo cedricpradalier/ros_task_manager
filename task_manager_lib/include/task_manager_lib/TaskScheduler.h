@@ -290,6 +290,9 @@ namespace task_manager_lib {
 			void loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env);
 			// Load all task from a folder and initialise all of them with env.
 			void loadAllTasks(const std::string & dirname, boost::shared_ptr<TaskEnvironment> env);
+
+            // Remove all the dynamic tasks from the list of known tasks
+            void clearAllDynamicTasks();
 			
 			double getdfltPeriod(){return defaultPeriod;};
 			

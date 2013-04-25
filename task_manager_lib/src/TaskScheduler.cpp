@@ -243,7 +243,7 @@ void TaskScheduler::configureTasks()
 
 static int dllfilter(const struct dirent * d) {
     std::string name(d->d_name);
-    unsigned int pos = name.find_last_of(".");
+    size_t pos = name.find_last_of(".");
     if (pos != std::string::npos) {
         std::string suffix = name.substr(pos+1,std::string::npos);
         return (suffix == DLL_EXT)?1:0;
@@ -269,6 +269,25 @@ void TaskScheduler::loadAllTasks(const std::string & dirname,
     }
 }
 
+void TaskScheduler::clearAllDynamicTasks() {
+    TaskDirectory::iterator it;
+    std::vector<TaskDirectory::iterator> tbd;
+
+    if (runScheduler) {
+        terminateAllTasks();
+        stopScheduler();
+    }
+
+    for (it=tasks.begin();it!=tasks.end();it++) {
+        boost::shared_ptr<DynamicTask> dt = boost::dynamic_pointer_cast<DynamicTask>(it->second);
+        if (dt) {
+            tbd.push_back(it);
+        }
+    }
+    for (unsigned int i=0;i<tbd.size();i++) {
+        tasks.erase(tbd[i]);
+    }
+}
 
 
 TaskScheduler::TaskId TaskScheduler::launchIdleTask()
@@ -742,7 +761,7 @@ int TaskScheduler::runSchedulerLoop()
     // Default:
     // pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
     while (1) {
-        PRINTF(2,"Waiting next action (%d)\n",actionQueue.size());
+        PRINTF(2,"Waiting next action (%d)\n",(int)(actionQueue.size()));
         if (!runScheduler && actionQueue.empty()) {
             break;
         }
@@ -800,7 +819,7 @@ int TaskScheduler::stopScheduler()
     runScheduler = false;
     enqueueAction(WAIT_CANCELLED,boost::shared_ptr<ThreadParameters>());
     aqid.join();
-    PRINTF(2,"Cleaning-up action queue (%d)\n",actionQueue.size());
+    PRINTF(2,"Cleaning-up action queue (%d)\n",(int)(actionQueue.size()));
 
     boost::unique_lock<boost::mutex> lock(aqMutex);
     actionQueue.clear();
