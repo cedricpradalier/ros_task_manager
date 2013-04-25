@@ -68,7 +68,7 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 	vsnprintf(buffer,1023, stemplate,args);
 	va_end(args);
     buffer[1023]=0;
-	ROS_DEBUG("%s: %s",this->getName().c_str(),buffer);
+	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
 }
 
 void TaskDefinition::doConfigure(const TaskParameters & parameters)
@@ -108,25 +108,46 @@ void TaskDefinition::doIterate()
 void TaskDefinition::doTerminate()
 {
 	statusString.clear();
-	taskStatus = this->terminate();
+    TaskIndicator ti = this->terminate();
+    if (ti == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
+        taskStatus |= task_manager_msgs::TaskStatus::TASK_TERMINATED; 
+    } else {
+        taskStatus = ti | task_manager_msgs::TaskStatus::TASK_TERMINATED;
+    }
 }
 
 const char * task_manager_lib::taskStatusToString(TaskIndicator ts)
 {
-	switch (ts) {
-        case task_manager_msgs::TaskStatus::TASK_NEWBORN: return "NEWBORN"; 
-		case task_manager_msgs::TaskStatus::TASK_CONFIGURED: return "CONFIGURED";
-		case task_manager_msgs::TaskStatus::TASK_INITIALISED: return "INITIALISED";
-		case task_manager_msgs::TaskStatus::TASK_RUNNING: return "RUNNING";
-		case task_manager_msgs::TaskStatus::TASK_COMPLETED: return "COMPLETED";
-		case task_manager_msgs::TaskStatus::TASK_TERMINATED: return "TERMINATED";
-		case task_manager_msgs::TaskStatus::TASK_FAILED: return "FAILED";
-		case task_manager_msgs::TaskStatus::TASK_INTERRUPTED: return "INTERRUPTED";
-		case task_manager_msgs::TaskStatus::TASK_TIMEOUT: return "TIMEOUT";
-		case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED: return "CONFIGURATION FAILED";
-		case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED: return "INITIALISATION FAILED";
-		default: return "INVALID STATUS";
-	}
+    unsigned int te = task_manager_msgs::TaskStatus::TASK_TERMINATED;
+    if (ts == te) {
+		return "TERMINATED";
+    } else if (ts & te) {
+        // Terminated
+        ts = ts & (~te);
+        switch (ts) {
+            case task_manager_msgs::TaskStatus::TASK_COMPLETED: return "TERMINATED:COMPLETED";
+            case task_manager_msgs::TaskStatus::TASK_FAILED: return "TERMINATED:FAILED";
+            case task_manager_msgs::TaskStatus::TASK_INTERRUPTED: return "TERMINATED:INTERRUPTED";
+            case task_manager_msgs::TaskStatus::TASK_TIMEOUT: return "TERMINATED:TIMEOUT";
+            case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED: return "TERMINATED:CONFIGURATION FAILED";
+            case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED: return "TERMINATED:INITIALISATION FAILED";
+            default: return "INVALID STATUS";
+        }
+    } else {
+        // Not terminated
+        switch (ts) {
+            case task_manager_msgs::TaskStatus::TASK_NEWBORN: return "NEWBORN"; 
+            case task_manager_msgs::TaskStatus::TASK_CONFIGURED: return "CONFIGURED";
+            case task_manager_msgs::TaskStatus::TASK_INITIALISED: return "INITIALISED";
+            case task_manager_msgs::TaskStatus::TASK_RUNNING: return "RUNNING";
+            case task_manager_msgs::TaskStatus::TASK_COMPLETED: return "COMPLETED";
+            case task_manager_msgs::TaskStatus::TASK_FAILED: return "FAILED";
+            case task_manager_msgs::TaskStatus::TASK_TIMEOUT: return "TIMEOUT";
+            case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED: return "CONFIGURATION FAILED";
+            case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED: return "INITIALISATION FAILED";
+            default: return "INVALID STATUS";
+        }
+    }
 	return NULL;
 }
 

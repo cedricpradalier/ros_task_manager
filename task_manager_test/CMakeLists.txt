@@ -38,6 +38,9 @@ gencfg()
 ROSBUILD_ADD_LIBRARY( TaskTest SHARED src/TaskTest.cpp)
 TARGET_LINK_LIBRARIES(TaskTest dl)
 
+ROSBUILD_ADD_LIBRARY( TaskFail SHARED src/TaskFail.cpp)
+TARGET_LINK_LIBRARIES(TaskFail dl)
+
 ROSBUILD_ADD_LIBRARY( TaskLong SHARED src/TaskLong.cpp)
 TARGET_LINK_LIBRARIES(TaskLong dl)
 

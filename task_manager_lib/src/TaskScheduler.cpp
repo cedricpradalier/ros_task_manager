@@ -440,7 +440,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             PRINTF(2,"Initialisation done\n");
             while (1) {
                 double t0 = ros::Time::now().toSec();
-                if (mainThread && (mainThread->task!=idle) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+                if (mainThread && (mainThread->task->getName()!=idle->getName()) && (t0 - lastKeepAlive.toSec() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed\n");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
                     break;
@@ -463,7 +463,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                     return ;
                 }
                 if (tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
-                    ROS_INFO("Task '%s' not running anymore",tp->task->getName().c_str());
+                    ROS_INFO("Task '%s' not running anymore (%d)",tp->task->getName().c_str(),tp->status);
                     break;
                 }
                 boost::this_thread::interruption_point();
@@ -475,7 +475,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             boost::thread id(&TaskScheduler::runAperiodicTask,this,tp);
             while (1) {
                 double t0 = ros::Time::now().toSec();
-                if (mainThread && (mainThread->task!=idle) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+                if (mainThread && (mainThread->task->getName()!=idle->getName()) && (t0 - lastKeepAlive.toSec() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed\n");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
                     break;
@@ -539,7 +539,7 @@ void TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
     PRINTF(1,"Cleaning up task %d:%s\n",tp->tpid,tp->task->getName().c_str());
     tp->task->doTerminate();
     ROS_INFO("Task '%s' terminated",tp->task->getName().c_str());
-    tp->status = task_manager_msgs::TaskStatus::TASK_TERMINATED;
+    tp->status |= task_manager_msgs::TaskStatus::TASK_TERMINATED;
     tp->statusTime = now();
     tp->statusString = "terminated";
     tp->updateStatus(now());

@@ -146,6 +146,9 @@ class TaskClient:
         self.server_node = server_node
         self.default_period = default_period
         rospy.loginfo("Creating link to services on node " + self.server_node)
+        # Bad hard-coding. TODO: get that from the status message def
+        self.taskStatusStrings[128] = "TASK_TERMINATED"
+        self.taskStatusId["TASK_TERMINATED"] = 128
         try:
             rospy.wait_for_service(self.server_node + '/get_all_tasks')
             self.get_task_list = rospy.ServiceProxy(self.server_node + '/get_all_tasks', GetTaskList)
@@ -329,14 +332,18 @@ class TaskClient:
                                 rospy.logerr("Id %d not in taskstatus" % id)
                             raise TaskException("Task %d did not appear in task status" % id);
                     else:
-                        if (self.taskstatus[id].status == statusTerminated):
+                        print "%d: %02X" % (id, self.taskstatus[id].status)
+                        if not (self.taskstatus[id].status & statusTerminated):
+                            continue
+                        status = self.taskstatus[id].status & (~statusTerminated)
+                        if (status == self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
-                                rospy.loginfo("Task %d terminated" % id)
+                                rospy.loginfo("Task %d terminated (%d)" % (id,status))
                             completed[id] = True
-                        if (self.taskstatus[id].status > statusTerminated):
+                        elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
-                                rospy.logwarn( "Task %d failed" % id)
-                            raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[self.taskstatus[id].status]));
+                                rospy.logwarn( "Task %d failed (%d)" %  (id,status))
+                            raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[status]));
                             # instead of raise?
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):

@@ -81,11 +81,11 @@ TaskIndicator SequenceTask::iterate()
 		{
 			return TaskStatus::TASK_FAILED;
 		}
-		else if((current_status>=TaskStatus::TASK_NEWBORN) && (current_status<TaskStatus::TASK_TERMINATED))
+		else if((current_status>=TaskStatus::TASK_NEWBORN) && !(current_status&TaskStatus::TASK_TERMINATED))
 		{
 			return TaskStatus::TASK_RUNNING;
 		}
-		else if(current_status==TaskStatus::TASK_TERMINATED)
+		else if(current_status&TaskStatus::TASK_TERMINATED)
 		{
             sequence_id++;
 			if (sequence_id<(signed)sequence.size())

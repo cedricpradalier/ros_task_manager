@@ -33,7 +33,7 @@ namespace task_manager_lib {
 #define TASK_STATUS_MASK 0xFFl
 #define TASK_FOREGROUND 0x100l
 #define TASK_BACKGROUND 0x000l
-#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_DEBUG(X)
+#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_INFO(X)
 	// Class that manages the execution of task directly or through ROS services
 	class TaskScheduler
 	{

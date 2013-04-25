@@ -57,7 +57,7 @@ void TaskClient::statusCallback(const task_manager_msgs::TaskStatus::ConstPtr& m
 
     std::vector<unsigned int> to_delete;
     for (StatusMap::iterator it=taskStatus.begin();it!=taskStatus.end();it++) {
-        if (it->second.status < task_manager_msgs::TaskStatus::TASK_TERMINATED) continue;
+        if (!(it->second.status & task_manager_msgs::TaskStatus::TASK_TERMINATED)) continue;
         if ((ts.status_time - it->second.statusTime).toSec() > 2.0) {
             to_delete.push_back(it->first);
         }
@@ -182,10 +182,10 @@ bool TaskClient::waitTask(TaskScheduler::TaskId tid)
             it = sm.find(tid);
             if (it == sm.end()) {
                 finished = true;
-            } else if (it->second.status == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
+            } else if (it->second.status & task_manager_msgs::TaskStatus::TASK_TERMINATED) {
                 finished = result = true;
-            } else if (it->second.status > task_manager_msgs::TaskStatus::TASK_TERMINATED) {
-                // Anything greater than terminated is a failure situation
+            } else if (it->second.status > task_manager_msgs::TaskStatus::TASK_COMPLETED) {
+                // Anything greater than completed is a failure situation
                 finished = true;
             }
         }
