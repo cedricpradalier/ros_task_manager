@@ -20,7 +20,7 @@ namespace task_manager_turtlesim {
             bool triggered;
 
             void buttonCallback(const std_msgs::String::ConstPtr& msg) {
-                ROS_INFO("%p,Received text %s (%d string in set)",this,msg->data.c_str(),expected_string.size());
+                ROS_INFO("%p,Received text %s (%d string in set)",this,msg->data.c_str(),(int)expected_string.size());
                 if (expected_string.find(boost::algorithm::to_lower_copy(msg->data)) != expected_string.end()) {
                     triggered = true;
                     ROS_INFO("%p: Triggered",this);

@@ -78,6 +78,9 @@ namespace task_manager_lib {
 				}
 				
 				
+                bool isAnInstanceOf(const boost::shared_ptr<TaskDefinition> & def) {
+                    return task->isAnInstanceOf(def);
+                }
 
 
 				void setStatus(TaskIndicator newstatus, const std::string & text, const ros::Time & tnow) {

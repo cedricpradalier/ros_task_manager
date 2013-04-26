@@ -7,6 +7,22 @@ void TaskDefinition::setName(const std::string & n) {
 	name = n;
 }
 
+void TaskDefinition::setTaskId(unsigned int id) {
+	taskId = id;
+}
+
+void TaskDefinition::setRuntimeId(unsigned int id) {
+	runId = id;
+}
+
+unsigned int TaskDefinition::getTaskId() const {
+    return taskId;
+}
+
+unsigned int TaskDefinition::getRuntimeId() const {
+    return runId;
+}
+
 const std::string & TaskDefinition::getName() const {
 	return name;
 }
@@ -71,8 +87,17 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
 }
 
-void TaskDefinition::doConfigure(const TaskParameters & parameters)
+bool TaskDefinition::isAnInstanceOf(const TaskDefinition & def) {
+    return this->getTaskId() == def.getTaskId();
+}
+
+bool TaskDefinition::isAnInstanceOf(const boost::shared_ptr<TaskDefinition> & def) {
+    return this->getTaskId() == def->getTaskId();
+}
+
+void TaskDefinition::doConfigure(unsigned int id, const TaskParameters & parameters)
 {
+    taskId = id;
     config = this->getDefaultParameters();
     // printf("Configure %s: default values\n",this->getName().c_str());
     // config.print(stdout);
@@ -89,8 +114,9 @@ void TaskDefinition::doConfigure(const TaskParameters & parameters)
 	taskStatus = this->configure(parameters);
 }
 
-void TaskDefinition::doInitialise(const TaskParameters & parameters)
+void TaskDefinition::doInitialise(unsigned int runtimeId, const TaskParameters & parameters)
 {
+    runId = runtimeId;
     config.update(parameters);
     // printf("Initialise %s: after update\n",this->getName().c_str());
     // config.print(stdout);

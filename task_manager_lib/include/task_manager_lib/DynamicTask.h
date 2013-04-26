@@ -52,6 +52,10 @@ namespace task_manager_lib {
             virtual const std::string & getHelp() const {return task->getHelp();}
             virtual const TaskParameters & getConfig() const {return task->getConfig();}
             virtual bool isPeriodic() const {return task->isPeriodic();}
+            virtual void setRuntimeId(unsigned int id) {task->setRuntimeId(id);}
+            virtual void setTaskId(unsigned int id) {task->setTaskId(id);}
+            virtual unsigned int getRuntimeId() {return task->getRuntimeId();}
+            virtual unsigned int getTaskId() {return task->getTaskId();}
 
             virtual double getTimeout() const {return task->getTimeout();}
             virtual void resetStatus() {
@@ -78,12 +82,12 @@ namespace task_manager_lib {
             }
 
             virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) {
-                task->doConfigure(parameters);
+                task->doConfigure(taskId,parameters);
                 return task->getStatus();
             }
 
             virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter) {
-                task->doInitialise(parameters);
+                task->doInitialise(runId,parameters);
                 return task->getStatus();
             }
 

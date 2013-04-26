@@ -226,7 +226,8 @@ void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<Tas
 void TaskScheduler::configureTasks()
 {
     TaskDirectory::const_iterator tit;
-    for (tit = tasks.begin();tit!=tasks.end();tit++) {
+    unsigned int taskId = 0;
+    for (tit = tasks.begin();tit!=tasks.end();tit++,taskId++) {
         // Try loading from the parameter server / launch file
         TaskParameters tp = tit->second->getParametersFromServer(n);
         // printf("TS %s param from server\n",tit->second->getName().c_str());
@@ -235,7 +236,7 @@ void TaskScheduler::configureTasks()
         if (tp.getParameter("task_rename",rename) && !rename.empty()) {
             tit->second->setName(rename);
         }
-        tit->second->doConfigure(tp);
+        tit->second->doConfigure(taskId, tp);
     }
 }
 
@@ -424,7 +425,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 
         tp->running = true;
         try {
-            tp->task->doInitialise(tp->params);
+            tp->task->doInitialise(tp->tpid,tp->params);
             tp->updateStatus(ros::Time::now());
         } catch (const std::exception & e) {
             tp->task->debug("Exception %s\n",e.what());
@@ -440,7 +441,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             PRINTF(2,"Initialisation done\n");
             while (1) {
                 double t0 = ros::Time::now().toSec();
-                if (mainThread && (mainThread->task->getName()!=idle->getName()) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+                if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.toSec() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed\n");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
                     break;
@@ -475,7 +476,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             boost::thread id(&TaskScheduler::runAperiodicTask,this,tp);
             while (1) {
                 double t0 = ros::Time::now().toSec();
-                if (mainThread && (mainThread->task->getName()!=idle->getName()) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+                if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.toSec() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed\n");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
                     break;

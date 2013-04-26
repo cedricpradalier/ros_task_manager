@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
 	TaskParameters tp;
     boost::shared_ptr<TaskEnvironment> env(new TaskEnvironment());
     boost::shared_ptr<TaskDefinition> idle(new TaskIdle(env));
-	idle->doConfigure(tp);
-	idle->doInitialise(tp);
+	idle->doConfigure(0,tp);
+	idle->doInitialise(0,tp);
 	for (i=0;i<5;i++) {
 		idle->doIterate();
 	}
@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
     idle.reset();
 
     boost::shared_ptr<TaskDefinition> dtask(new DynamicTask("./lib/libTaskTest.so",env));
-	dtask->doConfigure(tp);
-	dtask->doInitialise(tp);
+	dtask->doConfigure(1,tp);
+	dtask->doInitialise(1,tp);
 	while (dtask->getStatus() != TaskStatus::TASK_COMPLETED) {
 		dtask->doIterate();
 	}
