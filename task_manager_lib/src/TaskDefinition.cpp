@@ -68,7 +68,7 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 	vsnprintf(buffer,1023, stemplate,args);
 	va_end(args);
     buffer[1023]=0;
-	ROS_DEBUG("%s: %s",this->getName().c_str(),buffer);
+	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
 }
 
 void TaskDefinition::doConfigure(const TaskParameters & parameters)
