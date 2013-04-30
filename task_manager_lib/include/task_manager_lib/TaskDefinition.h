@@ -11,6 +11,7 @@
 #include <task_manager_msgs/TaskStatus.h>
 #include <task_manager_msgs/TaskDescription.h>
 #include <dynamic_reconfigure/ConfigDescription.h>
+#include <dynamic_reconfigure/server.h>
 #include <dynamic_reconfigure/Config.h>
 #include <dynamic_reconfigure/config_tools.h>
 
@@ -201,6 +202,16 @@ namespace task_manager_lib {
              * */
             TaskParameters config;
 
+            /**
+             * Id of the task, set by the scheduler in the list of known task.
+             * Should be unique for a given name
+             * */
+            unsigned int taskId;
+            /**
+             * Id of the task, set by the scheduler when initializing the
+             * instance
+             * */
+            unsigned int runId;
         public:
             // All the class below are intended for generic use
 
@@ -216,12 +227,19 @@ namespace task_manager_lib {
                     bool isperiodic, double deftTimeout) :
                 name(tname), help(thelp), periodic(isperiodic), 
                 taskStatus(task_manager_msgs::TaskStatus::TASK_NEWBORN), 
-                timeout(deftTimeout) {}
+                timeout(deftTimeout), taskId(-1), runId(-1) {}
             virtual ~TaskDefinition() {
                 // printf("Delete task '%s'\n",name.c_str());
                 // fflush(stdout);
             }
 
+
+            // Set the task runtime id . Has to be virtual because it is overloaded by
+            // the dynamic class proxy.
+            virtual unsigned int getRuntimeId() const;
+            // Set the task runtime id . Has to be virtual because it is overloaded by
+            // the dynamic class proxy.
+            virtual unsigned int getTaskId() const;
 
             // Set the task name . Has to be virtual because it is overloaded by
             // the dynamic class proxy.
@@ -259,6 +277,7 @@ namespace task_manager_lib {
 
             // Provide an instance of the class (or a derivative of it), with
             // its own internal variables that can be run multiple time. 
+            // Careful: getInstance must preserve taskId
             // Default implementation could be:
             // {
             //     return shared_from_this();
@@ -266,15 +285,25 @@ namespace task_manager_lib {
             virtual boost::shared_ptr<TaskDefinition> getInstance() = 0; 
 
         public:
-            // All the functions below are intended by the TaskScheduler.
+            // All the functions below are intended for the TaskScheduler.
+            // Set the task runtime id . Has to be virtual because it is overloaded by
+            // the dynamic class proxy.
+            virtual void setRuntimeId(unsigned int id);
+            // Set the task runtime id . Has to be virtual because it is overloaded by
+            // the dynamic class proxy.
+            virtual void setTaskId(unsigned int id);
+
+            // Test if a class is an instance of def
+            bool isAnInstanceOf(const TaskDefinition & def);
+            bool isAnInstanceOf(const boost::shared_ptr<TaskDefinition> & def);
 
             // Call the virtual configure function, but prepare the class before
             // hand.
-            void doConfigure(const TaskParameters & parameters);
+            void doConfigure(unsigned int taskId, const TaskParameters & parameters);
 
             // Call the virtual initialise function, but prepare the class before
             // hand.
-            void doInitialise(const TaskParameters & parameters);
+            void doInitialise(unsigned int runtimeId, const TaskParameters & parameters);
 
             // Call the virtual iterate function, but prepare the class before
             // hand.
@@ -353,14 +382,45 @@ namespace task_manager_lib {
     template <class CFG, class Instance>
         class TaskDefinitionWithConfig : public TaskDefinition {
             protected:
+                typedef TaskDefinitionWithConfig<CFG,Instance> Parent;
+
+                class DynRecfgData {
+                    protected:
+                        boost::shared_ptr< dynamic_reconfigure::Server<CFG> > srv;
+                        boost::recursive_mutex mutex;
+                        typename dynamic_reconfigure::Server<CFG>::CallbackType f;               
+                    public:
+                        DynRecfgData(TaskDefinitionWithConfig * td, const CFG & cfg) {
+                            char node_name[td->getName().size()+64];
+                            sprintf(node_name,"~%s_%d",td->getName().c_str(),td->getRuntimeId());
+                            f = boost::bind(&Parent::reconfigureCallback,td, _1, _2);
+                            srv.reset(new dynamic_reconfigure::Server<CFG>(mutex,ros::NodeHandle(node_name)));
+                            srv->updateConfig(cfg);
+                            srv->setCallback(f);
+                        }
+                };
+                friend class DynRecfgData;
+                boost::shared_ptr<DynRecfgData> recfg;
+
                 CFG cfg;
 
-                typedef TaskDefinitionWithConfig<CFG,Instance> Parent;
+                // Callback function to be bound to the server. It just calls
+                // the virtualised function in case it has been overloaded.
+                void reconfigureCallback(CFG &config, uint32_t level) {
+                    this->reconfigure(config, level);
+                }
+
+
+                // Setup a dynamic reconfigure server that just update all the
+                // config. To be updated 
+                virtual void reconfigure(CFG &config, uint32_t level) {
+                    cfg = config;
+                }
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskDefinitionWithConfig(const std::string & tname, const std::string & thelp, 
-                        bool isperiodic, double deftTimeout) :
-                    TaskDefinition(tname,thelp,isperiodic,deftTimeout) {}
+                        bool isperiodic, double deftTimeout) : TaskDefinition(tname,thelp,isperiodic,deftTimeout) {
+                }
                 virtual ~TaskDefinitionWithConfig() {}
 
                 // Returns the parameter description from the Config class.
@@ -394,6 +454,7 @@ namespace task_manager_lib {
                 virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter)
                 {
                     cfg = parameters.toConfig<CFG>();
+                    recfg.reset(new DynRecfgData(this, cfg));
                     return task_manager_msgs::TaskStatus::TASK_INITIALISED;
                 }
 

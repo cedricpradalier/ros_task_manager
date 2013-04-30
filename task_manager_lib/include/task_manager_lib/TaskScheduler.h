@@ -33,7 +33,7 @@ namespace task_manager_lib {
 #define TASK_STATUS_MASK 0xFFl
 #define TASK_FOREGROUND 0x100l
 #define TASK_BACKGROUND 0x000l
-#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_DEBUG(X)
+#define PRINTF(level,X...) if (level <= (signed)TaskScheduler::debug) ROS_INFO(X)
 	// Class that manages the execution of task directly or through ROS services
 	class TaskScheduler
 	{
@@ -78,6 +78,9 @@ namespace task_manager_lib {
 				}
 				
 				
+                bool isAnInstanceOf(const boost::shared_ptr<TaskDefinition> & def) {
+                    return task->isAnInstanceOf(def);
+                }
 
 
 				void setStatus(TaskIndicator newstatus, const std::string & text, const ros::Time & tnow) {
@@ -290,6 +293,9 @@ namespace task_manager_lib {
 			void loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env);
 			// Load all task from a folder and initialise all of them with env.
 			void loadAllTasks(const std::string & dirname, boost::shared_ptr<TaskEnvironment> env);
+
+            // Remove all the dynamic tasks from the list of known tasks
+            void clearAllDynamicTasks();
 			
 			double getdfltPeriod(){return defaultPeriod;};
 			
