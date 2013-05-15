@@ -332,7 +332,7 @@ class TaskClient:
                                 rospy.logerr("Id %d not in taskstatus" % id)
                             raise TaskException("Task %d did not appear in task status" % id);
                     else:
-                        print "%d: %02X" % (id, self.taskstatus[id].status)
+                        # print "%d: %02X" % (id, self.taskstatus[id].status)
                         if not (self.taskstatus[id].status & statusTerminated):
                             continue
                         status = self.taskstatus[id].status & (~statusTerminated)
