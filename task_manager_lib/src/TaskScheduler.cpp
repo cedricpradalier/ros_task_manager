@@ -214,6 +214,10 @@ int TaskScheduler::terminateAllTasks()
 void TaskScheduler::addTask(boost::shared_ptr<TaskDefinition> td) 
 {
     PRINTF(1,"Adding task %s",td->getName().c_str());
+    TaskDirectory::const_iterator tit = tasks.find(td->getName());
+    if (tit != tasks.end()) {
+        ROS_WARN("Warning: overwriting task '%s'",td->getName().c_str());
+    }
     tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinition> >(td->getName(),td));
 }
 
