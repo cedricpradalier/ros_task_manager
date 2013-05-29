@@ -84,7 +84,7 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
 
     mainThread.reset();
 
-    ROS_INFO("Task scheduler created: debug %d\n",debug);
+    ROS_INFO("Task scheduler created: debug %d",debug);
 
     n = nh;
     startTaskSrv = nh.advertiseService("start_task", &TaskScheduler::startTask,this);
@@ -201,7 +201,7 @@ int TaskScheduler::terminateAllTasks()
 {
     TaskSet copy = runningThreads;
     TaskSet::iterator it;
-    PRINTF(1,"Terminating all tasks\n");
+    PRINTF(1,"Terminating all tasks");
     for (it = copy.begin();it!=copy.end();it++) {
         // delete pointer and empty the list of running tasks
         terminateTask(it->second);
@@ -213,6 +213,7 @@ int TaskScheduler::terminateAllTasks()
 
 void TaskScheduler::addTask(boost::shared_ptr<TaskDefinition> td) 
 {
+    PRINTF(1,"Adding task %s",td->getName().c_str());
     tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinition> >(td->getName(),td));
 }
 
@@ -262,6 +263,7 @@ void TaskScheduler::loadAllTasks(const std::string & dirname,
         perror("scandir");
     else {
         while(n--) {
+	    PRINTF(2,"Scandir: %s / %s",dirname.c_str(),namelist[n]->d_name);
             std::string fname = dirname + "/" + namelist[n]->d_name;
             loadTask(fname,env);
             free(namelist[n]);
@@ -304,16 +306,16 @@ TaskScheduler::TaskId TaskScheduler::launchIdleTask()
     }
 
     // Finally create the thread responsible for running the task
-    PRINTF(3,"lit:Locking\n");
+    PRINTF(3,"lit:Locking");
     {
         boost::unique_lock<boost::mutex> lock(scheduler_mutex);
-        PRINTF(3,"lit:Locked\n");
+        PRINTF(3,"lit:Locked");
         mainThread = boost::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, idle, period));
         mainThread->foreground = true;
         runningThreads[mainThread->tpid] = mainThread;
         if (debug>=3) printTaskSet("After launch idle",runningThreads);
     }
-    PRINTF(3,"lit:Unlocked\n");
+    PRINTF(3,"lit:Unlocked");
 
     mainThread->tid = boost::shared_ptr<boost::thread>(new boost::thread(&TaskScheduler::runTask,this,mainThread));
 
@@ -327,10 +329,10 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
         terminateTask(mainThread);
     }
 
-    PRINTF(3,"lt:Locking\n");
+    PRINTF(3,"lt:Locking");
     {
         boost::unique_lock<boost::mutex> lock(scheduler_mutex);
-        PRINTF(3,"lt:Locked\n");
+        PRINTF(3,"lt:Locked");
 
         if (tp->foreground) {
             mainThread = tp;
@@ -338,7 +340,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
         runningThreads[tp->tpid] = tp;
         if (debug>=3) printTaskSet("After launch",runningThreads);
     }
-    PRINTF(3,"lt:Unlocked\n");
+    PRINTF(3,"lt:Unlocked");
 
     boost::unique_lock<boost::mutex> lock(tp->task_mutex);
     try {
@@ -366,13 +368,13 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     TaskDirectory::const_iterator tdit;
     tdit = tasks.find(taskname);
     if (tdit==tasks.end()) {
-        ROS_ERROR("Impossible to find task '%s'\n",taskname.c_str());
+        ROS_ERROR("Impossible to find task '%s'",taskname.c_str());
         return -1;
     }
 
     // See if some runtime period has been defined in the parameters
     if (!tp.getParameter("task_period",period)) {
-        ROS_ERROR("Missing required parameter task_period\n");
+        ROS_ERROR("Missing required parameter task_period");
         return -1;
     }
     tp.getParameter("main_task",mainTask); // ignore return
@@ -384,18 +386,18 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     tparam->foreground = mainTask;
     tparam->running = false;
 
-    PRINTF(3,"lt:Locking\n");
+    PRINTF(3,"lt:Locking");
     {
         boost::unique_lock<boost::mutex> lock(tparam->task_mutex);
-        PRINTF(3,"lt:Locked\n");
+        PRINTF(3,"lt:Locked");
 
         enqueueAction(START_TASK,tparam);
 
-        PRINTF(3,"lt:Wait condition\n");
+        PRINTF(3,"lt:Wait condition");
         tparam->task_condition.wait(lock);
-        PRINTF(3,"lt:Locked\n");
+        PRINTF(3,"lt:Locked");
     }
-    PRINTF(3,"lt:Unlocked\n");
+    PRINTF(3,"lt:Unlocked");
 
     return tparam->tpid;
 }
@@ -415,12 +417,12 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 {
     try {
         double tstart = ros::Time::now().toSec();
-        PRINTF(3,"lt:Signaling and unlocking\n");
+        PRINTF(3,"lt:Signaling and unlocking");
         {
             boost::unique_lock<boost::mutex> lock(tp->task_mutex);
             tp->task_condition.notify_all();
         }
-        PRINTF(3,"lt:Unlocked\n");
+        PRINTF(3,"lt:Unlocked");
         tp->updateStatus(ros::Time::now());
 
         tp->running = true;
@@ -428,7 +430,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             tp->task->doInitialise(tp->tpid,tp->params);
             tp->updateStatus(ros::Time::now());
         } catch (const std::exception & e) {
-            tp->task->debug("Exception %s\n",e.what());
+            tp->task->debug("Exception %s",e.what());
             tp->updateStatus(ros::Time::now());
             cleanupTask(tp);
             return ;
@@ -438,27 +440,27 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 
         if (tp->task->isPeriodic()) {
             ros::Rate rate(1. / tp->period);
-            PRINTF(2,"Initialisation done\n");
+            PRINTF(2,"Initialisation done");
             while (1) {
                 double t0 = ros::Time::now().toSec();
                 if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.toSec() > 1.0)) {
-                    tp->task->debug("KEEPALIVE failed\n");
+                    tp->task->debug("KEEPALIVE failed");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
                     break;
                 }
 
                 if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
-                    tp->task->debug("TIMEOUT\n");
+                    tp->task->debug("TIMEOUT");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
                     break;
                 }
 
                 try {
-                    // tp->task->debug("Iterating...\n");
+                    // tp->task->debug("Iterating...");
                     tp->task->doIterate();
                     tp->updateStatus(now());
                 } catch (const std::exception & e) {
-                    tp->task->debug("Exception %s\n",e.what());
+                    tp->task->debug("Exception %s",e.what());
                     tp->updateStatus(now());
                     cleanupTask(tp);
                     return ;
@@ -477,12 +479,12 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             while (1) {
                 double t0 = ros::Time::now().toSec();
                 if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.toSec() > 1.0)) {
-                    tp->task->debug("KEEPALIVE failed\n");
+                    tp->task->debug("KEEPALIVE failed");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
                     break;
                 }
                 if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
-                    tp->task->debug("TIMEOUT\n");
+                    tp->task->debug("TIMEOUT");
                     tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
                     break;
                 }
@@ -503,7 +505,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             }
             id.join();
         }
-        // tp->task->debug("Out of the loop\n");
+        // tp->task->debug("Out of the loop");
     } catch (const boost::thread_interrupted & e) {
         // Ignore, we just want to make sure we get to the next line
     }
@@ -513,12 +515,12 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 void TaskScheduler::terminateTask(boost::shared_ptr<ThreadParameters> tp)
 {
     if (!tp) return;
-    PRINTF(1,"Terminating thread %s\n",tp->task->getName().c_str());
+    PRINTF(1,"Terminating thread %s",tp->task->getName().c_str());
     tp->tid->interrupt();
     tp->tid->join();
     tp->running = false;
 
-    PRINTF(2,"Thread cancelled\n");
+    PRINTF(2,"Thread cancelled");
     return;
 }
 
@@ -537,7 +539,7 @@ void TaskScheduler::printTaskSet(const std::string & name, const TaskScheduler::
 void TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
 {
     if (tp == NULL) return ;
-    PRINTF(1,"Cleaning up task %d:%s\n",tp->tpid,tp->task->getName().c_str());
+    PRINTF(1,"Cleaning up task %d:%s",tp->tpid,tp->task->getName().c_str());
     tp->task->doTerminate();
     ROS_INFO("Task '%s' terminated",tp->task->getName().c_str());
     tp->status |= task_manager_msgs::TaskStatus::TASK_TERMINATED;
@@ -592,7 +594,7 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
     }
     it = runningThreads.find(id);
     if (it == runningThreads.end()) {
-        ROS_ERROR("Cannot find reference to task %d\n",id);
+        ROS_ERROR("Cannot find reference to task %d",id);
         return -1;
     }
     boost::posix_time::milliseconds dtimeout(timeout*1000);
@@ -623,9 +625,9 @@ void TaskScheduler::printTaskDirectory(bool with_ros) const
 
 void TaskScheduler::removeConditionalIdle()
 {
-    PRINTF(3,"rci:Locking\n");
+    PRINTF(3,"rci:Locking");
     boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"rci:Locked\n");
+    PRINTF(3,"rci:Locked");
 
     ActionQueue::iterator it = actionQueue.begin();
     while (it != actionQueue.end()) {
@@ -638,9 +640,9 @@ void TaskScheduler::removeConditionalIdle()
         }
     }
 
-    PRINTF(3,"rci:Signalling\n");
+    PRINTF(3,"rci:Signalling");
     aqCond.notify_all();
-    PRINTF(3,"rci:Unlocked\n");
+    PRINTF(3,"rci:Unlocked");
 }
 
 TaskScheduler::ThreadAction TaskScheduler::getNextAction()
@@ -649,15 +651,15 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
     ros::Time t;
     ThreadAction ta;
     ActionQueue::iterator it;
-    PRINTF(3,"gna:Locking\n");
+    PRINTF(3,"gna:Locking");
     boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"gna:Locked\n");
+    PRINTF(3,"gna:Locked");
     try {
         // TODO: this must get the next action in time
         if (actionQueue.empty()) {
-            PRINTF(3,"gna:Cond Wait\n");
+            PRINTF(3,"gna:Cond Wait");
             aqCond.wait(lock);
-            PRINTF(3,"gna:Locked\n");
+            PRINTF(3,"gna:Locked");
         }
         while (1) {
             t = ros::Time::now();
@@ -667,20 +669,20 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
                 if (it->first <= t.toSec()) {
                     ta = it->second;
                     actionQueue.erase(it);
-                    PRINTF(2,"Dequeueing action %.3f %s -- %s\n",it->first,actionString(ta.type),
+                    PRINTF(2,"Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
                             ta.tp?(ta.tp->task->getName().c_str()):"none");
                 } else {
                     // wait for the right time or another action to be inserted
-                    PRINTF(3,"gna:Cond TWait\n");
+                    PRINTF(3,"gna:Cond TWait");
                     boost::posix_time::milliseconds dtimeout((it->first-t.toSec())*1000);
                     aqCond.timed_wait(lock,dtimeout);
-                    PRINTF(3,"gna:Locked\n");
+                    PRINTF(3,"gna:Locked");
                     continue;
                 }
             } else {
                 ta = it->second;
                 actionQueue.erase(it);
-                PRINTF(2,"Dequeueing action %.3f %s -- %s\n",it->first,actionString(ta.type),
+                PRINTF(2,"Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
                         ta.tp?(ta.tp->task->getName().c_str()):"none");
             }
             break;
@@ -689,45 +691,45 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
         ta.type = WAIT_CANCELLED;
         ta.tp.reset();
     }
-    PRINTF(3,"gna:Unlocking\n");
+    PRINTF(3,"gna:Unlocking");
     return ta;
 }
 
 void TaskScheduler::enqueueAction(ActionType type,boost::shared_ptr<ThreadParameters> tp)
 {
     ThreadAction ta;
-    PRINTF(3,"ea:Locking\n");
+    PRINTF(3,"ea:Locking");
     boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"ea:Locked\n");
+    PRINTF(3,"ea:Locked");
     // if (!runScheduler) return;
     double when = ros::Time::now().toSec();
-    PRINTF(2,"Enqueueing action %.3f %s -- %s\n",when,actionString(type),
+    PRINTF(2,"Enqueueing action %.3f %s -- %s",when,actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
     ta.tp = tp;
     actionQueue[when] = ta;
-    PRINTF(3,"ea:Signalling\n");
+    PRINTF(3,"ea:Signalling");
     aqCond.notify_all();
-    PRINTF(3,"ea:Unlocking\n");
+    PRINTF(3,"ea:Unlocking");
 }
 
 void TaskScheduler::enqueueAction(const ros::Time & when,  ActionType type,boost::shared_ptr<ThreadParameters> tp)
 {
     ThreadAction ta;
-    PRINTF(3,"ea:Locking\n");
+    PRINTF(3,"ea:Locking");
     boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"ea:Locked\n");
+    PRINTF(3,"ea:Locked");
     // if (!runScheduler) return;
-    PRINTF(2,"Enqueing action %.3f %s -- %s\n",when.toSec(),actionString(type),
+    PRINTF(2,"Enqueing action %.3f %s -- %s",when.toSec(),actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
     ta.tp = tp;
     actionQueue[when.toSec()] = ta;
-    PRINTF(3,"ea:Signalling\n");
+    PRINTF(3,"ea:Signalling");
     aqCond.notify_all();
-    PRINTF(3,"ea:Unlocking\n");
+    PRINTF(3,"ea:Unlocking");
 }
 
 const char *TaskScheduler::actionString(ActionType at)
@@ -762,7 +764,7 @@ int TaskScheduler::runSchedulerLoop()
     // Default:
     // pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
     while (1) {
-        PRINTF(2,"Waiting next action (%d)\n",(int)(actionQueue.size()));
+        PRINTF(2,"Waiting next action (%d)",(int)(actionQueue.size()));
         if (!runScheduler && actionQueue.empty()) {
             break;
         }
@@ -770,22 +772,22 @@ int TaskScheduler::runSchedulerLoop()
         ThreadAction ta = getNextAction();
         PRINTF(2,"%.3f: got action %s %s",ros::Time::now().toSec(),actionString(ta.type),
                 ta.tp?(ta.tp->task->getName().c_str()):"none");
-        PRINTF(3,"rsl:Locking\n");
+        PRINTF(3,"rsl:Locking");
         switch (ta.type) {
             case START_IDLE_TASK:
-                PRINTF(2,"START_IDLE_TASK\n");
+                PRINTF(2,"START_IDLE_TASK");
                 launchIdleTask();
                 break;
             case START_TASK:
-                PRINTF(2,"START_TASK %s\n",ta.tp->task->getName().c_str());
+                PRINTF(2,"START_TASK %s",ta.tp->task->getName().c_str());
                 launchTask(ta.tp);
                 break;
             case DELETE_TASK:
-                PRINTF(2,"DELETE_TASK %s\n",ta.tp->task->getName().c_str());
+                PRINTF(2,"DELETE_TASK %s",ta.tp->task->getName().c_str());
                 deleteTask(ta.tp);
                 break;
             case CONDITIONALLY_IDLE:
-                PRINTF(2,"CONDITIONALLY_IDLE\n");
+                PRINTF(2,"CONDITIONALLY_IDLE");
                 if ((mainThread==NULL) && runScheduler) {
                     // no new task has been created yet, and only this function
                     // can trigger new task creation
@@ -793,13 +795,13 @@ int TaskScheduler::runSchedulerLoop()
                 }
                 break;
             case WAIT_CANCELLED:
-                PRINTF(2,"WAIT_CANCELLED\n");
+                PRINTF(2,"WAIT_CANCELLED");
                 break;
             case NO_ACTION:
-                PRINTF(2,"NO_ACTION\n");
+                PRINTF(2,"NO_ACTION");
                 break;
         }
-        PRINTF(3,"rsl:Unlocked\n");
+        PRINTF(3,"rsl:Unlocked");
     }
     return 0;
 }
@@ -815,16 +817,16 @@ int TaskScheduler::startScheduler()
 
 int TaskScheduler::stopScheduler()
 {
-    PRINTF(2,"Stopping scheduler (%d)\n",runScheduler);
+    PRINTF(2,"Stopping scheduler (%d)",runScheduler);
     if (!runScheduler) return 0;
     runScheduler = false;
     enqueueAction(WAIT_CANCELLED,boost::shared_ptr<ThreadParameters>());
     aqid.join();
-    PRINTF(2,"Cleaning-up action queue (%d)\n",(int)(actionQueue.size()));
+    PRINTF(2,"Cleaning-up action queue (%d)",(int)(actionQueue.size()));
 
     boost::unique_lock<boost::mutex> lock(aqMutex);
     actionQueue.clear();
-    PRINTF(2,"Scheduler stopped\n");
+    PRINTF(2,"Scheduler stopped");
     return 0;
 }
 

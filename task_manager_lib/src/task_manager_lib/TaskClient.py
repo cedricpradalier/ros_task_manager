@@ -14,8 +14,10 @@ import socket
 import sys
 
 class TaskException(Exception):
-    def __init__(self, value):
+    def __init__(self, value,id=None,status=None):
         self.value = value
+	self.id = id
+	self.status = status
     def __str__(self):
         return repr(self.value)
 
@@ -330,7 +332,7 @@ class TaskClient:
                         if (t1-t0) > 1.0: 
                             if (self.verbose):
                                 rospy.logerr("Id %d not in taskstatus" % id)
-                            raise TaskException("Task %d did not appear in task status" % id);
+                            raise TaskException("Task %d did not appear in task status" % id,id);
                     else:
                         # print "%d: %02X" % (id, self.taskstatus[id].status)
                         if not (self.taskstatus[id].status & statusTerminated):
@@ -343,7 +345,7 @@ class TaskClient:
                         elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
                                 rospy.logwarn( "Task %d failed (%d)" %  (id,status))
-                            raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[status]));
+                            raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[status]), id, status);
                             # instead of raise?
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):
