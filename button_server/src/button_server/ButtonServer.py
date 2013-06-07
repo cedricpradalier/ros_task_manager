@@ -8,20 +8,17 @@ import std_msgs
 import os
 from string import Template
 
-global server
-server = None
 
 class MyServer(SocketServer.TCPServer):
     allow_reuse_address = True
 
 class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
-        global server
         if self.path == "/":
             self.send_response(200)
             self.send_header('Content-type','text/html')
             self.end_headers()
-            self.wfile.write(server.page)
+            self.wfile.write(ButtonServer.global_server.page)
             self.wfile.close()
             return
         elif self.path == "/lib/jquery-1.8.2.min.js":
@@ -30,7 +27,6 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_error(404, "requested path not available")
 
     def do_POST(self):
-        global server
         if self.path == "/button":
             length = int(self.headers.getheader("content-length"))
             l = self.rfile.read(length).split("=")
@@ -43,7 +39,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(result) 
-            server.publish(buttonname)
+            ButtonServer.global_server.publish(buttonname)
         return
 
 
@@ -82,7 +78,9 @@ class Button:
 
 
 class ButtonServer:
+    global_server = None
     def __init__(self):
+        ButtonServer.global_server = self
         self.handler = MyRequestHandler
         rospy.init_node('button_server')
         self.pub = rospy.Publisher("buttons",std_msgs.msg.String)
@@ -101,19 +99,30 @@ class ButtonServer:
             i = i+1
         if len(self.blist)==0:
             self.blist = [Button("test","Debug Button","lightgreen")]
+
+        self.buildPage()
+
+        self.root = roslib.packages.get_pkg_dir('button_server')
+        os.chdir(self.root)
+        self.httpd = MyServer(("", self.port), self.handler)
+
+    def buildPage(self):
         self.page = """
         <http>
           <head>
           <meta http-equiv="content-type" content="text/html; charset=windows-1250">
           <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
           <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+          <META HTTP-EQUIV="refresh" CONTENT="15">
           <title>Button Server</title>
             <script language="javascript" type="text/javascript" src="lib/jquery-1.8.2.min.js"></script>
           </head>
           <body>
             <center>
             <h1>Button Server</h1>
+            </center>
             %s
+            <center>
             %s
             <br>
             <div id=result> _ </div>
@@ -128,10 +137,6 @@ class ButtonServer:
         </http>
         """ % (self.getHeader(), "<hl/>\n".join([b.getInput() for b in self.blist]),
                 "\n".join([b.getFunction() for b in self.blist]))
-
-        self.root = roslib.packages.get_pkg_dir('button_server')
-        os.chdir(self.root)
-        self.httpd = MyServer(("", self.port), self.handler)
 
     def getHeader(self):
         # To be overloaded
