@@ -18,6 +18,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type','text/html')
             self.end_headers()
+            ButtonServer.global_server.buildPage()
             self.wfile.write(ButtonServer.global_server.page)
             self.wfile.close()
             return
