@@ -266,9 +266,14 @@ namespace task_manager_lib {
             // Get the status indicator 
             // Has to be virtual because it is overloaded by the dynamic class proxy.
             virtual TaskIndicator getStatus() const;
+            // Update the task status
+            virtual void setStatus(const TaskIndicator & ti);
             // Get the status string 
             // Has to be virtual because it is overloaded by the dynamic class proxy.
             virtual const std::string & getStatusString() const;
+            // Update the task status string
+            virtual void setStatusString(const std::string & s); 
+
 
             // Get the task parameters, in case one does not store them at
             // initialisation
@@ -352,11 +357,6 @@ namespace task_manager_lib {
             void setPeriodic(bool p) {periodic = p;}
             // Update the task timeout
             void setTimeout(double tout) {timeout = tout;}
-            // Update the task status string
-            void setStatusString(const std::string & s) {
-                statusString = s;
-            }
-
         protected:
             // Set of functions that must be implemented by any inheriting class
 

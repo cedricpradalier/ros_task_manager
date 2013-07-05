@@ -44,8 +44,11 @@ double TaskDefinition::getTimeout() const {
 }
 
 TaskIndicator TaskDefinition::getStatus() const {
-	// printf("TaskDefinition: status of %s: %s\n",name.c_str(),taskStatusToString(taskStatus));
 	return taskStatus;
+}
+
+void TaskDefinition::setStatus(const TaskIndicator & ti) {
+	taskStatus = ti;
 }
 
 task_manager_msgs::TaskStatus TaskDefinition::getRosStatus() const {
@@ -74,6 +77,10 @@ void TaskDefinition::resetStatus() {
 
 const std::string & TaskDefinition::getStatusString() const {
 	return statusString;
+}
+
+void TaskDefinition::setStatusString(const std::string & s) {
+    statusString = s;
 }
 
 
