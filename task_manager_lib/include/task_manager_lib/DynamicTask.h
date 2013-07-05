@@ -65,8 +65,15 @@ namespace task_manager_lib {
                 //printf("DynamicTask: status of %s: %s\n",name.c_str(),taskStatusToString(task->getStatus()));
                 return task->getStatus();
             }
+            virtual void setStatus(const TaskIndicator & ti) {
+                task->setStatus(ti);
+            }
+
             virtual const std::string & getStatusString() const {
                 return task->getStatusString();
+            }
+            virtual void setStatusString(const std::string & s) {
+                task->setStatusString(s);
             }
 
             virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {

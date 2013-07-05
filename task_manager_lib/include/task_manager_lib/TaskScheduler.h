@@ -84,11 +84,9 @@ namespace task_manager_lib {
 
 
 				void setStatus(TaskIndicator newstatus, const std::string & text, const ros::Time & tnow) {
-					status = newstatus;
-					statusString = text;
-					statusTime = tnow;
-					statusPub.publish(getRosStatus());
-					manageHistory();
+                    task->setStatus(newstatus);
+                    task->setStatusString(text);
+                    updateStatus(tnow);
 				}
 
 				void updateStatus(const ros::Time & tnow) {

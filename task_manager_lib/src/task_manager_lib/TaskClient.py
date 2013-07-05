@@ -75,11 +75,7 @@ class TaskClient:
     taskstatus = {}
     conditions = []
 
-    taskStatusList = [	'TASK_NEWBORN', 'TASK_CONFIGURED', 'TASK_INITIALISED',\
-            'TASK_RUNNING', 'TASK_COMPLETED', 'TASK_TERMINATED', 'TASK_INTERRUPTED',\
-            'TASK_FAILED', 'TASK_TIMEOUT', 'TASK_CONFIGURATION_FAILED', \
-            'TASK_INITIALISATION_FAILED']
-    taskStatusStrings = dict(enumerate(taskStatusList))
+    taskStatusStrings = dict([( TaskStatus.__dict__[k],k) for k in TaskStatus.__dict__.keys() if k[0:5]=="TASK_"])
     taskStatusId = dict([(v,k) for k,v in taskStatusStrings.iteritems()])
 
     def addCondition(self,cond):
@@ -148,9 +144,6 @@ class TaskClient:
         self.server_node = server_node
         self.default_period = default_period
         rospy.loginfo("Creating link to services on node " + self.server_node)
-        # Bad hard-coding. TODO: get that from the status message def
-        self.taskStatusStrings[128] = "TASK_TERMINATED"
-        self.taskStatusId["TASK_TERMINATED"] = 128
         try:
             rospy.wait_for_service(self.server_node + '/get_all_tasks')
             self.get_task_list = rospy.ServiceProxy(self.server_node + '/get_all_tasks', GetTaskList)
@@ -247,6 +240,13 @@ class TaskClient:
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
+    def status_string(self,v):
+        statusTerminated = self.taskStatusId["TASK_TERMINATED"]
+        if (v & statusTerminated):
+            return self.taskStatusStrings[v & ~statusTerminated] + " & TASK_TERMINATED"
+        else:
+            return self.taskStatusStrings[v]
+
     def status_callback(self,t):
         with self.statusLock:
             ts = self.TaskStatus()
@@ -284,7 +284,7 @@ class TaskClient:
                 return False
             if not self.isKnown(taskId):
                 return True
-            return self.taskstatus[taskId].status >= self.taskStatusId['TASK_TERMINATED']
+            return self.taskstatus[taskId].status & self.taskStatusId['TASK_TERMINATED']
 
     def updateTaskStatus(self):
         try:
@@ -334,7 +334,8 @@ class TaskClient:
                                 rospy.logerr("Id %d not in taskstatus" % id)
                             raise TaskException("Task %d did not appear in task status" % id,id);
                     else:
-                        # print "%d: %02X" % (id, self.taskstatus[id].status)
+                        if self.verbose>1:
+                            print "%d: %02X - %s" % (id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status))
                         if not (self.taskstatus[id].status & statusTerminated):
                             continue
                         status = self.taskstatus[id].status & (~statusTerminated)
@@ -344,8 +345,8 @@ class TaskClient:
                             completed[id] = True
                         elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
-                                rospy.logwarn( "Task %d failed (%d)" %  (id,status))
-                            raise TaskException("Task %d failed: %s" % (id,self.taskStatusList[status]), id, status);
+                                rospy.logwarn( "Task %d failed (%d - %s)" %  (id,status,self.status_string(status)))
+                            raise TaskException("Task %d failed: %s" % (id,self.status_string(status)), id, status);
                             # instead of raise?
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):
