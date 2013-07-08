@@ -375,6 +375,10 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
         ROS_ERROR("Impossible to find task '%s'",taskname.c_str());
         return -1;
     }
+    if (tdit->second->getStatus() != TaskStatus::TASK_CONFIGURED) {
+        ROS_ERROR("Refusing to run task '%s' because it is not CONFIGURED",taskname.c_str());
+        return -1;
+    }
 
     // See if some runtime period has been defined in the parameters
     if (!tp.getParameter("task_period",period)) {
@@ -433,6 +437,10 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
         try {
             tp->task->doInitialise(tp->tpid,tp->params);
             tp->updateStatus(ros::Time::now());
+            if (tp->status != TaskStatus::TASK_INITIALISED) {
+                cleanupTask(tp);
+                return;
+            }
         } catch (const std::exception & e) {
             tp->task->debug("Exception %s",e.what());
             tp->updateStatus(ros::Time::now());
