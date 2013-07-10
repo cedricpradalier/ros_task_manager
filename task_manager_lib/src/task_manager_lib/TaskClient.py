@@ -346,7 +346,7 @@ class TaskClient:
                         elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
                                 rospy.logwarn( "Task %d failed (%d - %s)" %  (id,status,self.status_string(status)))
-                            raise TaskException("Task %d failed: %s" % (id,self.status_string(status)), id, status);
+                            raise TaskException("Task %d:%s failed: %d:%s" % (id,self.taskstatus[id].name,status,self.status_string(status)), id, status);
                             # instead of raise?
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):

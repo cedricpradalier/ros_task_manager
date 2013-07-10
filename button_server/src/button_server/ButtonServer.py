@@ -8,6 +8,7 @@ import std_msgs
 import os
 from string import Template
 
+from requesthdl import *
 
 class MyServer(SocketServer.TCPServer):
     allow_reuse_address = True
@@ -24,7 +25,13 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             return
         elif self.path == "/lib/jquery-1.8.2.min.js":
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-        else:
+        found = False
+        for h in ButtonServer.repository.gethdl:
+            if h.match(self.path):
+                found = True
+                h.run(self)
+                break
+        if not found:
             self.send_error(404, "requested path not available")
 
     def do_POST(self):
@@ -80,6 +87,7 @@ class Button:
 
 class ButtonServer:
     global_server = None
+    repository = HandlerRepository()
     def __init__(self):
         ButtonServer.global_server = self
         self.handler = MyRequestHandler

@@ -35,6 +35,11 @@ gencfg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+ROSBUILD_ADD_EXECUTABLE( task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
+TARGET_LINK_LIBRARIES(task_server dl )
+
+TARGET_LINK_LIBRARIES(task_server -lboost_system)
+
 
 ROSBUILD_ADD_LIBRARY( TaskGoTo SHARED tasks/TaskGoTo.cpp)
 TARGET_LINK_LIBRARIES(TaskGoTo dl)
@@ -54,8 +59,5 @@ TARGET_LINK_LIBRARIES(TaskWaitForROI dl)
 ROSBUILD_ADD_LIBRARY( TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
 TARGET_LINK_LIBRARIES(TaskWaitForButton dl)
 
-ROSBUILD_ADD_EXECUTABLE( task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
-TARGET_LINK_LIBRARIES(task_server dl )
-
-TARGET_LINK_LIBRARIES(task_server -lboost_system)
-
+ROSBUILD_ADD_LIBRARY( TaskFail SHARED tasks/TaskFail.cpp)
+TARGET_LINK_LIBRARIES(TaskFail dl)

@@ -448,6 +448,7 @@ namespace task_manager_lib {
 
                 virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter)
                 {
+                    cfg = parameters.toConfig<CFG>();
                     return task_manager_msgs::TaskStatus::TASK_CONFIGURED;
                 }
 
