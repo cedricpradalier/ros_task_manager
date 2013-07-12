@@ -9,20 +9,15 @@ namespace task_manager_lib {
     // This task does not do anything apart from waiting.
     // It still has a .cfg file in cfg/TaskWait.cfg which describe the duration
     // parameter
-    class TaskWaitDefault : public TaskDefinitionWithConfig<task_manager_lib::TaskWaitConfig,TaskWaitDefault>
+    class TaskWaitDefault : public TaskInstance<TaskWaitConfig,TaskEnvironment>
     {
         protected:
-            TaskWaitConfig cfg;
             ros::Time t0;
         public:
             // Basic constructor, receives the environment and ignore it.
-            // The class is periodic with whatever period the scheduler
-            // prefers.
-            TaskWaitDefault(boost::shared_ptr<TaskEnvironment> env) 
-                : TaskDefinitionWithConfig<task_manager_lib::TaskWaitConfig,TaskWaitDefault>("Wait","Do nothing for a given time",true,-1) {}
+            TaskWaitDefault(TaskDefinitionPtr def, TaskEnvironmentPtr ev) :
+                Parent(def,ev) {}
             virtual ~TaskWaitDefault() {};
-
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);
 
             /// Record the starting time
             virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter);
@@ -31,15 +26,21 @@ namespace task_manager_lib {
             // desired duration
             virtual TaskIndicator iterate();
 
-            virtual TaskIndicator terminate();
-
-            // We need to make a copy to make sure the private data stays
-            // private
-            virtual boost::shared_ptr<TaskDefinition> getInstance() {
-                return boost::shared_ptr<TaskDefinition>(new TaskWaitDefault(*this));
-            }
 
     };
+
+    class TaskFactoryWaitDefault : public TaskDefinition<TaskWaitConfig,TaskEnvironment, TaskWaitDefault>
+    {
+        public:
+            // Basic constructor, 
+            // The class is periodic with whatever period the scheduler
+            // prefers.
+            TaskFactoryWaitDefault(TaskEnvironmentPtr env) 
+                : Parent("Wait","Do nothing for a given time",true,env) {}
+            virtual ~TaskFactoryWaitDefault() {};
+
+    };
+
 };
 
 #endif // TASK_WAIT_DEFAULT_H

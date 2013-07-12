@@ -10,11 +10,10 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskWaitForButton : public TaskDefinitionWithConfig<TaskWaitForButtonConfig,TaskWaitForButton>
+    class TaskWaitForButton : public TaskInstance<TaskWaitForButtonConfig,TurtleSimEnv>
     {
 
         protected:
-            boost::shared_ptr<TurtleSimEnv> env;
             ros::Subscriber button_sub;
             std::set<std::string> expected_string;
             bool triggered;
@@ -28,13 +27,20 @@ namespace task_manager_turtlesim {
             }
 
         public:
-            TaskWaitForButton(boost::shared_ptr<TaskEnvironment> env); 
+            TaskWaitForButton(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskWaitForButton() {};
 
             virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter);
 
             virtual TaskIndicator iterate();
 
+    };
+    class TaskFactoryWaitForButton : public TaskDefinition<TaskWaitForButtonConfig, TurtleSimEnv, TaskWaitForButton>
+    {
+        public:
+            TaskFactoryWaitForButton(TaskEnvironmentPtr env) : 
+                Parent("WaitForButton","Do nothing until we receive a button message",true,env) {}
+            virtual ~TaskFactoryWaitForButton() {};
     };
 };
 

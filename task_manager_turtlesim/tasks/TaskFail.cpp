@@ -5,17 +5,12 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-TaskFail::TaskFail(boost::shared_ptr<TaskEnvironment> tenv) 
-    : TaskDefinitionWithConfig<TaskFailConfig,TaskFail>("Fail","Fail with a specified condition",true,-1.)
-{
-    env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
-
-TaskIndicator TaskFail::configure(const TaskParameters & parameters) throw (InvalidParameter) {
+TaskIndicator TaskFactoryFail::configure(const TaskParameters & parameters) throw (InvalidParameter) {
     TaskIndicator ti = Parent::configure(parameters);
     if (ti != TaskStatus::TASK_CONFIGURED) {
         return ti;
     }
+    TaskFailConfig cfg = getConfigFromServer(env->getNodeHandle());
     if (cfg.error_type == TaskStatus::TASK_CONFIGURATION_FAILED) {
         return cfg.error_type;
     }
@@ -49,4 +44,4 @@ TaskIndicator TaskFail::terminate()
 	return TaskStatus::TASK_TERMINATED;
 }
 
-DYNAMIC_TASK(TaskFail);
+DYNAMIC_TASK(TaskFactoryFail);

@@ -5,11 +5,6 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-TaskWaitForROI::TaskWaitForROI(boost::shared_ptr<TaskEnvironment> tenv) 
-    : Parent("WaitForROI","Do nothing until we reach a given destination",true,-1.)
-{
-    env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
 
 TaskIndicator TaskWaitForROI::iterate()
 {
@@ -22,4 +17,4 @@ TaskIndicator TaskWaitForROI::iterate()
 	return TaskStatus::TASK_RUNNING;
 }
 
-DYNAMIC_TASK(TaskWaitForROI);
+DYNAMIC_TASK(TaskFactoryWaitForROI);

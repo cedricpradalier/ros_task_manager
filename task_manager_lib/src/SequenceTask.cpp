@@ -4,14 +4,15 @@
 using namespace task_manager_lib;
 using namespace std;
 
-SequenceTask::SequenceTask(const std::vector<task_manager_msgs::TaskDescriptionLight> &tasks_sequence,TaskScheduler *ts) :
-	TaskDefinition("SequenceTask","Run a sequence of tasks",true,-1.0),sequence_id(-1),task_id(0)
+SequenceDef::SequenceDef(const std::vector<task_manager_msgs::TaskDescriptionLight> &tasks_sequence,
+        TaskScheduler *ts) :
+	Parent("SequenceTask","Run a sequence of tasks",true, boost::shared_ptr<TaskEnvironment>())
 {
 	sequence=DescriptionLightToTaskParameters(tasks_sequence);
-	that=ts;
+	sched=ts;
 }
 
-std::vector<std::pair<std::string, TaskParameters > > SequenceTask::DescriptionLightToTaskParameters(const std::vector<task_manager_msgs::TaskDescriptionLight>& tasks)
+std::vector<std::pair<std::string, TaskParameters > > SequenceDef::DescriptionLightToTaskParameters(const std::vector<task_manager_msgs::TaskDescriptionLight>& tasks)
 {
 	std::vector<std::pair<std::string, TaskParameters > > output;
 	for (unsigned int j=0;j<tasks.size();j++)
@@ -67,41 +68,42 @@ std::vector<std::pair<std::string, TaskParameters > > SequenceTask::DescriptionL
 
 TaskIndicator SequenceTask::iterate()
 {
-    that->keepAliveSequence();
+    boost::shared_ptr<SequenceDef> def = castDefinition<SequenceDef>();
+    def->sched->keepAliveSequence();
     if (sequence_id==-1)//first thread to launch
     {
     	sequence_id++;
-    	task_id=that->launchTask(sequence[sequence_id].first,sequence[sequence_id].second);
+    	current_task_id=def->sched->launchTask(def->sequence[sequence_id].first,def->sequence[sequence_id].second);
     	return TaskStatus::TASK_RUNNING;
     }
     else 
     {
-		int current_status=that->getstatus(task_id);
+		int current_status=def->sched->getstatus(current_task_id);
 		if (current_status<TaskStatus::TASK_NEWBORN)//task not found
 		{
 			return TaskStatus::TASK_FAILED;
 		}
-		else if((current_status>=TaskStatus::TASK_NEWBORN) && !(current_status&TaskStatus::TASK_TERMINATED))
+		else if((current_status>=TaskStatus::TASK_CONFIGURED) && !(current_status&TaskStatus::TASK_TERMINATED))
 		{
 			return TaskStatus::TASK_RUNNING;
 		}
 		else if(current_status&TaskStatus::TASK_TERMINATED)
 		{
             sequence_id++;
-			if (sequence_id<(signed)sequence.size())
+			if (sequence_id<(signed)def->sequence.size())
 			{
-				task_id=that->launchTask(sequence[sequence_id].first,sequence[sequence_id].second);
+				current_task_id=def->sched->launchTask(def->sequence[sequence_id].first,def->sequence[sequence_id].second);
 				return TaskStatus::TASK_RUNNING;
 			}
 			else
 			{
-                task_id = 0;
+                current_task_id = 0;
 				return TaskStatus::TASK_COMPLETED;
 			}
 		}
 		else
 		{
-			that->terminateTask(task_id);
+			def->sched->terminateTask(current_task_id);
 			return current_status;
 		}
 	}
@@ -109,8 +111,9 @@ TaskIndicator SequenceTask::iterate()
 
 TaskIndicator SequenceTask::terminate()
 {
-    if (sequence_id < (signed)sequence.size()) {
-        that->terminateTask(task_id);
+    boost::shared_ptr<SequenceDef> def = castDefinition<SequenceDef>();
+    if (sequence_id < (signed)def->sequence.size()) {
+        def->sched->terminateTask(current_task_id);
     }
 	return TaskStatus::TASK_TERMINATED ;
 }

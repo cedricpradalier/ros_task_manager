@@ -8,17 +8,21 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskWaitForROI : public TaskDefinitionWithConfig<TaskWaitForROIConfig,TaskWaitForROI>
+    class TaskWaitForROI : public TaskInstance<TaskWaitForROIConfig,TurtleSimEnv>
     {
-
-        protected:
-            boost::shared_ptr<TurtleSimEnv> env;
         public:
-            TaskWaitForROI(boost::shared_ptr<TaskEnvironment> env); 
+            TaskWaitForROI(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskWaitForROI() {};
 
             virtual TaskIndicator iterate();
 
+    };
+    class TaskFactoryWaitForROI : public TaskDefinition<TaskWaitForROIConfig, TurtleSimEnv, TaskWaitForROI>
+    {
+        public:
+            TaskFactoryWaitForROI(TaskEnvironmentPtr env) : 
+                Parent("WaitForROI","Do nothing until we reach a given destination",true,env) {}
+            virtual ~TaskFactoryWaitForROI() {};
     };
 };
 

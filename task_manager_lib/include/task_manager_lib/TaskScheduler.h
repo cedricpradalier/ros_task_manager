@@ -47,7 +47,7 @@ namespace task_manager_lib {
 
 				bool foreground,running;
 				unsigned int tpid;
-				boost::shared_ptr<TaskDefinition> task;
+				boost::shared_ptr<TaskInstanceBase> task;
 				TaskParameters params;
 				TaskScheduler *that;
 				double period;
@@ -63,7 +63,7 @@ namespace task_manager_lib {
 				ros::Publisher statusPub;
 				
 				ThreadParameters(ros::Publisher pub, TaskScheduler *ts, 
-						boost::shared_ptr<TaskDefinition> td, 
+						boost::shared_ptr<TaskDefinitionBase> td, 
 						double tperiod);
 				ThreadParameters(const ThreadParameters & tp);
 				~ThreadParameters();
@@ -74,11 +74,12 @@ namespace task_manager_lib {
 					st.status = status | 
 						(foreground?TASK_FOREGROUND:TASK_BACKGROUND);
 					st.status_time = statusTime;
+                    st.plist = params;
 					return st;
 				}
 				
 				
-                bool isAnInstanceOf(const boost::shared_ptr<TaskDefinition> & def) {
+                bool isAnInstanceOf(const boost::shared_ptr<TaskDefinitionBase> & def) {
                     return task->isAnInstanceOf(def);
                 }
 
@@ -115,7 +116,7 @@ namespace task_manager_lib {
 						}
 						if (task_exist==false)
 						{
-							TaskHistory current_task(tpid,task->getName().c_str(),task->getConfig(),statusTime,status) ;
+							TaskHistory current_task(tpid,task->getName().c_str(),params,statusTime,status) ;
 							if (that->history.size()< history_size)
 							{
 								that->history.push_back(current_task);
@@ -165,8 +166,8 @@ namespace task_manager_lib {
 			void keepAliveCallback(const std_msgs::Header::ConstPtr& msg);
 
 		protected:
-			boost::shared_ptr<TaskDefinition> idle;
-			typedef std::map<std::string,boost::shared_ptr<TaskDefinition>,std::less<std::string> > TaskDirectory;
+			boost::shared_ptr<TaskDefinitionBase> idle;
+			typedef std::map<std::string,boost::shared_ptr<TaskDefinitionBase>,std::less<std::string> > TaskDirectory;
 			typedef std::pair<unsigned int, boost::shared_ptr<ThreadParameters> > TaskSetItem;
 			typedef std::map<unsigned int, boost::shared_ptr<ThreadParameters>, std::less<unsigned int> > TaskSet;
 			std::vector<TaskHistory> history;
@@ -256,7 +257,7 @@ namespace task_manager_lib {
 			// created.
 			// idle: a pointer to the definition of the idle class
 			// deftPeriod: the default period for task execution
-			TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinition> idle, double deftPeriod);
+			TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinitionBase> idle, double deftPeriod);
 			~TaskScheduler();
 
 			// Cleanup all the task
@@ -284,7 +285,7 @@ namespace task_manager_lib {
 
 
 			// Add a task to the directory
-			void addTask(boost::shared_ptr<TaskDefinition> task);
+			void addTask(boost::shared_ptr<TaskDefinitionBase> task);
 
 			// Load a task from a file to the directory, and create it with
 			// argument env

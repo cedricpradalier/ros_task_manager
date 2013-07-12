@@ -109,15 +109,15 @@ class TaskClient:
         def __call__(self,**paramdict):
             paramdict['task_name'] = self.name
             foreground = True
-            if ('main_task' in paramdict):
-                foreground = bool(paramdict['main_task'])
+            if ('foreground' in paramdict):
+                foreground = bool(paramdict['foreground'])
             if (foreground):
                 rospy.loginfo("Starting task %s in foreground" % self.name)
                 res = self.client.startTaskAndWait(paramdict)
                 return res
             else:
-                rospy.loginfo("Starting task %s in background: %d" % (self.name,id))
                 id = self.client.startTask(paramdict)
+                rospy.loginfo("Starting task %s in background: %d" % (self.name,id))
                 return id
 
     class TaskStatus:
@@ -202,10 +202,10 @@ class TaskClient:
             if ('task_name' in paramdict):
                 name=paramdict['task_name']
                 del paramdict['task_name']
-            if ('main_task' not in paramdict):
-                paramdict['main_task'] = bool(foreground)
+            if ('foreground' not in paramdict):
+                paramdict['foreground'] = bool(foreground)
             else:
-                paramdict['main_task'] = bool(paramdict['main_task'])
+                paramdict['foreground'] = bool(paramdict['foreground'])
             if (period>0) and ('task_period' not in paramdict):
                 paramdict['task_period'] = float(period)
             config = encode_config(paramdict)

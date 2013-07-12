@@ -10,7 +10,7 @@ def TaskParameterGenerator():
     gen = ParameterGenerator()
     #       Name                    Type            Description               Default    Min   Max
     gen.add("task_rename",          str_t,    0,    "Task renaming at run-time",  "" )
-    gen.add("main_task",           bool_t,    0,    "Task running in foreground",  True )
+    gen.add("foreground",           bool_t,    0,    "Task running in foreground",  True )
     gen.add("task_period",       double_t,    0,    "Task period",  -1. )
     gen.add("task_timeout",      double_t,    0,    "Task timeout",  -1. )
 

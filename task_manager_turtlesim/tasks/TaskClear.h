@@ -7,19 +7,21 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskClear : public TaskDefinitionWithConfig<MinimalTaskConfig,TaskClear>
+    class TaskClear : public TaskInstance<MinimalTaskConfig,TurtleSimEnv>
     {
-        protected:
-            boost::shared_ptr<TurtleSimEnv> env;
         public:
-            TaskClear(boost::shared_ptr<TaskEnvironment> env); 
+            TaskClear(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskClear() {};
 
             virtual TaskIndicator iterate();
+    };
+    class TaskFactoryClear : public TaskDefinition<MinimalTaskConfig, TurtleSimEnv, TaskClear>
+    {
 
-            virtual boost::shared_ptr<TaskDefinition> getInstance() {
-                return shared_from_this();
-            }
+        public:
+            TaskFactoryClear(TaskEnvironmentPtr env) : 
+                Parent("Clear","Clear the screen",false,env) {}
+            virtual ~TaskFactoryClear() {};
     };
 };
 

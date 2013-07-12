@@ -119,7 +119,7 @@ TaskScheduler::TaskId TaskClient::startTask(const std::string & taskname,
     task_manager_lib::StartTask srv;
     srv.request.name = taskname;
     TaskParameters tp(tprm);
-    tp.setParameter("main_task",foreground);
+    tp.setParameter("foreground",foreground);
     tp.setParameter("task_period",period);
     srv.request.config = (dynamic_reconfigure::Config)tp;
 

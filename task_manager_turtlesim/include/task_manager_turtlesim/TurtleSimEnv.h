@@ -64,6 +64,8 @@ namespace task_manager_turtlesim {
             void clear();
     };
 
+    typedef boost::shared_ptr<TurtleSimEnv> TurtleSimEnvPtr;
+    typedef boost::shared_ptr<TurtleSimEnv const> TurtleSimEnvConstPtr;
 };
 
 #endif // TURTLE_SIM_ENV_H

@@ -7,16 +7,21 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskSetPen : public TaskDefinitionWithConfig<TaskSetPenConfig,TaskSetPen>
+    class TaskSetPen : public TaskInstance<TaskSetPenConfig,TurtleSimEnv>
     {
-        protected:
-            boost::shared_ptr<TurtleSimEnv> env;
         public:
-            TaskSetPen(boost::shared_ptr<TaskEnvironment> env); 
+            TaskSetPen(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskSetPen() {};
 
             virtual TaskIndicator iterate();
 
+    };
+    class TaskFactorySetPen : public TaskDefinition<TaskSetPenConfig, TurtleSimEnv, TaskSetPen>
+    {
+        public:
+            TaskFactorySetPen(TaskEnvironmentPtr env) : 
+                Parent("SetPen","Set pen value",false,env) {}
+            virtual ~TaskFactorySetPen() {};
     };
 };
 

@@ -8,18 +8,23 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskGoTo : public TaskDefinitionWithConfig<TaskGoToConfig, TaskGoTo>
+    class TaskGoTo : public TaskInstance<TaskGoToConfig, TurtleSimEnv>
     {
-
-        protected:
-            boost::shared_ptr<TurtleSimEnv> env;
         public:
-            TaskGoTo(boost::shared_ptr<TaskEnvironment> env); 
+            TaskGoTo(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskGoTo() {};
 
             virtual TaskIndicator iterate();
 
             virtual TaskIndicator terminate();
+    };
+    class TaskFactoryGoTo : public TaskDefinition<TaskGoToConfig, TurtleSimEnv, TaskGoTo>
+    {
+
+        public:
+            TaskFactoryGoTo(TaskEnvironmentPtr env) : 
+                Parent("GoTo","Reach a desired destination",true,env) {}
+            virtual ~TaskFactoryGoTo() {};
     };
 };
 

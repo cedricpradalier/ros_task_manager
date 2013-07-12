@@ -3,88 +3,81 @@
 #include "task_manager_lib/TaskDefinition.h"
 using namespace task_manager_lib;
 
-void TaskDefinition::setName(const std::string & n) {
+void TaskDefinitionBase::setName(const std::string & n) {
 	name = n;
 }
 
-void TaskDefinition::setTaskId(unsigned int id) {
+void TaskDefinitionBase::setTaskId(unsigned int id) {
 	taskId = id;
 }
 
-void TaskDefinition::setRuntimeId(unsigned int id) {
+void TaskInstanceBase::setRuntimeId(unsigned int id) {
 	runId = id;
 }
 
-unsigned int TaskDefinition::getTaskId() const {
+unsigned int TaskDefinitionBase::getTaskId() const {
     return taskId;
 }
 
-unsigned int TaskDefinition::getRuntimeId() const {
+unsigned int TaskInstanceBase::getRuntimeId() const {
     return runId;
 }
 
-const std::string & TaskDefinition::getName() const {
+const std::string & TaskDefinitionBase::getName() const {
 	return name;
 }
 
-const std::string & TaskDefinition::getHelp() const {
+const std::string & TaskDefinitionBase::getHelp() const {
 	return help;
 }
 
-const TaskParameters & TaskDefinition::getConfig() const {
-	return config;
-}
-
-bool TaskDefinition::isPeriodic() const {
+bool TaskDefinitionBase::isPeriodic() const {
 	return periodic;
 }
 
-double TaskDefinition::getTimeout() const {
-	return timeout;
-}
 
-TaskIndicator TaskDefinition::getStatus() const {
+TaskIndicator TaskDefinitionBase::getStatus() const {
 	return taskStatus;
 }
 
-void TaskDefinition::setStatus(const TaskIndicator & ti) {
+void TaskDefinitionBase::setStatus(const TaskIndicator & ti) {
 	taskStatus = ti;
 }
 
-task_manager_msgs::TaskStatus TaskDefinition::getRosStatus() const {
-    task_manager_msgs::TaskStatus st;
-    st.name = this->getName();
-    st.status = this->getStatus();
-    st.status_string = this->getStatusString();
-    st.plist = this->getConfig();
-    return st;
-}
-
-task_manager_msgs::TaskDescription TaskDefinition::getDescription() const {
+task_manager_msgs::TaskDescription TaskDefinitionBase::getDescription() const {
     task_manager_msgs::TaskDescription td;
     td.name = this->getName();
     td.description = this->getHelp();
     td.periodic = this->isPeriodic();
-    td.timeout_s = this->getTimeout();
     td.config = this->getParameterDescription();
     return td;
 }
 
-void TaskDefinition::resetStatus() {
-	// printf("TaskDefinition: status of %s: %s\n",name.c_str(),taskStatusToString(taskStatus));
-	taskStatus = task_manager_msgs::TaskStatus::TASK_CONFIGURED;
+void TaskDefinitionBase::doConfigure(unsigned int id, const TaskParameters & parameters)
+{
+    taskId = id;
+    // printf("Configure %s: default values\n",this->getName().c_str());
+    // config.print(stdout);
+    // printf("Configure %s: proposed values\n",this->getName().c_str());
+    // parameters.print(stdout);
+    // printf("Configure %s: after update\n",this->getName().c_str());
+    // config.print(stdout);
+
+	statusString.clear();
+	taskStatus = this->configure(parameters);
 }
 
-const std::string & TaskDefinition::getStatusString() const {
+
+const std::string & TaskDefinitionBase::getStatusString() const {
 	return statusString;
 }
 
-void TaskDefinition::setStatusString(const std::string & s) {
+void TaskDefinitionBase::setStatusString(const std::string & s) {
     statusString = s;
 }
 
 
-void TaskDefinition::debug(const char *stemplate,...) const {
+void TaskDefinitionBase::debug(const char *stemplate,...) const {
 	va_list args;
     char buffer[1024];
 	va_start(args, stemplate);
@@ -94,37 +87,60 @@ void TaskDefinition::debug(const char *stemplate,...) const {
 	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
 }
 
-bool TaskDefinition::isAnInstanceOf(const TaskDefinition & def) {
-    return this->getTaskId() == def.getTaskId();
+TaskIndicator TaskInstanceBase::getStatus() const {
+	return taskStatus;
 }
 
-bool TaskDefinition::isAnInstanceOf(const boost::shared_ptr<TaskDefinition> & def) {
-    return this->getTaskId() == def->getTaskId();
+void TaskInstanceBase::setStatus(const TaskIndicator & ti) {
+	taskStatus = ti;
 }
 
-void TaskDefinition::doConfigure(unsigned int id, const TaskParameters & parameters)
-{
-    taskId = id;
-    config = this->getDefaultParameters();
-    // printf("Configure %s: default values\n",this->getName().c_str());
-    // config.print(stdout);
-    // printf("Configure %s: proposed values\n",this->getName().c_str());
-    // parameters.print(stdout);
-    config.update(parameters);
-    // printf("Configure %s: after update\n",this->getName().c_str());
-    // config.print(stdout);
-
-    parameters.getParameter("task_timeout",timeout);
-
-
-	statusString.clear();
-	taskStatus = this->configure(parameters);
+TaskDefinitionPtr TaskInstanceBase::getDefinition() {
+    return definition;
 }
 
-void TaskDefinition::doInitialise(unsigned int runtimeId, const TaskParameters & parameters)
+task_manager_msgs::TaskStatus TaskInstanceBase::getRosStatus() const {
+    task_manager_msgs::TaskStatus st;
+    st.name = this->getName();
+    st.status = this->getStatus();
+    st.status_string = this->getStatusString();
+    return st;
+}
+
+const std::string & TaskInstanceBase::getStatusString() const {
+	return statusString;
+}
+
+void TaskInstanceBase::setStatusString(const std::string & s) {
+    statusString = s;
+}
+
+double TaskInstanceBase::getTimeout() const {
+	return timeout;
+}
+
+
+void TaskInstanceBase::debug(const char *stemplate,...) const {
+	va_list args;
+    char buffer[1024];
+	va_start(args, stemplate);
+	vsnprintf(buffer,1023, stemplate,args);
+	va_end(args);
+    buffer[1023]=0;
+	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
+}
+
+bool TaskInstanceBase::isAnInstanceOf(const TaskDefinitionBase & def) {
+    return this->getDefinition()->getTaskId() == def.getTaskId();
+}
+
+bool TaskInstanceBase::isAnInstanceOf(TaskDefinitionConstPtr def) {
+    return this->getDefinition()->getTaskId() == def->getTaskId();
+}
+
+void TaskInstanceBase::doInitialise(unsigned int runtimeId, const TaskParameters & parameters)
 {
     runId = runtimeId;
-    config.update(parameters);
     // printf("Initialise %s: after update\n",this->getName().c_str());
     // config.print(stdout);
     parameters.getParameter("task_timeout",timeout);
@@ -132,13 +148,13 @@ void TaskDefinition::doInitialise(unsigned int runtimeId, const TaskParameters &
 	taskStatus = this->initialise(parameters);
 }
 
-void TaskDefinition::doIterate()
+void TaskInstanceBase::doIterate()
 {
 	statusString.clear();
 	taskStatus = this->iterate();
 }
 
-void TaskDefinition::doTerminate()
+void TaskInstanceBase::doTerminate()
 {
 	statusString.clear();
     TaskIndicator ti = this->terminate();
