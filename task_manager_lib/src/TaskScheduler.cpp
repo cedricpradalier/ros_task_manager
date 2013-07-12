@@ -24,12 +24,11 @@ const double TaskScheduler::IDLE_TIMEOUT=0.5;
 const unsigned int TaskScheduler::history_size=10;
 
 TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskScheduler *ts, 
-        boost::shared_ptr<TaskDefinition> td, double tperiod) : statusPub(pub)
+        boost::shared_ptr<TaskDefinitionBase> td, double tperiod) : statusPub(pub)
 {
     gtpid += 1;
     tpid = gtpid;
-    task = td->getInstance();
-    task->resetStatus();
+    task = td->instantiate();
     that = ts;
     period = tperiod;
     foreground = true;
@@ -71,7 +70,7 @@ TaskScheduler::ThreadParameters::~ThreadParameters()
     }
 }
 
-TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinition> tidle, double deftPeriod)
+TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinitionBase> tidle, double deftPeriod)
 {
     runScheduler = false;
 
@@ -211,19 +210,19 @@ int TaskScheduler::terminateAllTasks()
     return 0;
 }
 
-void TaskScheduler::addTask(boost::shared_ptr<TaskDefinition> td) 
+void TaskScheduler::addTask(boost::shared_ptr<TaskDefinitionBase> td) 
 {
     PRINTF(1,"Adding task %s",td->getName().c_str());
     TaskDirectory::const_iterator tit = tasks.find(td->getName());
     if (tit != tasks.end()) {
         ROS_WARN("Warning: overwriting task '%s'",td->getName().c_str());
     }
-    tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinition> >(td->getName(),td));
+    tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinitionBase> >(td->getName(),td));
 }
 
 void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env)
 {
-    boost::shared_ptr<TaskDefinition> td(new DynamicTask(filename, env));
+    boost::shared_ptr<TaskDefinitionBase> td(new DynamicTask(filename, env));
 
     addTask(td);
 }
@@ -302,7 +301,7 @@ TaskScheduler::TaskId TaskScheduler::launchIdleTask()
     double period = defaultPeriod;
 
     if (mainThread) {
-        if (mainThread->task == idle) {
+        if (mainThread->task->isAnInstanceOf(idle)) {
             return mainThread->tpid;
         } else {
             terminateTask(mainThread);
@@ -367,7 +366,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
 TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname, 
         const TaskParameters & tp)
 {
-    bool mainTask = true;
+    bool foreground = true;
     double period = defaultPeriod;
     TaskDirectory::const_iterator tdit;
     tdit = tasks.find(taskname);
@@ -385,13 +384,13 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
         ROS_ERROR("Missing required parameter task_period");
         return -1;
     }
-    tp.getParameter("main_task",mainTask); // ignore return
+    tp.getParameter("foreground",foreground); // ignore return
 
     // Finally create the thread responsible for running the task
     boost::shared_ptr<ThreadParameters> tparam =
         boost::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, tdit->second, period));
     tparam->params = tp;
-    tparam->foreground = mainTask;
+    tparam->foreground = foreground;
     tparam->running = false;
 
     PRINTF(3,"lt:Locking");
@@ -571,7 +570,7 @@ void TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
 
     if (tp->foreground) {
         mainThread.reset();
-        if (tp->task!=idle) {
+        if (!tp->task->isAnInstanceOf(idle)) {
             enqueueAction(ros::Time::now()+ros::Duration(IDLE_TIMEOUT),CONDITIONALLY_IDLE,tp);
         }
     }
@@ -879,14 +878,13 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
         current_task.name=tasklist[i].name;
         current_task.description=tasklist[i].description;
         current_task.periodic=tasklist[i].periodic;
-        current_task.timeout_s=tasklist[i].timeout_s;
 
 #if ROS_VERSION_MINIMUM(1, 8, 0)
 #pragma message("Compiling for ROS Fuerte")
         for (unsigned int g=0;g<tasklist[i].config.groups.size();g++) {
             for (unsigned int j = 0;j<tasklist[i].config.groups[g].parameters.size();j++) {
                 if ( (tasklist[i].config.groups[g].parameters[j].name!= "task_rename") 
-                        && (tasklist[i].config.groups[g].parameters[j].name!= "main_task") 
+                        && (tasklist[i].config.groups[g].parameters[j].name!= "foreground") 
                         && (tasklist[i].config.groups[g].parameters[j].name!= "task_period") 
                         && (tasklist[i].config.groups[g].parameters[j].name!= "task_timeout"))
                 {
@@ -898,7 +896,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
 #pragma message("Compiling for ROS Electric Turtle")
                     for (unsigned int j = 0;j<tasklist[i].config.parameters.size();j++) {
                         if ( (tasklist[i].config.parameters[j].name!= "task_rename") 
-                                && (tasklist[i].config.parameters[j].name!= "main_task") 
+                                && (tasklist[i].config.parameters[j].name!= "foreground") 
                                 && (tasklist[i].config.parameters[j].name!= "task_period") 
                                 && (tasklist[i].config.parameters[j].name!= "task_timeout"))
                         {
@@ -1055,7 +1053,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             //bool
             for (unsigned int j = 0;j<history[i].getparams().bools.size();j++) 
             {
-                if (history[i].getparams().bools[j].name!="main_task" && history[i].getparams().bools[j].name!="task_rename" && history[i].getparams().bools[j].name!="task_period" && history[i].getparams().bools[j].name!="task_period")
+                if (history[i].getparams().bools[j].name!="foreground" && history[i].getparams().bools[j].name!="task_rename" && history[i].getparams().bools[j].name!="task_period" && history[i].getparams().bools[j].name!="task_period")
                 {
                     task_manager_msgs::TaskParameter current_parameter;
                     current_parameter.name=history[i].getparams().bools[j].name;
@@ -1075,7 +1073,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             //int
             for (unsigned int j = 0;j<history[i].getparams().ints.size();j++) 
             {
-                if (history[i].getparams().ints[j].name!="main_task" && history[i].getparams().ints[j].name!="task_rename" && history[i].getparams().ints[j].name!="task_period" && history[i].getparams().ints[j].name!="task_period")
+                if (history[i].getparams().ints[j].name!="foreground" && history[i].getparams().ints[j].name!="task_rename" && history[i].getparams().ints[j].name!="task_period" && history[i].getparams().ints[j].name!="task_period")
                 {
 
                     task_manager_msgs::TaskParameter current_parameter;
@@ -1092,7 +1090,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             //strs
             for (unsigned int j = 0;j<history[i].getparams().strs.size();j++) 
             {
-                if (history[i].getparams().strs[j].name!="main_task" && history[i].getparams().strs[j].name!="task_rename" && history[i].getparams().strs[j].name!="task_period" && history[i].getparams().strs[j].name!="task_period")
+                if (history[i].getparams().strs[j].name!="foreground" && history[i].getparams().strs[j].name!="task_rename" && history[i].getparams().strs[j].name!="task_period" && history[i].getparams().strs[j].name!="task_period")
                 {
                     task_manager_msgs::TaskParameter current_parameter;
                     current_parameter.name=history[i].getparams().strs[j].name;
@@ -1105,7 +1103,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
             //double
             for (unsigned int j = 0;j<history[i].getparams().doubles.size();j++) 
             {
-                if (history[i].getparams().doubles[j].name!="main_task" && history[i].getparams().doubles[j].name!="task_rename" && history[i].getparams().doubles[j].name!="task_period" && history[i].getparams().doubles[j].name!="task_period")
+                if (history[i].getparams().doubles[j].name!="foreground" && history[i].getparams().doubles[j].name!="task_rename" && history[i].getparams().doubles[j].name!="task_period" && history[i].getparams().doubles[j].name!="task_period")
                 {
 
                     task_manager_msgs::TaskParameter current_parameter;
@@ -1125,7 +1123,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
 
     void TaskScheduler::launchTaskSequence(std::vector<task_manager_msgs::TaskDescriptionLight> &tasks, int &id) 
     {
-        boost::shared_ptr<TaskDefinition> st(new SequenceTask(tasks,this));
+        TaskDefinitionPtr st(new SequenceDef(tasks,this));
         boost::shared_ptr<ThreadParameters> tp(new ThreadParameters(statusPub, this, st, defaultPeriod ));
         tp->foreground = false;
         id=launchTask(tp);

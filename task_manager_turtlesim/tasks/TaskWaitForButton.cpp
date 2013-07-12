@@ -7,12 +7,6 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 using namespace boost::algorithm;
 
-TaskWaitForButton::TaskWaitForButton(boost::shared_ptr<TaskEnvironment> tenv) 
-    : Parent("WaitForButton","Do nothing until we receive a button message",true,-1.)
-{
-    env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
-
 TaskIndicator TaskWaitForButton::initialise(const TaskParameters & parameters) throw (InvalidParameter)
 {
     TaskIndicator parent = Parent::initialise(parameters);
@@ -40,4 +34,4 @@ TaskIndicator TaskWaitForButton::iterate()
 }
 
 
-DYNAMIC_TASK(TaskWaitForButton);
+DYNAMIC_TASK(TaskFactoryWaitForButton);

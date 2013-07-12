@@ -5,12 +5,6 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-TaskReachAngle::TaskReachAngle(boost::shared_ptr<TaskEnvironment> tenv) 
-    : Parent("ReachAngle","Reach a desired destination",true,-1.)
-{
-    env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
-
 TaskIndicator TaskReachAngle::iterate()
 {
     const turtlesim::Pose & tpose = env->getPose();
@@ -32,4 +26,4 @@ TaskIndicator TaskReachAngle::terminate()
 	return Parent::terminate();
 }
 
-DYNAMIC_TASK(TaskReachAngle);
+DYNAMIC_TASK(TaskFactoryReachAngle);

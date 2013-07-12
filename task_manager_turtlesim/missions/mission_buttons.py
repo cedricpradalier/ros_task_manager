@@ -18,8 +18,8 @@ wp = [ [1., 9., pi/2, 0, 0, 255],
 
 tc.WaitForButton(text="go");
 # Start the wait for button task in the background
-w4abort = tc.WaitForButton(main_task=False,text="abort")
-w4home = tc.WaitForButton(main_task=False,text="home")
+w4abort = tc.WaitForButton(foreground=False,text="abort")
+w4home = tc.WaitForButton(foreground=False,text="home")
 # Prepare a condition so that the following gets executed only until the 
 # a button is pressed
 tc.addCondition(ConditionIsCompleted("Abort",tc,w4abort))

@@ -5,11 +5,6 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-TaskGoTo::TaskGoTo(boost::shared_ptr<TaskEnvironment> tenv) 
-    : TaskDefinitionWithConfig<TaskGoToConfig,TaskGoTo>("GoTo","Reach a desired destination",true,-1.)
-{
-    env = boost::dynamic_pointer_cast<TurtleSimEnv,TaskEnvironment>(tenv);
-}
 
 TaskIndicator TaskGoTo::iterate()
 {
@@ -40,4 +35,4 @@ TaskIndicator TaskGoTo::terminate()
 	return TaskStatus::TASK_TERMINATED;
 }
 
-DYNAMIC_TASK(TaskGoTo);
+DYNAMIC_TASK(TaskFactoryGoTo);

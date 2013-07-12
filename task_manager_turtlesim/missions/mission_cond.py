@@ -24,7 +24,7 @@ while True:
     tc.Clear()
 
     # Start the wait for roi task in the background
-    w4roi = tc.WaitForROI(main_task=False,roi_x=1.,roi_y=6.,roi_radius=1.0)
+    w4roi = tc.WaitForROI(foreground=False,roi_x=1.,roi_y=6.,roi_radius=1.0)
     # Prepare a condition so that the following gets executed only until the 
     # Region of Interest is found
     tc.addCondition(ConditionIsCompleted("ROI detector",tc,w4roi))

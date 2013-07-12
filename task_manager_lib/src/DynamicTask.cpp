@@ -4,8 +4,8 @@
 using namespace task_manager_lib;
 
 
-DynamicTask::DynamicTask(const std::string & fname, boost::shared_ptr<TaskEnvironment> env) :
-	TaskDefinition("DynamicTask","undefined",true,-1.0),filename(fname) 
+DynamicTask::DynamicTask(const std::string & fname, TaskEnvironmentPtr env) :
+	TaskDefinitionBase("DynamicTask","undefined",true,env),filename(fname) 
 {
 	// Hack to garantee alignment on 32 bits, for valgrind
 	char fbuffer[1024];

@@ -7,17 +7,22 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    class TaskReachAngle : public TaskDefinitionWithConfig<TaskReachAngleConfig,TaskReachAngle>
+    class TaskReachAngle : public TaskInstance<TaskReachAngleConfig,TurtleSimEnv>
     {
-        protected:
-            boost::shared_ptr<TurtleSimEnv> env;
         public:
-            TaskReachAngle(boost::shared_ptr<TaskEnvironment> env); 
+            TaskReachAngle(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskReachAngle() {};
 
             virtual TaskIndicator iterate();
 
             virtual TaskIndicator terminate();
+    };
+    class TaskFactoryReachAngle : public TaskDefinition<TaskReachAngleConfig, TurtleSimEnv, TaskReachAngle>
+    {
+        public:
+            TaskFactoryReachAngle(TaskEnvironmentPtr env) : 
+                Parent("ReachAngle","Reach a desired angular set-point",true,env) {}
+            virtual ~TaskFactoryReachAngle() {};
     };
 };
 
