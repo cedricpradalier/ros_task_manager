@@ -2,7 +2,7 @@
 using namespace task_manager_msgs;
 using namespace task_manager_lib;
 
-TaskIndicator TaskWaitDefault::initialise(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskWaitDefault::initialise(const TaskParameters & parameters) 
 {
     t0 = ros::Time::now();
 	return TaskStatus::TASK_INITIALISED;
@@ -10,6 +10,7 @@ TaskIndicator TaskWaitDefault::initialise(const TaskParameters & parameters) thr
 
 TaskIndicator TaskWaitDefault::iterate()
 {
+    ROS_INFO("Waiting %.3f",cfg.duration);
     ros::Duration d = ros::Time::now() - t0;
     if (d.toSec() > cfg.duration) {
         return TaskStatus::TASK_COMPLETED;

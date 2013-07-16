@@ -145,6 +145,7 @@ void TaskInstanceBase::doInitialise(unsigned int runtimeId, const TaskParameters
     // config.print(stdout);
     parameters.getParameter("task_timeout",timeout);
 	statusString.clear();
+    this->parseParameters(parameters);
 	taskStatus = this->initialise(parameters);
 }
 

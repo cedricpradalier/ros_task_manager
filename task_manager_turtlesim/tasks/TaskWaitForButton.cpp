@@ -7,7 +7,7 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 using namespace boost::algorithm;
 
-TaskIndicator TaskWaitForButton::initialise(const TaskParameters & parameters) throw (InvalidParameter)
+TaskIndicator TaskWaitForButton::initialise(const TaskParameters & parameters) 
 {
     TaskIndicator parent = Parent::initialise(parameters);
     if (parent != TaskStatus::TASK_INITIALISED) {
