@@ -10,7 +10,6 @@ TaskIndicator TaskWaitDefault::initialise(const TaskParameters & parameters)
 
 TaskIndicator TaskWaitDefault::iterate()
 {
-    ROS_INFO("Waiting %.3f",cfg.duration);
     ros::Duration d = ros::Time::now() - t0;
     if (d.toSec() > cfg.duration) {
         return TaskStatus::TASK_COMPLETED;
