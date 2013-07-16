@@ -356,6 +356,8 @@ namespace task_manager_lib {
             unsigned int runId;
 
             TaskEnvironmentPtr env_gen;
+            virtual void parseParameters(const TaskParameters & parameters) throw (InvalidParameter) {
+            }
         public:
             // All the class below are intended for generic use
 
@@ -443,7 +445,7 @@ namespace task_manager_lib {
             // Set of functions that must be implemented by any inheriting class
 
             // Initialise is called once every time the task is launched
-            virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter) = 0;
+            virtual TaskIndicator initialise(const TaskParameters & parameters) = 0;
 
             // iterate is called only once for non periodic tasks. It is called
             // iteratively with period 'task_period' for periodic class. 
@@ -562,6 +564,11 @@ namespace task_manager_lib {
                 virtual void reconfigure(CFG &config, uint32_t level) {
                     cfg = config;
                 }
+
+                virtual void parseParameters(const TaskParameters & parameters) throw (InvalidParameter) {
+                    cfg = parameters.toConfig<CFG>();
+                    recfg.reset(new DynRecfgData(this, cfg));
+                }
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskInstance(TaskDefinitionPtr def, TaskEnvironmentPtr ev) 
@@ -570,10 +577,8 @@ namespace task_manager_lib {
                     }
                 virtual ~TaskInstance() {}
 
-                virtual TaskIndicator initialise(const TaskParameters & parameters) throw (InvalidParameter)
+                virtual TaskIndicator initialise(const TaskParameters & parameters) 
                 {
-                    cfg = parameters.toConfig<CFG>();
-                    recfg.reset(new DynRecfgData(this, cfg));
                     return task_manager_msgs::TaskStatus::TASK_INITIALISED;
                 }
 

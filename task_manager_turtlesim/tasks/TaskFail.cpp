@@ -17,7 +17,7 @@ TaskIndicator TaskFactoryFail::configure(const TaskParameters & parameters) thro
     return ti;
 }
 
-TaskIndicator TaskFail::initialise(const TaskParameters & parameters) throw (InvalidParameter) {
+TaskIndicator TaskFail::initialise(const TaskParameters & parameters)  {
     TaskIndicator ti = Parent::initialise(parameters);
     if (ti != TaskStatus::TASK_INITIALISED) {
         return ti;

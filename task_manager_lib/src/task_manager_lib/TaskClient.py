@@ -176,10 +176,14 @@ class TaskClient:
 
 
     def timerCallback(self,timerEvent):
-        if self.keepAlive:
-            header = std_msgs.msg.Header()
-            header.stamp = rospy.Time.now()
-            self.keepAlivePub.publish(header)
+        if self.keepAlive and not rospy.is_shutdown():
+            try:
+                header = std_msgs.msg.Header()
+                header.stamp = rospy.Time.now()
+                self.keepAlivePub.publish(header)
+            except rospy.ROSException, e:
+                # Ignore, this sometimes happens on shutdown
+                pass
 
     def updateTaskList(self):
         try:
