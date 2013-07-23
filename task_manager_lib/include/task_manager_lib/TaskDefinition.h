@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <ros/ros.h>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread.hpp>
 
 #include <string>
 #include <task_manager_msgs/TaskStatus.h>
@@ -28,6 +29,16 @@ namespace task_manager_lib {
      * the argument.\
      * */
     class TaskEnvironment {
+        public:
+            // This mutex will be locked in all the task instance function
+            // (initialize, iterate, terminate) for periodic tasks. However, 
+            // for non-periodic tasks, it is not possible to lock the
+            // environment forever, so the lock is taken only for initialize and
+            // terminate, but the user needs to organise his/her own locking as
+            // appropriate, e.g for a reader or a writer
+            // boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
+            // boost::unique_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
+            boost::shared_mutex environment_mutex;
         public:
             TaskEnvironment() {}
             virtual ~TaskEnvironment() {}
