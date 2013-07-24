@@ -140,6 +140,7 @@ bool TaskInstanceBase::isAnInstanceOf(TaskDefinitionConstPtr def) {
 
 void TaskInstanceBase::doInitialise(unsigned int runtimeId, const TaskParameters & parameters)
 {
+    boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
     runId = runtimeId;
     // printf("Initialise %s: after update\n",this->getName().c_str());
     // config.print(stdout);
@@ -152,11 +153,18 @@ void TaskInstanceBase::doInitialise(unsigned int runtimeId, const TaskParameters
 void TaskInstanceBase::doIterate()
 {
 	statusString.clear();
-	taskStatus = this->iterate();
+    // TODO: improve ways to specify what requires locking
+    if (this->isPeriodic()) {
+        boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
+        taskStatus = this->iterate();
+    } else {
+        taskStatus = this->iterate();
+    }
 }
 
 void TaskInstanceBase::doTerminate()
 {
+    boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
 	statusString.clear();
     TaskIndicator ti = this->terminate();
     if (ti == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
