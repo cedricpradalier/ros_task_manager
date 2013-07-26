@@ -101,9 +101,10 @@ class TaskClient:
         name = ""
         help = ""
         client = None
-        def __init__(self,name,help,client):
+        def __init__(self,name,help,cfg,client):
             self.name = name
             self.help = help
+            self.config = cfg
             self.client = client
 
         def __call__(self,**paramdict):
@@ -172,6 +173,8 @@ class TaskClient:
         self.idle()
 
     def __getattr__(self,name):
+        if name=="__dir__":
+            return self.tasklist.keys
         return self.tasklist[name]
 
 
@@ -190,7 +193,7 @@ class TaskClient:
             resp = self.get_task_list()
             self.tasklist = {}
             for t in resp.tlist:
-                self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,self)
+                self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.config,self)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)
 

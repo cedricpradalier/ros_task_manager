@@ -1,0 +1,6 @@
+#!/bin/sh
+
+path=`rospack find task_manager_lib`
+
+ipython --no-banner -i $path/node/console.py -- $*
+
