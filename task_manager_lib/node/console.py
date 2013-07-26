@@ -6,11 +6,14 @@ from task_manager_lib.TaskClient import *
 from dynamic_reconfigure.encoding import *
 import argparse
 
-server_node="/task_server"
+server_node=""
 default_period=0.1
+rospy.init_node('task_console')
+server_node = rospy.get_param("~server",server_node)
+default_period = rospy.get_param("~period",default_period)
 
 parser = argparse.ArgumentParser(description='Print the list of tasks running on a given server node')
-parser.add_argument('--server', '-s',default=server_node,required=True,
+parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),
         nargs=1, help='server node name, e.g. /task_server')
 parser.add_argument('--period', '-p',default=default_period,type=float, 
         nargs=1, help='default period for new tasks')
@@ -19,9 +22,6 @@ args = parser.parse_args()
 default_period=args.period
 server_node=args.server[0]
 
-rospy.init_node('task_console')
-server_node = rospy.get_param("~server",server_node)
-default_period = rospy.get_param("~period",default_period)
 tc = TaskClient(server_node,default_period)
 
 def param_string(t):
