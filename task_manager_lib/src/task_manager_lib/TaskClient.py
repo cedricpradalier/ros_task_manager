@@ -8,6 +8,7 @@ import std_msgs.msg
 from task_manager_msgs.msg import *
 from task_manager_lib.srv import *
 from dynamic_reconfigure.encoding import *
+import argparse
 
 import time
 import socket
@@ -105,13 +106,34 @@ class TaskClient:
             self.name = name
             self.help = help
             self.config = cfg
+            params = extract_params(decode_description(self.config))
+            self.params = dict([(p["name"],p) for p in params])
+            for p in self.params.values():
+                if p["type"]=="int":
+                    p["conv"]=int
+                if p["type"]=="double":
+                    p["conv"]=float
+                if p["type"]=="str":
+                    p["conv"]=str
+                if p["type"]=="bool":
+                    p["conv"]=bool
             self.client = client
 
+
         def __call__(self,**paramdict):
-            paramdict['task_name'] = self.name
             foreground = True
             if ('foreground' in paramdict):
                 foreground = bool(paramdict['foreground'])
+            for p in paramdict:
+                if p not in self.params:
+                    raise NameError("Parameter '%s' is not declared for task '%s'" % (p,self.name))
+                try:
+                    paramdict[p] = self.params[p]["conv"](paramdict[p])
+                except ValueError:
+                    raise ValueError("Could not convert argument '%s' from '%s' to '%s'"
+                            % (p, str(paramdict[p]), self.params[p]["type"]))
+                        
+            paramdict['task_name'] = self.name
             if (foreground):
                 rospy.loginfo("Starting task %s in foreground" % self.name)
                 res = self.client.startTaskAndWait(paramdict)
@@ -142,9 +164,25 @@ class TaskClient:
     def __init__(self,server_node,default_period):
         self.statusLock = threading.RLock()
         self.statusCond = threading.Condition(self.statusLock)
-        self.server_node = server_node
-        self.default_period = default_period
+        parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
+        parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),
+                nargs=1, help='server node name, e.g. /task_server', type=str)
+        parser.add_argument('--period', '-p',default=default_period,type=float, 
+                nargs=1, help='default period for new tasks')
+        parser.add_argument('--check', '-c',action='store_const', const=True, dest='check', default=False,  
+                help='if set, only test task syntax, but do not run')
+        args = parser.parse_args()
+        # print args
+        self.default_period=args.period
+        if type(args.server) is list:
+            self.server_node=args.server[0]
+        else:
+            self.server_node=args.server
+        self.check_only=args.check
+
         rospy.loginfo("Creating link to services on node " + self.server_node)
+        if self.check_only:
+            rospy.loginfo("Dry-run only: this might not work for complex mission")
         try:
             rospy.wait_for_service(self.server_node + '/get_all_tasks')
             self.get_task_list = rospy.ServiceProxy(self.server_node + '/get_all_tasks', GetTaskList)
@@ -203,6 +241,11 @@ class TaskClient:
 
 
     def startTask(self,paramdict,name="",foreground=True,period=-1):
+        if rospy.is_shutdown():
+            raise TaskException("Aborting due to ROS shutdown")
+        if self.check_only:
+            rospy.sleep(0.5)
+            return 0
         if period < 0:
             period = self.default_period
         try:
@@ -229,6 +272,8 @@ class TaskClient:
         tid = self.startTask(paramdict,name,foreground,period)
         if (self.verbose):
             rospy.logdebug( "Waiting task %d" % tid)
+        if self.check_only:
+            return True
         return self.waitTask(tid)
 
     def stopTask(self,id):
@@ -368,6 +413,14 @@ class TaskClient:
             if rospy.core.is_shutdown():
                 raise TaskException("Aborting due to ROS shutdown");
             return False
+
+    def stopAllTasks(self):
+        self.keepAlive = False
+        statusTerminated = self.taskStatusId['TASK_TERMINATED']
+        for id in self.taskstatus:
+            if self.taskstatus[id].status & (~statusTerminated):
+                continue
+            self.stopTask(id)
 
     def waitTask(self,id):
         return self.waitTaskList([id],True,False)

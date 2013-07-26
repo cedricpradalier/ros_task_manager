@@ -5,24 +5,24 @@ import rospy
 from task_manager_lib.TaskClient import *
 from dynamic_reconfigure.encoding import *
 import argparse
+import signal
+
+    
 
 server_node=""
 default_period=0.1
-rospy.init_node('task_console')
+rospy.init_node('task_console',disable_signals=False)
 server_node = rospy.get_param("~server",server_node)
 default_period = rospy.get_param("~period",default_period)
 
-parser = argparse.ArgumentParser(description='Print the list of tasks running on a given server node')
-parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),
-        nargs=1, help='server node name, e.g. /task_server')
-parser.add_argument('--period', '-p',default=default_period,type=float, 
-        nargs=1, help='default period for new tasks')
-args = parser.parse_args()
-# print args
-default_period=args.period
-server_node=args.server[0]
-
+print "Node: " + str(server_node)
 tc = TaskClient(server_node,default_period)
+def signal_handler(signal, frame):
+    global tc
+    print "Killing all tasks by stopping the keep-alive pulse"
+    tc.stopAllTasks()
+
+signal.signal(signal.SIGINT,signal_handler)
 
 def param_string(t):
     if t["type"]=="double" or t["type"]=="int":
@@ -39,6 +39,7 @@ def index():
         print "  %-16s: %s" % (t.name,t.help)
     print "Tasks name can be used as functions, e.g. Wait(duration=1.0)"
     print "Use help(Task) to get help on a specific task, e.g. help(Wait)"
+    print "Use Ctrl-C to stop the keep-alive thread and kill all tasks"
     print "Type index() to display this summary"
 
 for t in tc.tasklist.values():
@@ -52,4 +53,6 @@ for t in tc.tasklist.values():
 
 del param_string
 index()
+
+
 
