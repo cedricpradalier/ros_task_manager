@@ -40,7 +40,12 @@ def index():
     print "Tasks name can be used as functions, e.g. Wait(duration=1.0)"
     print "Use help(Task) to get help on a specific task, e.g. help(Wait)"
     print "Use Ctrl-C to stop the keep-alive thread and kill all tasks"
+    print "Type status() to display the status of currently running tasks"
     print "Type index() to display this summary"
+
+def status():
+    global tc
+    tc.printTaskStatus()
 
 for t in tc.tasklist.values():
     params=extract_params(decode_description(t.config))

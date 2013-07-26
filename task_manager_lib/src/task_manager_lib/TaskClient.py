@@ -144,12 +144,14 @@ class TaskClient:
                 return id
 
     class TaskStatus:
-        id = 0
-        name = ""
-        status = 0
-        foreground = True
-        statusString = ""
-        statusTime = 0.0
+        def __init__(self,client):
+            self.client = client
+            self.id = 0
+            self.name = ""
+            self.status = 0
+            self.foreground = True
+            self.statusString = ""
+            self.statusTime = 0.0
 
         def __str__(self):
             output = "%f %-12s " % (self.statusTime,self.name)
@@ -157,8 +159,7 @@ class TaskClient:
                 output += "F "
             else:
                 output += "B "
-            output += TaskClient.taskStatusStrings[self.status]
-            output += ":" + self.statusString
+            output += self.client.status_string(self.status)
             return output
 
     def __init__(self,server_node,default_period):
@@ -301,7 +302,7 @@ class TaskClient:
 
     def status_callback(self,t):
         with self.statusLock:
-            ts = self.TaskStatus()
+            ts = self.TaskStatus(self)
             ts.id = t.id
             ts.name = t.name
             status = t.status
@@ -343,7 +344,7 @@ class TaskClient:
             with self.statusLock:
                 resp = self.get_status()
                 for t in resp.running_tasks + resp.zombie_tasks:
-                    ts = self.TaskStatus()
+                    ts = self.TaskStatus(self)
                     ts.id = t.id
                     ts.name = t.name
                     status = t.status
