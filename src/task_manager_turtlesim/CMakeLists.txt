@@ -4,7 +4,7 @@ project(task_manager_turtlesim)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
@@ -13,7 +13,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
+# catkin_python_setup()
 
 #######################################
 ## Declare ROS messages and services ##
@@ -61,7 +61,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES task_manager_turtlesim
-  CATKIN_DEPENDS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim message_runtime
+#  CATKIN_DEPENDS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim message_runtime
 #  DEPENDS system_lib
 )
 

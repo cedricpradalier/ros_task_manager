@@ -50,8 +50,6 @@
   <run_depend>task_manager_lib</run_depend>
   <run_depend>task_manager_msgs</run_depend>
   <run_depend>turtlesim</run_depend>
-  <build_depend>message_generation</build_depend>
-  <run_depend>message_runtime</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
