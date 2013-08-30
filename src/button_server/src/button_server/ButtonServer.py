@@ -25,6 +25,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             return
         elif self.path == "/lib/jquery-1.8.2.min.js":
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            return
         found = False
         for h in ButtonServer.repository.gethdl:
             if h.match(self.path):

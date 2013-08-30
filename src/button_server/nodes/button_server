@@ -9,7 +9,7 @@ import os
 from string import Template
 
 import sys
-print sys.path
+# print sys.path
 
 from button_server.ButtonServer import ButtonServer
 
