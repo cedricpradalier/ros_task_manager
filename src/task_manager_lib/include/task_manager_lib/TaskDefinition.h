@@ -39,9 +39,12 @@ namespace task_manager_lib {
             // boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
             // boost::unique_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
             boost::shared_mutex environment_mutex;
+        protected:
+            ros::NodeHandle nh;
         public:
-            TaskEnvironment() {}
+            TaskEnvironment(ros::NodeHandle & _nh) : nh(_nh) {}
             virtual ~TaskEnvironment() {}
+            ros::NodeHandle & getNodeHandle() {return nh;}
     };
     typedef boost::shared_ptr<TaskEnvironment> TaskEnvironmentPtr;
     typedef boost::shared_ptr<TaskEnvironment const> TaskEnvironmentConstPtr;
