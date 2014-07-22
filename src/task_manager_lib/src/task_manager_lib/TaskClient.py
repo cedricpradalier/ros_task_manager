@@ -75,6 +75,7 @@ class TaskClient:
     tasklist = {}
     taskstatus = {}
     conditions = []
+    status_functions = []
 
     taskStatusStrings = dict([( TaskStatus.__dict__[k],k) for k in TaskStatus.__dict__.keys() if k[0:5]=="TASK_"])
     taskStatusId = dict([(v,k) for k,v in taskStatusStrings.iteritems()])
@@ -98,6 +99,9 @@ class TaskClient:
                 v.append(x)
         return v
 
+    def registerStatusFunction(self,f):
+        self.status_functions.append(f)
+
     class TaskDefinition:
         name = ""
         help = ""
@@ -119,11 +123,7 @@ class TaskClient:
                     p["conv"]=bool
             self.client = client
 
-
-        def __call__(self,**paramdict):
-            foreground = True
-            if ('foreground' in paramdict):
-                foreground = bool(paramdict['foreground'])
+        def prepareParams(self,paramdict):
             for p in paramdict:
                 if p not in self.params:
                     raise NameError("Parameter '%s' is not declared for task '%s'" % (p,self.name))
@@ -134,6 +134,18 @@ class TaskClient:
                             % (p, str(paramdict[p]), self.params[p]["type"]))
                         
             paramdict['task_name'] = self.name
+            return paramdict
+
+        def start(self,**paramdict):
+            paramdict = self.prepareParams(paramdict)
+            id = self.client.startTask(paramdict)
+            return id
+
+        def __call__(self,**paramdict):
+            paramdict = self.prepareParams(paramdict)
+            foreground = True
+            if ('foreground' in paramdict):
+                foreground = bool(paramdict['foreground'])
             if (foreground):
                 rospy.loginfo("Starting task %s in foreground" % self.name)
                 res = self.client.startTaskAndWait(paramdict)
@@ -319,6 +331,8 @@ class TaskClient:
                     to_be_deleted.append(k)
             for k in to_be_deleted:
                 del self.taskstatus[k]
+            for f in self.status_functions:
+                f(ts)
         try:
             self.statusCond.notify_all()
         except RuntimeError:
