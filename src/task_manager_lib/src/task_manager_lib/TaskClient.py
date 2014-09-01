@@ -209,7 +209,7 @@ class TaskClient:
             rospy.logerr("Service initialisation failed: %s"%e)
             raise
 
-        self.keepAlivePub = rospy.Publisher(self.server_node + "/keep_alive",std_msgs.msg.Header)
+        self.keepAlivePub = rospy.Publisher(self.server_node + "/keep_alive",std_msgs.msg.Header,queue_size=1)
         self.statusSub = rospy.Subscriber(self.server_node + "/status",
                 TaskStatus, self.status_callback)
         self.timer = rospy.timer.Timer(rospy.Duration(0.1),self.timerCallback)
