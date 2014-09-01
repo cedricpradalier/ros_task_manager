@@ -2,7 +2,7 @@
 using namespace task_manager_msgs;
 using namespace task_manager_lib;
 
-TaskIndicator TaskWaitDefault::initialise(const TaskParameters & parameters) 
+TaskIndicator TaskWaitDefault::initialise() 
 {
     t0 = ros::Time::now();
 	return TaskStatus::TASK_INITIALISED;

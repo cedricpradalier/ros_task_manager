@@ -6,6 +6,12 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 
+TaskIndicator TaskGoTo::initialise()  {
+    ROS_INFO("TaskGoTo: Going to (%.2f,%.2f)",cfg.goal_x,cfg.goal_y);
+    return TaskStatus::TASK_INITIALISED;
+}
+            
+
 TaskIndicator TaskGoTo::iterate()
 {
     const turtlesim::Pose & tpose = env->getPose();

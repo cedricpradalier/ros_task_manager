@@ -16,7 +16,7 @@ namespace task_manager_turtlesim {
             TaskFail(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskFail() {};
 
-            virtual TaskIndicator initialise(const TaskParameters & parameters) ;
+            virtual TaskIndicator initialise() ;
             
             virtual TaskIndicator iterate();
 

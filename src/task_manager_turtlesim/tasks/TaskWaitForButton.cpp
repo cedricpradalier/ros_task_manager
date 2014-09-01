@@ -7,12 +7,8 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 using namespace boost::algorithm;
 
-TaskIndicator TaskWaitForButton::initialise(const TaskParameters & parameters) 
+TaskIndicator TaskWaitForButton::initialise()
 {
-    TaskIndicator parent = Parent::initialise(parameters);
-    if (parent != TaskStatus::TASK_INITIALISED) {
-        return parent;
-    }
     button_sub = env->getNodeHandle().subscribe("/buttons",10,&TaskWaitForButton::buttonCallback,this);
     triggered = false;
     expected_string.clear();

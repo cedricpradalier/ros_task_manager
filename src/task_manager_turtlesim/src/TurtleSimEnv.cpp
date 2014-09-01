@@ -3,8 +3,8 @@
 
 using namespace task_manager_turtlesim;
 
-TurtleSimEnv::TurtleSimEnv(ros::NodeHandle & n, unsigned int id) :
-    turtleId(id), nh(n), paused(false)
+TurtleSimEnv::TurtleSimEnv(ros::NodeHandle & n, unsigned int id) : task_manager_lib::TaskEnvironment(n)
+    turtleId(id), paused(false)
 {
     char buffer[128]; sprintf(buffer,"/turtle%d",id);
     std::string tname(buffer);

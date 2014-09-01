@@ -43,8 +43,6 @@ namespace task_manager_turtlesim {
             TurtleSimEnv(ros::NodeHandle & nh, unsigned int id=1);
             ~TurtleSimEnv() {};
 
-            ros::NodeHandle & getNodeHandle() {return nh;}
-
             const turtlesim::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {

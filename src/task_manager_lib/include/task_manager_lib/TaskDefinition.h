@@ -39,9 +39,12 @@ namespace task_manager_lib {
             // boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
             // boost::unique_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
             boost::shared_mutex environment_mutex;
+        protected:
+            ros::NodeHandle nh;
         public:
-            TaskEnvironment() {}
+            TaskEnvironment(ros::NodeHandle & _nh) : nh(_nh) {}
             virtual ~TaskEnvironment() {}
+            ros::NodeHandle & getNodeHandle() {return nh;}
     };
     typedef boost::shared_ptr<TaskEnvironment> TaskEnvironmentPtr;
     typedef boost::shared_ptr<TaskEnvironment const> TaskEnvironmentConstPtr;
@@ -456,7 +459,7 @@ namespace task_manager_lib {
             // Set of functions that must be implemented by any inheriting class
 
             // Initialise is called once every time the task is launched
-            virtual TaskIndicator initialise(const TaskParameters & parameters) = 0;
+            virtual TaskIndicator initialise() = 0;
 
             // iterate is called only once for non periodic tasks. It is called
             // iteratively with period 'task_period' for periodic class. 
@@ -588,7 +591,7 @@ namespace task_manager_lib {
                     }
                 virtual ~TaskInstance() {}
 
-                virtual TaskIndicator initialise(const TaskParameters & parameters) 
+                virtual TaskIndicator initialise() 
                 {
                     return task_manager_msgs::TaskStatus::TASK_INITIALISED;
                 }

@@ -14,6 +14,8 @@ namespace task_manager_turtlesim {
             TaskGoTo(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskGoTo() {};
 
+            virtual TaskIndicator initialise() ;
+
             virtual TaskIndicator iterate();
 
             virtual TaskIndicator terminate();
