@@ -1,19 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # ROS specific imports
 import roslib; roslib.load_manifest('button_server')
 import rospy
-import SimpleHTTPServer
-import SocketServer
+import http.server
+import socketserver
 import std_msgs
 import os
 from string import Template
 
-from requesthdl import *
+from .requesthdl import *
 
-class MyServer(SocketServer.TCPServer):
+class MyServer(socketserver.TCPServer):
     allow_reuse_address = True
 
-class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
             self.send_response(200)
@@ -24,7 +24,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.wfile.close()
             return
         elif self.path == "/lib/jquery-1.8.2.min.js":
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            http.server.SimpleHTTPRequestHandler.do_GET(self)
             return
         found = False
         for h in ButtonServer.repository.gethdl:
@@ -89,11 +89,15 @@ class Button:
 class ButtonServer:
     global_server = None
     repository = HandlerRepository()
+    def on_shutdown(self):
+        self.httpd.socket.close()
+
     def __init__(self):
         ButtonServer.global_server = self
         self.handler = MyRequestHandler
         rospy.init_node('button_server')
-        self.pub = rospy.Publisher("buttons",std_msgs.msg.String)
+        rospy.on_shutdown(self.on_shutdown)
+        self.pub = rospy.Publisher("buttons",std_msgs.msg.String,queue_size=1)
         self.port = rospy.get_param("~port",5180)
         self.blist = []
         i=0
@@ -161,7 +165,9 @@ class ButtonServer:
         rospy.loginfo("serving '%s' at port %d" % (self.root,self.port))
         while not rospy.is_shutdown():
             try:
+                # rospy.loginfo("Handling next request")
                 self.httpd.handle_request()
-            except:
-                pass
+            except ValueError:
+                if not rospy.is_shutdown():
+                    raise
 
