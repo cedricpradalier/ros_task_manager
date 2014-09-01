@@ -44,10 +44,10 @@ generate_dynamic_reconfigure_options(
 
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs   task_manager_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs   task_manager_msgs
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -61,7 +61,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES task_manager_turtlesim
-#  CATKIN_DEPENDS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim message_runtime
+  CATKIN_DEPENDS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim 
 #  DEPENDS system_lib
 )
 
