@@ -92,9 +92,10 @@ class ButtonServer:
         ButtonServer.global_server = self
         self.handler = MyRequestHandler
         rospy.init_node('button_server')
-        self.pub = rospy.Publisher("buttons",std_msgs.msg.String)
+        self.pub = rospy.Publisher("buttons",std_msgs.msg.String,queue_size=1)
         self.port = rospy.get_param("~port",5180)
         self.blist = []
+        rospy.loginfo("Started Button Server on port %d" % self.port)
         i=0
         while True:
             bname = rospy.get_param("~button%d"%i,"")
