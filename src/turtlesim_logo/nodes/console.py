@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding=utf8
 # ROS specific imports
 import roslib; roslib.load_manifest('turtlesim_logo')
 import rospy
@@ -33,7 +34,7 @@ def param_string(t):
         return "%s: %s, default %s\n\t%s" % (t["name"],t["type"],\
                 str(t["default"]),t["description"])
 
-def index():
+def index_tasks():
     global tc
     print "Known tasks summary:"
     for t in tc.tasklist.values():
@@ -110,6 +111,24 @@ def VERT():
 def BLEU():
     SetPen(on=True,r=0,g=0,b=255,width=3)
 
+def AIDE():
+    print("PAUSE(temps): Attend selon le temps demandé")
+    print("AV(distance): Avance de la distance demandée")
+    print("TG(angle)   : Tourne vers la gauche selon l'angle demandé (degré)")
+    print("TD(angle)   : Tourne vers la droite selon l'angle demandé (degré)")
+    print("EFFACE()    : Efface l'écran")
+    print("LEVE()      : Leve le crayon")
+    print("NOIR()      : Sélectionne et pose un crayon noir")
+    print("BLANC()     : Sélectionne et pose un crayon blanc")
+    print("CYAN()      : Sélectionne et pose un crayon cyan/turquoise")
+    print("JAUNE()     : Sélectionne et pose un crayon jaune")
+    print("ROSE()      : Sélectionne et pose un crayon rose")
+    print("ROUGE()     : Sélectionne et pose un crayon rouge")
+    print("VERT()      : Sélectionne et pose un crayon vert")
+    print("BLEU()      : Sélectionne et pose un crayon bleu")
+    print("COULEUR(rouge,vert,bleu): Pose le crayon et choisit une couleur")
+
+AIDE()
 
 
 
