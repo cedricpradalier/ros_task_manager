@@ -1,7 +1,6 @@
 
 import re
-import urllib.request, urllib.parse, urllib.error
-import http.server
+import urllib
 
 class requesthdl:
     def __init__(self,path_re):
@@ -16,7 +15,7 @@ class requesthdl:
         if argpos > 0 :
             args=dict([s.split("=") for s in path[argpos+1:].split("&")])
             for k in list(args.keys()):
-                args[k] = urllib.parse.unquote(args[k])
+                args[k] = urllib.unquote(args[k])
         return args
 
     def run(self, request):

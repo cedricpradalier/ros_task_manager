@@ -1,19 +1,19 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # ROS specific imports
 import roslib; roslib.load_manifest('button_server')
 import rospy
-import http.server
-import socketserver
+import SimpleHTTPServer
+import SocketServer
 import std_msgs
 import os
 from string import Template
 
-from .requesthdl import *
+from .requesthdl2 import *
 
-class MyServer(socketserver.TCPServer):
+class MyServer(SocketServer.TCPServer):
     allow_reuse_address = True
 
-class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
+class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
             self.send_response(200)
@@ -24,7 +24,7 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.close()
             return
         elif self.path == "/lib/jquery-1.8.2.min.js":
-            http.server.SimpleHTTPRequestHandler.do_GET(self)
+            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
             return
         found = False
         for h in ButtonServer.repository.gethdl:
