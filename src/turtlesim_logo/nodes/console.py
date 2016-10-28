@@ -97,7 +97,7 @@ def CYAN():
     SetPen(on=True,r=0,g=255,b=255,width=3)
 
 def JAUNE():
-    SetPen(on=True,r=0,g=255,b=255,width=3)
+    SetPen(on=True,r=255,g=0,b=255,width=3)
 
 def ROSE():
     SetPen(on=True,r=255,g=0,b=255,width=3)
@@ -127,6 +127,58 @@ def AIDE():
     print("VERT()      : Sélectionne et pose un crayon vert")
     print("BLEU()      : Sélectionne et pose un crayon bleu")
     print("COULEUR(rouge,vert,bleu): Pose le crayon et choisit une couleur")
+
+# Same command in small letter
+def init():
+    INIT()
+
+def av(d):
+    AV(d)
+
+def tg(a):
+    TG(a)
+
+def td(a):
+    TD(a)
+
+def pause(t):
+    PAUSE(t)
+    
+def efface():
+    EFFACE()
+
+def leve():
+    LEVE()
+
+def couleur(red,green,blue):
+    COULEUR(red,green,blue)
+
+def noir():
+    NOIR()
+
+def blanc():
+    BLANC()
+
+def cyan():
+    CYAN()
+
+def jaune():
+    JAUNE()
+
+def rose():
+    ROSE()
+
+def rouge():
+    ROUGE()
+
+def vert():
+    VERT()
+
+def bleu():
+    BLEU()
+
+def aide():
+    AIDE()
 
 AIDE()
 

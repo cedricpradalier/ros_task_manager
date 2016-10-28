@@ -36,6 +36,18 @@ TaskIndicator TaskGoTo::iterate()
             + cfg.goal_y*cos(initial_pose.theta);
     }
     double r = hypot(goal_y-tpose.y,goal_x-tpose.x);
+    if ((tpose.x < 0.1) && (goal_x < tpose.x)) {
+		return TaskStatus::TASK_COMPLETED;
+    }
+    if ((tpose.y < 0.1) && (goal_y < tpose.y)) {
+		return TaskStatus::TASK_COMPLETED;
+    }
+    if ((tpose.x > 10.9) && (goal_x > tpose.x)) {
+		return TaskStatus::TASK_COMPLETED;
+    }
+    if ((tpose.y > 10.9) && (goal_y > tpose.y)) {
+		return TaskStatus::TASK_COMPLETED;
+    }
     if (r < cfg.dist_threshold) {
 		return TaskStatus::TASK_COMPLETED;
     }
