@@ -97,7 +97,7 @@ def CYAN():
     SetPen(on=True,r=0,g=255,b=255,width=3)
 
 def JAUNE():
-    SetPen(on=True,r=255,g=0,b=255,width=3)
+    SetPen(on=True,r=255,g=255,b=0,width=3)
 
 def ROSE():
     SetPen(on=True,r=255,g=0,b=255,width=3)
