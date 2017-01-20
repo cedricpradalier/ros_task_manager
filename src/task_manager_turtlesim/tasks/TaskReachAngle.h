@@ -9,9 +9,13 @@ using namespace task_manager_lib;
 namespace task_manager_turtlesim {
     class TaskReachAngle : public TaskInstance<TaskReachAngleConfig,TurtleSimEnv>
     {
+        protected:
+            double initial_theta;
         public:
             TaskReachAngle(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
             virtual ~TaskReachAngle() {};
+
+            virtual TaskIndicator initialise() ;
 
             virtual TaskIndicator iterate();
 

@@ -5,7 +5,13 @@
 #include "task_manager_lib/TaskDefinition.h"
 #include "std_srvs/Empty.h"
 #include "turtlesim/SetPen.h"
+#if ROS_VERSION_MINIMUM(1, 10, 0) 
+// Hydro
+#include "geometry_msgs/Twist.h"
+#else
+// Groovy and earlier code
 #include "turtlesim/Velocity.h"
+#endif
 #include "turtlesim/Pose.h"
 #include "boost/algorithm/string.hpp"
 #include "std_msgs/String.h"
@@ -43,11 +49,19 @@ namespace task_manager_turtlesim {
             TurtleSimEnv(ros::NodeHandle & nh, unsigned int id=1);
             ~TurtleSimEnv() {};
 
-            ros::NodeHandle & getNodeHandle() {return nh;}
-
             const turtlesim::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {
+#if ROS_VERSION_MINIMUM(1, 10, 0) 
+                geometry_msgs::Twist cmd;
+                if (paused) {
+                    cmd.linear.x = 0.;
+                    cmd.angular.z = 0.;
+                } else {
+                    cmd.linear.x = linear;
+                    cmd.angular.z = angular;
+                }
+#else
                 turtlesim::Velocity cmd;
                 if (paused) {
                     cmd.linear = 0.;
@@ -56,6 +70,7 @@ namespace task_manager_turtlesim {
                     cmd.linear = linear;
                     cmd.angular = angular;
                 }
+#endif
                 velPub.publish(cmd);
             }
 

@@ -1,7 +1,6 @@
 
 import re
 import urllib
-import SimpleHTTPServer
 
 class requesthdl:
     def __init__(self,path_re):
@@ -15,7 +14,7 @@ class requesthdl:
         args = {}
         if argpos > 0 :
             args=dict([s.split("=") for s in path[argpos+1:].split("&")])
-            for k in args.keys():
+            for k in list(args.keys()):
                 args[k] = urllib.unquote(args[k])
         return args
 

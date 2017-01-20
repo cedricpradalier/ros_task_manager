@@ -20,7 +20,7 @@ namespace task_manager_lib {
             virtual ~TaskWaitDefault() {};
 
             /// Record the starting time
-            virtual TaskIndicator initialise(const TaskParameters & parameters) ;
+            virtual TaskIndicator initialise() ;
 
             // Return COMPLETED once the current time - starting time is larger than the
             // desired duration

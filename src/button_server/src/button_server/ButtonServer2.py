@@ -8,7 +8,7 @@ import std_msgs
 import os
 from string import Template
 
-from requesthdl import *
+from .requesthdl2 import *
 
 class MyServer(SocketServer.TCPServer):
     allow_reuse_address = True
@@ -25,6 +25,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             return
         elif self.path == "/lib/jquery-1.8.2.min.js":
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            return
         found = False
         for h in ButtonServer.repository.gethdl:
             if h.match(self.path):
@@ -88,10 +89,14 @@ class Button:
 class ButtonServer:
     global_server = None
     repository = HandlerRepository()
+    def on_shutdown(self):
+        self.httpd.socket.close()
+
     def __init__(self):
         ButtonServer.global_server = self
         self.handler = MyRequestHandler
         rospy.init_node('button_server')
+        rospy.on_shutdown(self.on_shutdown)
         self.pub = rospy.Publisher("buttons",std_msgs.msg.String,queue_size=1)
         self.port = rospy.get_param("~port",5180)
         self.blist = []
@@ -161,7 +166,9 @@ class ButtonServer:
         rospy.loginfo("serving '%s' at port %d" % (self.root,self.port))
         while not rospy.is_shutdown():
             try:
+                # rospy.loginfo("Handling next request")
                 self.httpd.handle_request()
-            except:
-                pass
+            except ValueError:
+                if not rospy.is_shutdown():
+                    raise
 

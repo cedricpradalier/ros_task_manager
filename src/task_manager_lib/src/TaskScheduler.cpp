@@ -473,6 +473,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                     tp->updateStatus(now());
                 } catch (const std::exception & e) {
                     tp->task->debug("Exception %s",e.what());
+                    tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",ros::Time(t0));
                     tp->updateStatus(now());
                     cleanupTask(tp);
                     return ;
@@ -520,6 +521,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
         // tp->task->debug("Out of the loop");
     } catch (const boost::thread_interrupted & e) {
         // Ignore, we just want to make sure we get to the next line
+        tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",ros::Time::now());
     }
     cleanupTask(tp);
 }

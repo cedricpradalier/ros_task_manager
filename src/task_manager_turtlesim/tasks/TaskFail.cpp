@@ -17,16 +17,12 @@ TaskIndicator TaskFactoryFail::configure(const TaskParameters & parameters) thro
     return ti;
 }
 
-TaskIndicator TaskFail::initialise(const TaskParameters & parameters)  {
-    TaskIndicator ti = Parent::initialise(parameters);
-    if (ti != TaskStatus::TASK_INITIALISED) {
-        return ti;
-    }
+TaskIndicator TaskFail::initialise()  {
     counter = 0;
     if (cfg.error_type == TaskStatus::TASK_INITIALISATION_FAILED) {
         return cfg.error_type;
     }
-    return ti;
+    return TaskStatus::TASK_INITIALISED;
 }
             
 

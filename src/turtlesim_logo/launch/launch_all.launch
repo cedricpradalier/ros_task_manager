@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+    <!-- 
+         <include file="$(find task_manager_turtlesim)/launch/button_server.launch"/>
+    -->
+    <node name="turtlesim" pkg="turtlesim" type="turtlesim_node"  />
+    <node name="task_server" pkg="task_manager_turtlesim" type="task_server" output="screen" >
+        <!-- After install -->
+        <!-- <param name="lib_path" value="$(find task_manager_turtlesim)/tasks"/> -->
+        <!-- While developing -->
+        <param name="lib_path" value="$(find task_manager_turtlesim)/../../devel/share/task_manager_turtlesim/tasks"/>
+    </node>
+    <!--
+    <node name="mission" pkg="task_manager_turtlesim" type="mission.py"  >
+        <param name="server" value="/task_server"/>
+    </node>
+    -->
+</launch>

@@ -5,10 +5,18 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
+TaskIndicator TaskReachAngle::initialise()
+{
+    const turtlesim::Pose & tpose = env->getPose();
+    initial_theta = tpose.theta;
+	return TaskStatus::TASK_INITIALISED;
+}
+
 TaskIndicator TaskReachAngle::iterate()
 {
     const turtlesim::Pose & tpose = env->getPose();
-    double alpha = remainder(cfg.target-tpose.theta,2*M_PI);
+    double target = cfg.relative?(initial_theta+cfg.target):cfg.target;
+    double alpha = remainder(target-tpose.theta,2*M_PI);
     if (fabs(alpha) < cfg.threshold) {
 		return TaskStatus::TASK_COMPLETED;
     }

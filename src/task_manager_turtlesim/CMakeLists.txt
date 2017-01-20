@@ -44,10 +44,10 @@ generate_dynamic_reconfigure_options(
 
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs   task_manager_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs   task_manager_msgs
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -61,7 +61,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES task_manager_turtlesim
-#  CATKIN_DEPENDS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim message_runtime
+  CATKIN_DEPENDS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim 
 #  DEPENDS system_lib
 )
 
@@ -100,24 +100,31 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE
 
 ADD_LIBRARY( TaskGoTo SHARED tasks/TaskGoTo.cpp)
 TARGET_LINK_LIBRARIES(TaskGoTo ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskGoTo ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
 TARGET_LINK_LIBRARIES(TaskReachAngle ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskReachAngle ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( TaskSetPen SHARED tasks/TaskSetPen.cpp)
 TARGET_LINK_LIBRARIES(TaskSetPen ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskSetPen ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( TaskClear SHARED tasks/TaskClear.cpp)
 TARGET_LINK_LIBRARIES(TaskClear ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskClear ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
 TARGET_LINK_LIBRARIES(TaskWaitForROI ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskWaitForROI ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
 TARGET_LINK_LIBRARIES(TaskWaitForButton ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskWaitForButton ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( TaskFail SHARED tasks/TaskFail.cpp)
 TARGET_LINK_LIBRARIES(TaskFail ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(TaskFail ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##

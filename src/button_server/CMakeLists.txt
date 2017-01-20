@@ -97,6 +97,11 @@ install(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+install(DIRECTORY src/button_server/
+  DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  PATTERN ".svn" EXCLUDE)
+
 ## Mark executables and/or libraries for installation
 # install(TARGETS button_server button_server_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
