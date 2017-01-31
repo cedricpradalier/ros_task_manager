@@ -93,38 +93,38 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-ADD_EXECUTABLE( task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
-TARGET_LINK_LIBRARIES(task_server ${catkin_LIBRARIES} dl )
+ADD_EXECUTABLE( turtlesim_task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
+TARGET_LINK_LIBRARIES(turtlesim_task_server ${catkin_LIBRARIES} dl )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tasks)
 
-ADD_LIBRARY( TaskGoTo SHARED tasks/TaskGoTo.cpp)
-TARGET_LINK_LIBRARIES(TaskGoTo ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskGoTo ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskGoTo SHARED tasks/TaskGoTo.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskGoTo ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskGoTo ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-ADD_LIBRARY( TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
-TARGET_LINK_LIBRARIES(TaskReachAngle ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskReachAngle ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskReachAngle ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskReachAngle ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-ADD_LIBRARY( TaskSetPen SHARED tasks/TaskSetPen.cpp)
-TARGET_LINK_LIBRARIES(TaskSetPen ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskSetPen ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskSetPen SHARED tasks/TaskSetPen.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskSetPen ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskSetPen ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-ADD_LIBRARY( TaskClear SHARED tasks/TaskClear.cpp)
-TARGET_LINK_LIBRARIES(TaskClear ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskClear ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskClear SHARED tasks/TaskClear.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskClear ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskClear ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-ADD_LIBRARY( TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
-TARGET_LINK_LIBRARIES(TaskWaitForROI ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskWaitForROI ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForROI ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskWaitForROI ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-ADD_LIBRARY( TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
-TARGET_LINK_LIBRARIES(TaskWaitForButton ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskWaitForButton ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskWaitForButton ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-ADD_LIBRARY( TaskFail SHARED tasks/TaskFail.cpp)
-TARGET_LINK_LIBRARIES(TaskFail ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskFail ${${PROJECT_NAME}_EXPORTED_TARGETS})
+ADD_LIBRARY( turtlesim_TaskFail SHARED tasks/TaskFail.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskFail ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskFail ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
