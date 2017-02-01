@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+   <node name="button_server" pkg="button_server" type="button_server2" clear_params="true" output="screen">
+    <param name="button0" value="Go"/>
+    <param name="button0_color" value="lightgreen"/>
+    <param name="button1" value="Pause"/>
+    <param name="button1_style" value="background-color:#202020;color:white;"/>
+    <param name="button2" value="Home"/>
+    <param name="button2_text" value="Go Home"/>
+    <param name="button2_color" value="lightblue"/>
+    <param name="button3" value="Abort"/>
+    <param name="button3_style" value="background-color:red;color:black;"/>
+   </node>
+</launch>

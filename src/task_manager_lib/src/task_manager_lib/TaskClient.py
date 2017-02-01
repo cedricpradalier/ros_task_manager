@@ -395,7 +395,7 @@ class TaskClient:
                     trueConditions = self.getVerifiedConditions();
                     self.clearConditions()
                     rospy.loginfo("%s: Task %s terminated on condition" % (self.server_node,str(ids)))
-                    raise TaskConditionException("%s: Task %d terminated on condition" % self.server_nodeid,trueConditions)
+                    raise TaskConditionException("%s: Task %s terminated on condition" % (self.server_node,str(ids)),trueConditions)
                 for id in ids:
                     if id not in self.taskstatus:
                         if (t1-t0) > 1.0: 

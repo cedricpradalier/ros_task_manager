@@ -6,7 +6,7 @@ from math import *
 from task_manager_lib.TaskClient import *
 
 rospy.init_node('task_client')
-server_node = rospy.get_param("~server","/task_server")
+server_node = rospy.get_param("~server","/turtlesim_tasks")
 default_period = rospy.get_param("~period",0.2)
 tc = TaskClient(server_node,default_period)
 
