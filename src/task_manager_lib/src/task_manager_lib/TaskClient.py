@@ -401,7 +401,7 @@ class TaskClient:
                         if (t1-t0) > 1.0: 
                             if (self.verbose):
                                 rospy.logerr("%s: Id %d not in taskstatus" % self.server_node,id)
-                            raise TaskException("%s: Task %d did not appear in task status" % self.server_node,id,id);
+                            raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
                     else:
                         if self.verbose>1:
                             print "%s: %d: %02X - %s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status))
