@@ -388,6 +388,8 @@ class TaskClient:
 
         with self.statusLock:
             while not rospy.core.is_shutdown():
+                if self.verbose>1:
+                    self.printTaskStatus()
                 t1 = rospy.Time.now().to_sec()
                 if (self.anyConditionVerified()):
                     for id in ids:
@@ -398,9 +400,9 @@ class TaskClient:
                     raise TaskConditionException("%s: Task %s terminated on condition" % (self.server_node,str(ids)),trueConditions)
                 for id in ids:
                     if id not in self.taskstatus:
-                        if (t1-t0) > 1.0: 
+                        if (t1-t0) > 2.0: 
                             if (self.verbose):
-                                rospy.logerr("%s: Id %d not in taskstatus" % self.server_node,id)
+                                rospy.logerr("%s: Id %d not in taskstatus" % (self.server_node,id))
                             raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
                     else:
                         if self.verbose>1:
