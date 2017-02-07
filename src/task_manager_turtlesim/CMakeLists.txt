@@ -4,7 +4,7 @@ project(task_manager_turtlesim)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs task_manager_lib task_manager_msgs turtlesim )
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs task_manager_lib task_manager_action task_manager_msgs turtlesim )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
@@ -125,6 +125,10 @@ ADD_DEPENDENCIES(turtlesim_TaskWaitForButton ${${PROJECT_NAME}_EXPORTED_TARGETS}
 ADD_LIBRARY( turtlesim_TaskFail SHARED tasks/TaskFail.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskFail ${catkin_LIBRARIES} dl)
 ADD_DEPENDENCIES(turtlesim_TaskFail ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskMoveBase ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
