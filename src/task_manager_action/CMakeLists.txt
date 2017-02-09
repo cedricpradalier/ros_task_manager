@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   task_manager_msgs
   tf
   move_base_msgs
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -90,6 +91,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
   cfg/TaskActionMoveBase.cfg
+  cfg/TaskActionMoveGoal.cfg
 )
 
 ###################################

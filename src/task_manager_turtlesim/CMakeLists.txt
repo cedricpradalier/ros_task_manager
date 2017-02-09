@@ -130,6 +130,10 @@ ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${catkin_LIBRARIES} dl)
 ADD_DEPENDENCIES(turtlesim_TaskMoveBase ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
+ADD_LIBRARY( turtlesim_TaskMoveGoal SHARED tasks/TaskMoveGoal.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskMoveGoal ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskMoveGoal ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############
