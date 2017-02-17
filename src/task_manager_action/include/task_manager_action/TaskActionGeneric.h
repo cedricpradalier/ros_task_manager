@@ -24,6 +24,9 @@ namespace task_manager_action {
             virtual const std::string & getActionName() const = 0;
             virtual void buildActionGoal(Goal& goal) const = 0;
 
+            // This can be overwritten if needed
+            virtual void handleResult(ResultConstPtr result) {};
+
         public:
             // Basic constructor, receives the environment and ignore it.
             TaskActionGeneric(task_manager_lib::TaskDefinitionPtr def, 
@@ -49,6 +52,7 @@ namespace task_manager_action {
             virtual task_manager_lib::TaskIndicator iterate() {
                 switch (client->getState().state_) {
                     case actionlib::SimpleClientGoalState::SUCCEEDED:
+                        this->handleResult(client->getResult());
                         return task_manager_msgs::TaskStatus::TASK_COMPLETED;
                     case actionlib::SimpleClientGoalState::PENDING:
                     case actionlib::SimpleClientGoalState::ACTIVE:

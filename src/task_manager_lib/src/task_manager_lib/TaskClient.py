@@ -15,10 +15,11 @@ import socket
 import sys
 
 class TaskException(Exception):
-    def __init__(self, value,id=None,status=None):
+    def __init__(self, value,id=None,status=None,statusString=""):
         self.value = value
 	self.id = id
 	self.status = status
+	self.statusString = statusString
     def __str__(self):
         return repr(self.value)
 
@@ -406,7 +407,7 @@ class TaskClient:
                             raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
                     else:
                         if self.verbose>1:
-                            print "%s: %d: %02X - %s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status))
+                            print "%s: %d: %02X - %s\n%s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status),self.taskstatus[id].status_string)
                         if not (self.taskstatus[id].status & statusTerminated):
                             continue
                         status = self.taskstatus[id].status & (~statusTerminated)
@@ -417,7 +418,7 @@ class TaskClient:
                         elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
                                 rospy.logwarn( "%s: Task %d failed (%d - %s)" %  (self.server_node,id,status,self.status_string(status)))
-                            raise TaskException("%s: Task %d:%s failed: %d:%s" % (self.server_node,id,self.taskstatus[id].name,status,self.status_string(status)), id, status);
+                            raise TaskException("%s: Task %d:%s failed: %d:%s" % (self.server_node,id,self.taskstatus[id].name,status,self.status_string(status)), id, status,self.taskstatus[id].status_string);
                             # instead of raise?
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):
