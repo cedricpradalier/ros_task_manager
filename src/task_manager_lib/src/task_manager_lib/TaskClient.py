@@ -407,7 +407,7 @@ class TaskClient:
                             raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
                     else:
                         if self.verbose>1:
-                            print "%s: %d: %02X - %s\n%s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status),self.taskstatus[id].status_string)
+                            print "%s: %d: %02X - %s\n%s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status),self.taskstatus[id].statusString)
                         if not (self.taskstatus[id].status & statusTerminated):
                             continue
                         status = self.taskstatus[id].status & (~statusTerminated)
@@ -418,7 +418,7 @@ class TaskClient:
                         elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
                                 rospy.logwarn( "%s: Task %d failed (%d - %s)" %  (self.server_node,id,status,self.status_string(status)))
-                            raise TaskException("%s: Task %d:%s failed: %d:%s" % (self.server_node,id,self.taskstatus[id].name,status,self.status_string(status)), id, status,self.taskstatus[id].status_string);
+                            raise TaskException("%s: Task %d:%s failed: %d:%s" % (self.server_node,id,self.taskstatus[id].name,status,self.status_string(status)), id, status,self.taskstatus[id].statusString);
                             # instead of raise?
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):
