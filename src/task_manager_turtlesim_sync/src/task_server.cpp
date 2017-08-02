@@ -5,15 +5,15 @@
 
 #include "task_manager_sync/TaskServerSync.h"
 
-#include "task_manager_sync/TaskEnvironmentSync.h"
+#include "task_manager_turtlesim_sync/TurtleSimEnv.h"
 
 
-using namespace task_manager_sync;
+using namespace task_manager_turtlesim_sync;
 using namespace task_manager_lib;
 
-class TaskServer : public TaskServerSync {
+class TaskServer : public task_manager_sync::TaskServerSync {
     public:
-        TaskServer(TaskEnvironmentPtr _env) : TaskServerSync(_env) {
+        TaskServer(TaskEnvironmentPtr _env) : task_manager_sync::TaskServerSync(_env) {
             start();
         }
 
@@ -21,12 +21,14 @@ class TaskServer : public TaskServerSync {
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc,argv,"task_server_sync");//init ros
+    ros::init(argc,argv,"turtlesim_tasks");//init ros
     ros::NodeHandle nh("~");
     std::string partner_name = "partner";
+    int id = 1;
     nh.getParam("my_name",partner_name);
+    nh.getParam("my_id",id);
 
-    TaskEnvironmentSyncPtr env(new TaskEnvironmentSync(nh,partner_name,"sync"));
+    TurtleSimEnvPtr env(new TurtleSimEnv(nh,partner_name,id));
     env->addSyncSource("partner1");
     env->addSyncSource("partner2");
     TaskServer ts(env);

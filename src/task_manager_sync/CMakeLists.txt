@@ -105,7 +105,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES task_manager_sync
+  LIBRARIES task_manager_sync
   CATKIN_DEPENDS roscpp rospy task_manager_lib task_manager_msgs message_runtime
 #  DEPENDS system_lib
 )
@@ -122,9 +122,12 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/task_manager_sync.cpp
-# )
+add_library(${PROJECT_NAME}
+  tasks/TaskSetStatusSync.cpp
+  tasks/TaskWaitForStatusSync.cpp
+)
+ADD_DEPENDENCIES(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} dl)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -147,19 +150,17 @@ add_executable(task_server_sync tests/task_server.cpp)
 add_dependencies(task_server_sync ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(task_server_sync
-  ${catkin_LIBRARIES} dl
-)
+target_link_libraries(task_server_sync ${PROJECT_NAME} ${catkin_LIBRARIES} dl)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tasks)
-
-ADD_LIBRARY( TaskManagerSyncTaskSetStatusSync SHARED tasks/TaskSetStatusSync.cpp)
-ADD_DEPENDENCIES(TaskManagerSyncTaskSetStatusSync ${${PROJECT_NAME}_EXPORTED_TARGETS})
-TARGET_LINK_LIBRARIES(TaskManagerSyncTaskSetStatusSync ${catkin_LIBRARIES} dl)
-
-ADD_LIBRARY( TaskManagerSyncTaskWaitForStatusSync SHARED tasks/TaskWaitForStatusSync.cpp)
-TARGET_LINK_LIBRARIES(TaskManagerSyncTaskWaitForStatusSync ${catkin_LIBRARIES} dl)
-ADD_DEPENDENCIES(TaskManagerSyncTaskWaitForStatusSync ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tasks)
+# 
+# ADD_LIBRARY( TaskManagerSyncTaskSetStatusSync SHARED tasks/TaskSetStatusSync.cpp)
+# ADD_DEPENDENCIES(TaskManagerSyncTaskSetStatusSync ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# TARGET_LINK_LIBRARIES(TaskManagerSyncTaskSetStatusSync ${catkin_LIBRARIES} dl)
+# 
+# ADD_LIBRARY( TaskManagerSyncTaskWaitForStatusSync SHARED tasks/TaskWaitForStatusSync.cpp)
+# TARGET_LINK_LIBRARIES(TaskManagerSyncTaskWaitForStatusSync ${catkin_LIBRARIES} dl)
+# ADD_DEPENDENCIES(TaskManagerSyncTaskWaitForStatusSync ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
@@ -176,11 +177,11 @@ ADD_DEPENDENCIES(TaskManagerSyncTaskWaitForStatusSync ${${PROJECT_NAME}_EXPORTED
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS ${PROJECT_NAME} 
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/

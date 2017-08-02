@@ -1,6 +1,6 @@
 
 #include <math.h>
-#include "TaskSetStatusSync.h"
+#include "task_manager_sync/TaskSetStatusSync.h"
 #include "task_manager_sync/TaskSetStatusSyncConfig.h"
 using namespace task_manager_msgs;
 using namespace task_manager_lib;
@@ -20,5 +20,7 @@ TaskIndicator TaskSetStatusSync::iterate()
 }
 
 
-DYNAMIC_TASK(TaskFactorySetStatusSync);
+
+// This is not designed to be a dynamic task. Use TaskServerSync instead
+// DYNAMIC_TASK(TaskFactorySetStatusSync);
 

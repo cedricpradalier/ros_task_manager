@@ -1,5 +1,5 @@
 #include <math.h>
-#include "TaskWaitForStatusSync.h"
+#include "task_manager_sync/TaskWaitForStatusSync.h"
 #include "task_manager_sync/TaskWaitForStatusSyncConfig.h"
 using namespace task_manager_msgs;
 using namespace task_manager_lib;
@@ -36,5 +36,6 @@ TaskIndicator TaskWaitForStatusSync::terminate()
 	return TaskStatus::TASK_TERMINATED;
 }
 
-DYNAMIC_TASK(TaskFactoryWaitForStatusSync);
+// This is not designed to be a dynamic task. Use TaskServerSync instead
+// DYNAMIC_TASK(TaskFactoryWaitForStatusSync);
 
