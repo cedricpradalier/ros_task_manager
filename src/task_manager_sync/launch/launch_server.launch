@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+    <node name="task_server1" pkg="task_manager_sync" type="task_server_sync"  output="screen">
+        <param name="lib_path" value="$(find task_manager_sync)/tasks"/>
+        <param name="my_name" value="partner1"/>
+        <remap from="~/partner1" to="/task_server2/sync"/>
+        <remap from="~/partner2" to="/task_server3/sync"/>
+    </node>
+    <node name="task_server2" pkg="task_manager_sync" type="task_server_sync"  output="screen">
+        <param name="lib_path" value="$(find task_manager_sync)/tasks"/>
+        <param name="my_name" value="partner2"/>
+        <remap from="~/partner1" to="/task_server1/sync"/>
+        <remap from="~/partner2" to="/task_server3/sync"/>
+    </node>
+    <node name="task_server3" pkg="task_manager_sync" type="task_server_sync"  output="screen">
+        <param name="lib_path" value="$(find task_manager_sync)/tasks"/>
+        <param name="my_name" value="partner3"/>
+        <remap from="~/partner1" to="/task_server1/sync"/>
+        <remap from="~/partner2" to="/task_server2/sync"/>
+    </node>
+</launch>
