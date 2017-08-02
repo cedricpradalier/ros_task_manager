@@ -2,6 +2,8 @@
 
 <launch>
     <node name="turtlesim" pkg="turtlesim" type="turtlesim_node"  />
+    <node pkg="rosservice" type="rosservice" name="spawn2" args="call --wait /spawn 4 4 0 turtle2"/>
+    <node pkg="rosservice" type="rosservice" name="spawn3" args="call --wait /spawn 7 7 0 turtle3"/>
     <node name="turtlesim_tasks1" pkg="task_manager_turtlesim_sync" type="turtlesim_task_server_sync"  output="screen">
         <param name="lib_path" value="$(find task_manager_turtlesim_sync)/tasks"/>
         <param name="my_id" value="1"/>
