@@ -11,7 +11,7 @@ import signal
 
 server_node=""
 default_period=0.1
-rospy.init_node('task_console',disable_signals=False)
+rospy.init_node('task_console',disable_signals=False,anonymous=True)
 server_node = rospy.get_param("~server",server_node)
 default_period = rospy.get_param("~period",default_period)
 
