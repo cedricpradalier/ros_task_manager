@@ -41,6 +41,7 @@ namespace task_manager_action {
                 Goal goal;
                 client = new Client(getActionName(),true);
                 if (!client->waitForServer(ros::Duration(5.0))) {
+                    ROS_ERROR("Action server %s did not reply after 5s, aborting task",getActionName().c_str());
                     delete client; client = NULL;
                     return task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED;
                 }
