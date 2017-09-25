@@ -40,7 +40,7 @@ namespace task_manager_action {
             virtual task_manager_lib::TaskIndicator initialise() {
                 Goal goal;
                 client = new Client(getActionName(),true);
-                if (!client->waitForServer(ros::Duration(1.0))) {
+                if (!client->waitForServer(ros::Duration(5.0))) {
                     delete client; client = NULL;
                     return task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED;
                 }
