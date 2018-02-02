@@ -223,9 +223,13 @@ void TaskScheduler::addTask(boost::shared_ptr<TaskDefinitionBase> td)
 
 void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env)
 {
+    try {
     boost::shared_ptr<TaskDefinitionBase> td(new DynamicTask(filename, env));
 
     addTask(td);
+    } catch (DynamicTask::DLLoadError & e) {
+        ROS_ERROR("Ignoring file '%s': '%s'",filename.c_str(),e.what());
+    }
 }
 
 void TaskScheduler::configureTasks()
