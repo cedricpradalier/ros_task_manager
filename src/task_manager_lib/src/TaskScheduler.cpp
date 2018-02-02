@@ -503,7 +503,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                 }
                 tp->updateStatus(ros::Time::now());
                 if (!first && tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
-                    ROS_INFO("Task '%s' not running anymore",tp->task->getName().c_str());
+                    ROS_INFO("Task '%s' not running anymore or not reporting itself running in time",tp->task->getName().c_str());
                     break;
                 }
 

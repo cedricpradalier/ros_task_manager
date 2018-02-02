@@ -20,6 +20,9 @@ DynamicTask::DynamicTask(const std::string & fname, TaskEnvironmentPtr env) :
 		throw DLLoadError(error);
 	}
 	TaskFactory tf = (TaskFactory)dlsym(handle, "TaskFactoryObject");
+    if (!tf) {
+		throw DLLoadError("The TaskFactoryObject is NULL. The task probably missed the DYNAMIC_TASK macro");
+    }
 	task = tf(env);
 	if (!task) {
 		dlclose(handle);

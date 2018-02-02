@@ -9,6 +9,7 @@ TaskIndicator TaskSetPen::iterate()
 {
     ROS_INFO("Set pen to %d %d %d %d %d",cfg.on,cfg.r,cfg.g,cfg.b,cfg.width);
     env->setPen(cfg.on,cfg.r,cfg.g,cfg.b,cfg.width);
+    ros::Duration(cfg.artificial_delay).sleep();
     return TaskStatus::TASK_COMPLETED;
 }
 
