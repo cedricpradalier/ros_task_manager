@@ -11,4 +11,4 @@ TaskIndicator TaskClear::iterate()
     return TaskStatus::TASK_COMPLETED;
 }
 
-// DYNAMIC_TASK(TaskFactoryClear);
+DYNAMIC_TASK(TaskFactoryClear);
