@@ -93,6 +93,8 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
+ADD_DEFINITIONS(-g -ggdb -Wall)
+
 ADD_EXECUTABLE( turtlesim_task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
 TARGET_LINK_LIBRARIES(turtlesim_task_server ${catkin_LIBRARIES} dl )
 
@@ -129,6 +131,10 @@ ADD_DEPENDENCIES(turtlesim_TaskFail ${${PROJECT_NAME}_EXPORTED_TARGETS})
 ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${catkin_LIBRARIES} dl)
 ADD_DEPENDENCIES(turtlesim_TaskMoveBase ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+ADD_LIBRARY( turtlesim_TaskMoveBaseWC SHARED tasks/TaskMoveBaseWC.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBaseWC ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskMoveBaseWC ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( turtlesim_TaskMoveGoal SHARED tasks/TaskMoveGoal.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskMoveGoal ${catkin_LIBRARIES} dl)

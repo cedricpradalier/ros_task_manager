@@ -16,6 +16,14 @@
 #include "boost/algorithm/string.hpp"
 #include "std_msgs/String.h"
 
+#define TEST_ACTION_CLIENT
+#ifdef TEST_ACTION_CLIENT
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/simple_client_goal_state.h>
+#include <actionlib/action_definition.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#endif
+
 namespace task_manager_turtlesim {
     class TurtleSimEnv: public task_manager_lib::TaskEnvironment
     {
@@ -43,6 +51,12 @@ namespace task_manager_turtlesim {
                 tpose = *msg;
             }
             turtlesim::Pose tpose;
+#ifdef TEST_ACTION_CLIENT
+            ACTION_DEFINITION(move_base_msgs::MoveBaseAction)
+            typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
+            typedef boost::shared_ptr<Client> ClientPtr;
+            ClientPtr move_base_action_client;
+#endif
 
         public:
             TurtleSimEnv(ros::NodeHandle & nh, unsigned int id=1);
@@ -76,6 +90,9 @@ namespace task_manager_turtlesim {
             void setPen(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
 
             void clear();
+#ifdef TEST_ACTION_CLIENT
+            ClientPtr getMoveBaseActionClient();
+#endif
     };
 
     typedef boost::shared_ptr<TurtleSimEnv> TurtleSimEnvPtr;

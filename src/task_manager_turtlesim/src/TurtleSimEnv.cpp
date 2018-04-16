@@ -41,3 +41,15 @@ void TurtleSimEnv::clear()
     }
 }
 
+#ifdef TEST_ACTION_CLIENT
+TurtleSimEnv::ClientPtr TurtleSimEnv::getMoveBaseActionClient() {
+    if (!move_base_action_client) {
+        move_base_action_client = ClientPtr(new Client("/move_base",true));
+        if (!move_base_action_client->waitForServer(ros::Duration(5.0))) {
+            ROS_ERROR("Action server /move_base did not reply after 5s, aborting task");
+            move_base_action_client.reset();
+        }
+    }
+    return move_base_action_client;
+}
+#endif
