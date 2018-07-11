@@ -83,14 +83,14 @@ class MissionStateMachine:
             num_complete = sum([1 for x in states.values() if x == 'TASK_COMPLETED'])
             if num_complete>=1:
                 return 'TASK_COMPLETED'
-            return states[fg]
+            return states[fg] #FIXME: what is fg ? standard function ?
 
     def createConcurrence(self,fg_state):
         # Create the sub SMACH state machine
         return smach.Concurrence(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
                     'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'], default_outcome='TASK_FAILED',
                     outcome_cb = self.concurrent_outcome_cb(self,fg_state),
-                    child_termination_cb=lambda x:True)
+                    child_termination_cb=lambda x:True) #FIXME: Lambda function not right
 
     class TaskEpsilon(smach.State):
         def __init__(self):
