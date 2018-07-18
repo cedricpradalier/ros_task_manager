@@ -5,17 +5,17 @@ import smach_ros
 import signal
 import sys
 
-# FIXME: What is the purpose of this class ?
-class MissionFailed(smach.State): 
-    def __init__(self):
-        smach.State.__init__(self, 
-                outcomes=['MISSION_FAILED'])
+# # FIXME: What is the purpose of this class ?
+# class MissionFailed(smach.State): 
+#     def __init__(self):
+#         smach.State.__init__(self, 
+#                 outcomes=['MISSION_FAILED'])
 
-# FIXME: What is the purpose of this class ?
-class MissionCompleted(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, 
-                outcomes=['MISSION_COMPLETED'])
+# # FIXME: What is the purpose of this class ?
+# class MissionCompleted(smach.State):
+#     def __init__(self):
+#         smach.State.__init__(self, 
+#                 outcomes=['MISSION_COMPLETED'])
 
 
 
@@ -75,6 +75,18 @@ class MissionStateMachine:
 
     def is_shutdown(self):
         return self.shutdown_requested
+
+
+    # Generate new name
+    # --------------------
+    def getLabel(self,name):
+        state_name = "__"+name+"_0"
+        if name in self.pseudo_states:
+            state_name = "__" + name + "_" + str(self.pseudo_states[name])
+        else:
+            self.pseudo_states[name] = 0
+        self.pseudo_states[name] += 1
+        return state_name
 
 
     # Launch mission
@@ -138,10 +150,11 @@ class MissionStateMachine:
     # Concurrence
     # --------------
     def Concurrence(self, outcomes = [], default_outcome = 'TASK_FAILED', input_keys = [], output_keys = [], 
-                outcome_map = {}, outcome_cb = None, child_termination_cb = lambda x:False):
+                outcome_map = {}, outcome_cb = None, child_termination_cb = None, wait_for_all = True):
         return self.ConcurrenceC(self, outcomes = outcomes, default_outcome = default_outcome,
                     input_keys = input_keys, output_keys = output_keys, outcome_map = outcome_map,
-                    outcome_cb = outcome_cb, child_termination_cb = child_termination_cb)
+                    outcome_cb = outcome_cb, child_termination_cb = child_termination_cb,
+                    wait_for_all = wait_for_all)
 
     class ConcurrenceC(smach.Concurrence):
         """ Smash Concurrence surcharge
@@ -149,16 +162,24 @@ class MissionStateMachine:
         bla bla
         """
         def __init__(self, mi, outcomes = [], default_outcome = 'TASK_FAILED', input_keys = [], output_keys = [], 
-                    outcome_map = {}, outcome_cb = None, child_termination_cb = lambda x:False):
+                    outcome_map = {}, outcome_cb = None, child_termination_cb = None, wait_for_all = True):
             self.mi = mi
             temp_outcomes = self.mi.default_outcomes
             for outcome in outcomes:
                 temp_outcomes.append(outcome)
             if not outcome_cb:
                 outcome_cb = self.concurrent_default_outcome_cb(self.mi)
+            if not child_termination_cb:
+                if wait_for_all:
+                    new_termination_cb = lambda x:False
+                else:
+                    new_termination_cb = lambda x:True
+            else:
+                new_termination_cb = child_termination_cb
+
             smach.Concurrence.__init__(self, outcomes = temp_outcomes, default_outcome = default_outcome,
                     input_keys = input_keys, output_keys = output_keys, outcome_map = outcome_map,
-                    outcome_cb = outcome_cb, child_termination_cb = child_termination_cb)
+                    outcome_cb = outcome_cb, child_termination_cb = new_termination_cb)
 
         def add(self, label, state = None, remapping = None, **params):
             # if not params['foreground']:
@@ -211,6 +232,29 @@ class MissionStateMachine:
             return label
 
 
+    # Iterator
+    # -----------
+    def Iterator(self, outcomes = [], input_keys = [], output_keys = [], it = [], 
+                it_label = 'it_data', exhausted_outcome = 'TASK_COMPLETED'):
+        return self.IteratorC(self, outcomes = outcomes, input_keys = input_keys, output_keys = output_keys,
+                    it = it, it_label = it_label, exhausted_outcome = exhausted_outcome)
+
+    class IteratorC(smach.Iterator):
+        """ Smash Iterator surcharge
+
+        bla bla
+        """
+        def __init__(self, mi, outcomes = [], input_keys = [], output_keys = [], it = [], 
+                    it_label = 'it_data', exhausted_outcome = 'TASK_COMPLETED'):
+            self.mi = mi
+            temp_outcomes = self.mi.default_outcomes
+            for outcome in outcomes:
+                temp_outcomes.append(outcome)
+            smach.Iterator.__init__(self, outcomes = temp_outcomes, 
+                        input_keys = input_keys, output_keys = output_keys,
+                        it = it, it_label = it_label, exhausted_outcome = exhausted_outcome)
+
+
     # Epsilon task
     # -----------
     class TaskEpsilon(smach.State):
@@ -235,84 +279,87 @@ class MissionStateMachine:
     #####  Intern function  #####
     #############################
 
-    def getLabel(self,name):
-        state_name = "__"+name+"_0"
-        if name in self.pseudo_states:
-            state_name = "__" + name + "_" + str(self.pseudo_states[name])
-        else:
-            self.pseudo_states[name] = 0
-        self.pseudo_states[name] += 1
-        return state_name
+    # def getLabel(self,name):
+    #     state_name = "__"+name+"_0"
+    #     if name in self.pseudo_states:
+    #         state_name = "__" + name + "_" + str(self.pseudo_states[name])
+    #     else:
+    #         self.pseudo_states[name] = 0
+    #     self.pseudo_states[name] += 1
+    #     return state_name
 
 
 
-    ########################
-    #####  Deprecated  #####
-    ########################
 
-    def createStateMachine(self):
-        return smach.StateMachine(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
-                    'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'])
 
-    def createSequence(self):
-        return smach.Sequence(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
-                    'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'],
-                connector_outcome='TASK_COMPLETED')
 
-    class concurrent_outcome_cb:
-        def __init__(self,mi,fg):
-            self.mi = mi
-            self.fg = fg
-        def __call__(self,states):
-            print states
-            if self.mi.is_shutdown():
-                return 'TASK_INTERRUPTED'
-            num_complete = sum([1 for x in states.values() if x == 'TASK_COMPLETED'])
-            if num_complete>=1: #FIXME: meaning it works if only one worked ?!
-                return 'TASK_COMPLETED'
-            return states[fg] #FIXME: what is fg ? fallback output ?
+    # ########################
+    # #####  Deprecated  #####
+    # ######################## TODO: REMOVE
 
-    def createConcurrence(self,fg_state):
-        # Create the sub SMACH state machine
-        return smach.Concurrence(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
-                    'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'], default_outcome='TASK_FAILED',
-                    outcome_cb = self.concurrent_outcome_cb(self,fg_state),
-                    child_termination_cb=lambda x:True) #FIXME: Lambda function not right
+    # def createStateMachine(self):
+    #     return smach.StateMachine(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
+    #                 'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'])
 
-    def task(self,name,**params):
-        params['foreground']=True
-        state_name = None
-        if 'label' in params:
-            state_name=params['label']
-            del params['label']
-        else:
-            state_name = self.getLabel(name)
-        T=params['transitions']
-        del params['transitions']
-        smach.StateMachine.add(state_name, TaskState(self,self.tc,name,**params),T)
-        return state_name
+    # def createSequence(self):
+    #     return smach.Sequence(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
+    #                 'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'],
+    #             connector_outcome='TASK_COMPLETED')
 
-    def seq_task(self,name,**params):
-        state_name = None
-        params['foreground']=True
-        if 'label' in params:
-            state_name=params['label']
-            del params['label']
-        else:
-            state_name = self.getLabel(name)
-        if 'transitions' in params:
-            T=params['transitions']
-            del params['transitions']
-            smach.Sequence.add(state_name, TaskState(self,self.tc,name,**params),T)
-        else:
-            smach.Sequence.add(state_name, TaskState(self,self.tc,name,**params))
-        return state_name
+    # class concurrent_outcome_cb:
+    #     def __init__(self,mi,fg):
+    #         self.mi = mi
+    #         self.fg = fg
+    #     def __call__(self,states):
+    #         print states
+    #         if self.mi.is_shutdown():
+    #             return 'TASK_INTERRUPTED'
+    #         num_complete = sum([1 for x in states.values() if x == 'TASK_COMPLETED'])
+    #         if num_complete>=1: #FIXME: meaning it works if only one worked ?!
+    #             return 'TASK_COMPLETED'
+    #         return states[fg] #FIXME: what is fg ? fallback output ? -> front task
 
-    def concurrent_task(self,name,**params):
-        state_name = self.getLabel(name)
-        foreground = params['foreground'] # This must be defined
-        if 'label' in params:
-            state_name=params['label']
-            del params['label']
-        smach.Concurrence.add(state_name, TaskState(self,self.tc,name,**params))
-        return state_name
+    # def createConcurrence(self,fg_state):
+    #     # Create the sub SMACH state machine
+    #     return smach.Concurrence(outcomes=['TASK_COMPLETED','TASK_INTERRUPTED',
+    #                 'TASK_FAILED','TASK_TIMEOUT','MISSION_COMPLETED'], default_outcome='TASK_FAILED',
+    #                 outcome_cb = self.concurrent_outcome_cb(self,fg_state),
+    #                 child_termination_cb=lambda x:True) #FIXME: Lambda function not right
+
+    # def task(self,name,**params):
+    #     params['foreground']=True
+    #     state_name = None
+    #     if 'label' in params:
+    #         state_name=params['label']
+    #         del params['label']
+    #     else:
+    #         state_name = self.getLabel(name)
+    #     T=params['transitions']
+    #     del params['transitions']
+    #     smach.StateMachine.add(state_name, TaskState(self,self.tc,name,**params),T)
+    #     return state_name
+
+    # def seq_task(self,name,**params):
+    #     state_name = None
+    #     params['foreground']=True
+    #     if 'label' in params:
+    #         state_name=params['label']
+    #         del params['label']
+    #     else:
+    #         state_name = self.getLabel(name)
+    #     if 'transitions' in params:
+    #         T=params['transitions']
+    #         del params['transitions']
+    #         smach.Sequence.add(state_name, TaskState(self,self.tc,name,**params),T)
+    #     else:
+    #         smach.Sequence.add(state_name, TaskState(self,self.tc,name,**params))
+    #     return state_name
+
+    # def concurrent_task(self,name,**params):
+    #     state_name = self.getLabel(name)
+    #     foreground = params['foreground'] # This must be defined
+    #     if 'label' in params:
+    #         state_name=params['label']
+    #         del params['label']
+    #     smach.Concurrence.add(state_name, TaskState(self,self.tc,name,**params))
+    #     return state_name
