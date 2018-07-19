@@ -15,25 +15,52 @@ wp = [ [1., 9., 0, 0, 255],
     [1., 1., 255, 255, 0]]
 
 # Create a SMACH state machine
-sm = mi.createSequence()
+sm = mi.Sequence()
 
 # Add states to the container
 with sm:
-    mi.seq_task("Wait",duration=1.0)
-    mi.seq_task("SetPen",on=False)
-    mi.seq_task("GoTo",goal_x=1.0,goal_y=1.0)
+    sm.add("Wait",duration=1.0)
+    sm.add("SetPen",on=False)
+    sm.add("GoTo",goal_x=1.0,goal_y=1.0)
     for p in wp:
-        mi.seq_task("Wait",duration=0.2)
-        mi.seq_task("SetPen",on=True,r=p[2],g=p[3],b=p[4])
-        mi.seq_task("GoTo",goal_x=p[0],goal_y=p[1])
+        sm.add("Wait",duration=0.2)
+        sm.add("SetPen",on=True,r=p[2],g=p[3],b=p[4])
+        sm.add("GoTo",goal_x=p[0],goal_y=p[1])
 
-    mi.seq_task("Wait",duration=2.0)
-    mi.seq_task("SetPen",on=False)
-    mi.seq_task("GoTo",goal_x=5.0,goal_y=5.0)
-    mi.seq_task("ReachAngle",target=pi/2)
+    sm.add("Wait",duration=2.0)
+    sm.add("SetPen",on=False)
+    sm.add("GoTo",goal_x=5.0,goal_y=5.0)
+    sm.add("ReachAngle",target=pi/2)
 
 mi.run(sm)
 
 rospy.loginfo("Mission completed")
 
 
+
+
+
+
+# TODO: Remove when new exemple accepted
+
+# # Create a SMACH state machine
+# sm = mi.createSequence()
+
+# # Add states to the container
+# with sm:
+#     mi.seq_task("Wait",duration=1.0)
+#     mi.seq_task("SetPen",on=False)
+#     mi.seq_task("GoTo",goal_x=1.0,goal_y=1.0)
+#     for p in wp:
+#         mi.seq_task("Wait",duration=0.2)
+#         mi.seq_task("SetPen",on=True,r=p[2],g=p[3],b=p[4])
+#         mi.seq_task("GoTo",goal_x=p[0],goal_y=p[1])
+
+#     mi.seq_task("Wait",duration=2.0)
+#     mi.seq_task("SetPen",on=False)
+#     mi.seq_task("GoTo",goal_x=5.0,goal_y=5.0)
+#     mi.seq_task("ReachAngle",target=pi/2)
+
+# mi.run(sm)
+
+# rospy.loginfo("Mission completed")
