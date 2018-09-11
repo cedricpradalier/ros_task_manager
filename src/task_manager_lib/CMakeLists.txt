@@ -4,7 +4,7 @@ project(task_manager_lib)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure roscpp roslib rospy std_srvs task_manager_msgs  message_generation)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure roscpp roslib rospy std_srvs task_manager_msgs  message_generation genmsg)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
