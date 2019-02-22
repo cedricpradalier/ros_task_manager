@@ -36,6 +36,11 @@ class TaskState(smach.State):
             return 'MISSION_COMPLETED'
         # rospy.loginfo('Executing state '+self.name)
         try:
+            # TODO: Remove when bug with crash found
+            print("EXECUTE TASK: name = " + self.name)
+            print("EXECUTE TASK: params = ")
+
+            print(self.params)
             self.id = self.tc.tasklist[self.name].start(**self.params)
             self.tc.waitTask(self.id)
             return 'TASK_COMPLETED'
@@ -54,11 +59,11 @@ class TaskState(smach.State):
             self.tc.stopTask(self.id)
 
 class MissionStateMachine:
-    def __init__(self,tc=None, new_outcomes=[]):
+    def __init__(self,tc=None, new_outcomes=[], period = 0.2):
         self.shutdown_requested = False
         self.pseudo_states={}
         server_node = rospy.get_param("~server","/turtlesim_tasks") # FIXME: why turtlesim_tasks appear here ?
-        default_period = rospy.get_param("~period",0.2) # TODO: see if it could be usefull to set the period manually ?
+        default_period = rospy.get_param("~period", period)
         if tc:
             self.tc = tc
         else:
@@ -111,8 +116,25 @@ class MissionStateMachine:
         smach_thread = threading.Thread(target = sm.execute)
         smach_thread.start()
 
+        # TODO: TEST ONLY
+        if not sm.is_running():
+            print("ERROR: STATE MACHINE IS NOT RUNNING")
+
+            # Wait for thread to set sm to running
+            rospy.rostime.wallsleep(0.5)
+
+            # TODO: TEST ONLY
+            if not sm.is_running():
+                print("ERROR: STATE MACHINE IS STILL NOT RUNNING")
+            else:
+                print("IS RUNNING")
+
         while sm.is_running():
             rospy.rostime.wallsleep(0.5)
+            # print ("test")
+
+        # TODO: TEST ONLY
+        print ("END SIS !!!")
 
         sis.stop()
 
@@ -273,20 +295,6 @@ class MissionStateMachine:
             smach.Sequence.add(label, self.TaskEpsilon())
         return label
 
-
-
-    #############################
-    #####  Intern function  #####
-    #############################
-
-    # def getLabel(self,name):
-    #     state_name = "__"+name+"_0"
-    #     if name in self.pseudo_states:
-    #         state_name = "__" + name + "_" + str(self.pseudo_states[name])
-    #     else:
-    #         self.pseudo_states[name] = 0
-    #     self.pseudo_states[name] += 1
-    #     return state_name
 
 
 

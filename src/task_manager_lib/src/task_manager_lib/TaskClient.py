@@ -276,7 +276,7 @@ class TaskClient:
                 paramdict['task_period'] = float(period)
             config = encode_config(paramdict)
             # print config
-            # rospy.loginfo("Starting task %s" % name)
+            rospy.loginfo("Starting task %s" % name)
             resp = self.start_task(name,config)
             self.keepAlive = True
             return resp.id
