@@ -8,44 +8,27 @@
 using namespace task_manager_lib;
 using namespace task_manager_action;
 
-// There is no move_base for turtlesim, this is to test the principle of the
-// generic TaskActionMoveBase
 namespace task_manager_turtlesim {
-    class TaskMoveBaseWC : public TaskActionGenericWithoutClient<move_base_msgs::MoveBaseAction,TaskActionMoveBaseConfig, TurtleSimEnv>
+    class TaskMoveBaseWC : public TaskActionMoveBase<TurtleSimEnv>
     {
-        protected:
-            typedef TaskActionGenericWithoutClient<move_base_msgs::MoveBaseAction,
-                    TaskActionMoveBaseConfig, TurtleSimEnv> Parent;
+        public:
+            TaskMoveBaseWC(TaskDefinitionPtr def, TaskEnvironmentPtr env) :
+                TaskActionMoveBase<TurtleSimEnv>(def,env) {}
+            virtual ~TaskMoveBaseWC() {};
 
+        protected:
+            // We need to replace the action client.
             virtual typename Parent::ClientPtr getActionClient() {
                 return env->getMoveBaseActionClient();
             }
-
-            void buildActionGoal(typename Parent::Goal & goal) const {
-                const TaskActionMoveBaseConfig & cfg_ = Parent::cfg;
-                goal.target_pose.header.frame_id = cfg_.frame_id;
-                goal.target_pose.header.stamp = ros::Time::now();
-
-                goal.target_pose.pose.position.x = cfg_.goal_x;
-                goal.target_pose.pose.position.y = cfg_.goal_y;
-                goal.target_pose.pose.position.z = cfg_.goal_z;
-                goal.target_pose.pose.orientation = 
-                    tf::createQuaternionMsgFromRollPitchYaw(cfg_.goal_roll,cfg_.goal_pitch,cfg_.goal_yaw);
-            }
-
-        public:
-            TaskMoveBaseWC(TaskDefinitionPtr def, TaskEnvironmentPtr env) :
-                Parent(def,env) {}
-            virtual ~TaskMoveBaseWC() {};
     };
 
-    class TaskFactoryMoveBaseWC : public task_manager_lib::TaskDefinition<TaskActionMoveBaseConfig, TurtleSimEnv, TaskMoveBaseWC>
+    class TaskFactoryMoveBaseWC : public TaskFactoryActionMoveBase<TurtleSimEnv>
     {
-        protected:
-            typedef task_manager_lib::TaskDefinition<TaskActionMoveBaseConfig, TurtleSimEnv, TaskMoveBaseWC> Parent;
+
         public:
             TaskFactoryMoveBaseWC(TaskEnvironmentPtr env) :
-                Parent("ActionMoveBaseWC","Publish an action goal for move base, using client from the environment",true,env) {}
+                TaskFactoryActionMoveBase<TurtleSimEnv>(env) {}
             virtual ~TaskFactoryMoveBaseWC() {};
     };
 };
