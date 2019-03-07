@@ -246,9 +246,8 @@ class TaskClient:
 
     def updateTaskList(self):
         try:
-            self.serviceLock.acquire()
-            resp = self.get_task_list()
-            self.serviceLock.release()
+            with self.serviceLock:
+                resp = self.get_task_list()
             self.tasklist = {}
             for t in resp.tlist:
                 self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.config,self)
@@ -281,9 +280,8 @@ class TaskClient:
             config = encode_config(paramdict)
             # print config
             # rospy.loginfo("Starting task %s" % name)
-            self.serviceLock.acquire()
-            resp = self.start_task(name,config)
-            self.serviceLock.release()
+            with self.serviceLock:
+                resp = self.start_task(name,config)
             self.keepAlive = True
             return resp.id
         except rospy.ServiceException, e:
@@ -300,9 +298,8 @@ class TaskClient:
 
     def stopTask(self,id):
         try:
-            self.serviceLock.acquire()
-            resp = self.stop_task(id)
-            self.serviceLock.release()
+            with self.serviceLock:
+                resp = self.stop_task(id)
             return 0
         except rospy.ServiceException, e:
             rospy.logerr( "Service call failed: %s"%e)
@@ -310,9 +307,8 @@ class TaskClient:
 
     def idle(self):
         try:
-            self.serviceLock.acquire()
-            resp = self.stop_task(-1)
-            self.serviceLock.release()
+            with self.serviceLock:
+                resp = self.stop_task(-1)
             return 0
         except rospy.ServiceException, e:
             rospy.logerr( "Service call failed: %s"%e)
@@ -369,9 +365,8 @@ class TaskClient:
     def updateTaskStatus(self):
         try:
             with self.statusLock:
-                self.serviceLock.acquire()
-                resp = self.get_status()
-                self.serviceLock.release()
+                with self.serviceLock:
+                    resp = self.get_status()
                 for t in resp.running_tasks + resp.zombie_tasks:
                     ts = self.TaskStatus(self)
                     ts.id = t.id
