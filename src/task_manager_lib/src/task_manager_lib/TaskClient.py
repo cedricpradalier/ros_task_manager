@@ -249,6 +249,7 @@ class TaskClient:
             for t in resp.tlist:
                 self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.config,self)
         except rospy.ServiceException, e:
+            rospy.logwarn("error at line 251")
             rospy.logerr("Service call failed: %s"%e)
 
     def printTaskList(self):
@@ -277,10 +278,12 @@ class TaskClient:
             config = encode_config(paramdict)
             # print config
             rospy.loginfo("Starting task %s" % name)
+            rospy.loginfo("Config = %s" % config)
             resp = self.start_task(name,config)
             self.keepAlive = True
             return resp.id
         except rospy.ServiceException, e:
+            rospy.logwarn("error at line 285")
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
@@ -297,6 +300,7 @@ class TaskClient:
             resp = self.stop_task(id)
             return 0
         except rospy.ServiceException, e:
+            rospy.logwarn("error at line 302")
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
@@ -305,6 +309,7 @@ class TaskClient:
             resp = self.stop_task(-1)
             return 0
         except rospy.ServiceException, e:
+            rospy.logwarn("error at line 311")
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
@@ -376,6 +381,7 @@ class TaskClient:
                 # Nobody is waiting
                 pass
         except rospy.ServiceException, e:
+            rospy.logwarn("error at line 383")
             rospy.logerr( "%s: Service call failed: %s"%(self.server_node,e))
             raise
 
