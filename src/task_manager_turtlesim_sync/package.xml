@@ -45,12 +45,14 @@
   <build_depend>task_manager_lib</build_depend>
   <build_depend>task_manager_msgs</build_depend>
   <build_depend>task_manager_action</build_depend>
+  <build_depend>task_manager_sync</build_depend>
   <build_depend>turtlesim</build_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>task_manager_lib</run_depend>
   <run_depend>task_manager_msgs</run_depend>
   <run_depend>task_manager_action</run_depend>
+  <run_depend>task_manager_sync</run_depend>
   <run_depend>turtlesim</run_depend>
 
 

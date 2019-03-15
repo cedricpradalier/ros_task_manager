@@ -328,7 +328,7 @@ namespace task_manager_lib {
             // Set of functions that must be implemented by any inheriting class
 
             // Configure is called only once when the task scheduler is started.
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) = 0;
+            virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/ = 0;
 
     };
 
@@ -370,7 +370,7 @@ namespace task_manager_lib {
             unsigned int runId;
 
             TaskEnvironmentPtr env_gen;
-            virtual void parseParameters(const TaskParameters & parameters) throw (InvalidParameter) {
+            virtual void parseParameters(const TaskParameters & parameters) /*throw (InvalidParameter)*/ {
             }
         public:
             // All the class below are intended for generic use
@@ -520,7 +520,7 @@ namespace task_manager_lib {
                     return c;
                 }
 
-                virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter)
+                virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/
                 {
                     return task_manager_msgs::TaskStatus::TASK_CONFIGURED;
                 }
@@ -579,7 +579,7 @@ namespace task_manager_lib {
                     cfg = config;
                 }
 
-                virtual void parseParameters(const TaskParameters & parameters) throw (InvalidParameter) {
+                virtual void parseParameters(const TaskParameters & parameters) /*throw (InvalidParameter)*/ {
                     cfg = parameters.toConfig<CFG>();
                     recfg.reset(new DynRecfgData(this, cfg));
                 }
