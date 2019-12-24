@@ -517,9 +517,15 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                 }
 
                 double t1 = ros::Time::now().toSec();
-                double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
-                boost::posix_time::milliseconds dtimeout(ttimeout*1000);
-                tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
+                // Adding a while loop here to account for the fact that we may be running in sim time but the 
+                // timed_wait is in real time
+                do {
+                    double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
+                    boost::posix_time::milliseconds dtimeout(ttimeout*1000);
+                    tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
+                    t1 = ros::Time::now().toSec();
+                    // printf("%f / %f\n",t1-t0,tp->period);
+                } while ((t1 - t0) < tp->period);
                 first = false;
             }
             if (tp->status != task_manager_msgs::TaskStatus::TASK_COMPLETED) {
