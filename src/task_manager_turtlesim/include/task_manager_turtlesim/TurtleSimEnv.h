@@ -15,6 +15,7 @@
 #include "turtlesim/Pose.h"
 #include "boost/algorithm/string.hpp"
 #include "std_msgs/String.h"
+#include "task_manager_turtlesim/FollowPathPL.h"
 
 #define TEST_ACTION_CLIENT
 #ifdef TEST_ACTION_CLIENT
@@ -58,6 +59,8 @@ namespace task_manager_turtlesim {
             ClientPtr move_base_action_client;
 #endif
 
+            FollowPathPL waypoints;
+
         public:
             TurtleSimEnv(ros::NodeHandle & nh, unsigned int id=1);
             ~TurtleSimEnv() {};
@@ -88,6 +91,18 @@ namespace task_manager_turtlesim {
             }
 
             void setPen(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
+
+            const FollowPathPL & getWP() const {
+                return waypoints;
+            }
+
+            FollowPathPL & getWP() {
+                return waypoints;
+            }
+
+            void popWP() {
+                waypoints.pop_front();
+            }
 
             void clear();
 #ifdef TEST_ACTION_CLIENT

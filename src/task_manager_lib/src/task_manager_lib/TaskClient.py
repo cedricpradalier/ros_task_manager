@@ -10,6 +10,7 @@ from task_manager_lib.srv import *
 from dynamic_reconfigure.encoding import *
 import argparse
 import threading
+import importlib
 
 import time
 import socket
@@ -124,6 +125,28 @@ class TaskClient:
                 if p["type"]=="bool":
                     p["conv"]=bool
             self.client = client
+
+        def getActionDict(self, pkg, task=None, cfg=None):
+            """
+            Ugly helper function to get simple parameter names for tasks whose 
+            config includes a task_action (TaskParameterListGenerator)
+            """
+            if task is None:
+                task="Task"+self.name
+            if cfg is None:
+                cfg=task+"Config"
+            d = {}
+            # This is one ugly way to write it
+            module = "%s.cfg.%s" % (pkg,cfg)
+            mod = importlib.import_module(module)
+            d["Clear"] = eval("mod.%s_Clear" % task)
+            d["Push"] = eval("mod.%s_Push" % task)
+            d["Execute"] = eval("mod.%s_Execute" % task)
+            # This would work as well...
+            # d["Clear"] = 0
+            # d["Push"] = 1
+            # d["Execute"] = 2
+            return d
 
         def prepareParams(self,paramdict):
             for p in paramdict:

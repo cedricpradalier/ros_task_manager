@@ -16,3 +16,15 @@ def TaskParameterGenerator():
 
     return gen
 
+def TaskParameterListGenerator():
+    gen = TaskParameterGenerator()
+
+    param_list_enum = gen.enum([ gen.const("Clear",      int_t, 0, "Clear parameter list"),
+                           gen.const("Push",         int_t, 1, "Push parameter to the list"),
+                           gen.const("Execute",      int_t, 2, "Execute the parameter list")],
+                         "parameter list action")
+
+    gen.add("param_list_action",      int_t,   0,    "What should we do with this goal",  2, edit_method=param_list_enum) 
+
+    return gen
+
