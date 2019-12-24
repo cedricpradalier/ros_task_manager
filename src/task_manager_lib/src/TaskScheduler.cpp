@@ -420,6 +420,8 @@ void TaskScheduler::runAperiodicTask(boost::shared_ptr<ThreadParameters> tp)
     tp->aperiodic_task_mutex.lock();
     tp->aperiodic_task_mutex.unlock();
 
+    // Forcing status to RUNNING to avoid task not appearing in task client
+    tp->updateStatus(now());
     tp->task->doIterate();
     // WARNING: this might be misinterpreted. Check this.
     tp->aperiodic_task_condition.notify_all();
@@ -506,6 +508,9 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                     break;
                 }
                 tp->updateStatus(ros::Time::now());
+                if (tp->status == task_manager_msgs::TaskStatus::TASK_COMPLETED) {
+                    break;
+                }
                 if (!first && tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
                     ROS_INFO("Task '%s' not running anymore or not reporting itself running in time",tp->task->getName().c_str());
                     break;

@@ -31,7 +31,7 @@ namespace task_manager_turtlesim {
                 Parent("Fail","Fail with a specified condition",true,env) {}
             virtual ~TaskFactoryFail() {};
 
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter);
+            virtual TaskIndicator configure(const TaskParameters & parameters);
     };
 };
 
