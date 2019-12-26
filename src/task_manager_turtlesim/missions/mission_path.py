@@ -12,16 +12,16 @@ tc = TaskClient(server_node,default_period)
 
 wp = [ (1.,1.), (1.,9.), (9.,9.), (9.,1.), (1.,1.) ] 
 
-Action=tc.FollowPath.getActionDict("task_manager_turtlesim")
+Action=tc.getParameterListAction()
 
 while True:
     tc.Wait(duration=1.)
     tc.Clear()
     tc.SetPen(on=False)
-    tc.FollowPath(param_list_action=Action["Clear"])
+    tc.FollowPath(param_list_action=Action.Clear)
     for x,y in wp:
-        tc.FollowPath(goal_x=x,goal_y=y, param_list_action=Action["Push"])
-    tc.FollowPath(param_list_action=Action["Execute"])
+        tc.FollowPath(goal_x=x,goal_y=y, param_list_action=Action.Push)
+    tc.FollowPath(param_list_action=Action.Execute)
 
     tc.Wait(duration=1.)
     tc.SetPen(on=False)
