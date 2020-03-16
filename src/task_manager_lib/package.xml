@@ -46,14 +46,16 @@
   <build_depend>rospy</build_depend>
   <build_depend>std_srvs</build_depend>
   <build_depend>task_manager_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>genmsg</build_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>task_manager_msgs</run_depend>
-  <build_depend>message_generation</build_depend>
   <run_depend>message_runtime</run_depend>
+  <run_depend>genmsg</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
