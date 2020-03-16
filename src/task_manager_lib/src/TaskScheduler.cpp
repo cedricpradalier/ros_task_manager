@@ -420,6 +420,8 @@ void TaskScheduler::runAperiodicTask(boost::shared_ptr<ThreadParameters> tp)
     tp->aperiodic_task_mutex.lock();
     tp->aperiodic_task_mutex.unlock();
 
+    // Forcing status to RUNNING to avoid task not appearing in task client
+    tp->updateStatus(now());
     tp->task->doIterate();
     // WARNING: this might be misinterpreted. Check this.
     tp->aperiodic_task_condition.notify_all();
@@ -506,15 +508,24 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                     break;
                 }
                 tp->updateStatus(ros::Time::now());
+                if (tp->status == task_manager_msgs::TaskStatus::TASK_COMPLETED) {
+                    break;
+                }
                 if (!first && tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
                     ROS_INFO("Task '%s' not running anymore or not reporting itself running in time",tp->task->getName().c_str());
                     break;
                 }
 
                 double t1 = ros::Time::now().toSec();
-                double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
-                boost::posix_time::milliseconds dtimeout(ttimeout*1000);
-                tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
+                // Adding a while loop here to account for the fact that we may be running in sim time but the 
+                // timed_wait is in real time
+                do {
+                    double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
+                    boost::posix_time::milliseconds dtimeout(ttimeout*1000);
+                    tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
+                    t1 = ros::Time::now().toSec();
+                    // printf("%f / %f\n",t1-t0,tp->period);
+                } while ((t1 - t0) < tp->period);
                 first = false;
             }
             if (tp->status != task_manager_msgs::TaskStatus::TASK_COMPLETED) {

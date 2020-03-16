@@ -70,7 +70,7 @@ namespace task_manager_lib {
                 task->setStatusString(s);
             }
 
-            virtual TaskIndicator configure(const TaskParameters & parameters) throw (InvalidParameter) {
+            virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/ {
                 task->doConfigure(taskId,parameters);
                 return task->getStatus();
             }

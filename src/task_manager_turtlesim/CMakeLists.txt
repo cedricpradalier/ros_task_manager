@@ -36,6 +36,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 generate_dynamic_reconfigure_options(
     cfg/TaskFail.cfg
     cfg/TaskGoTo.cfg
+    cfg/TaskFollowPath.cfg
     cfg/TaskReachAngle.cfg
     cfg/TaskSetPen.cfg
     cfg/TaskWaitForButton.cfg
@@ -103,6 +104,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE
 ADD_LIBRARY( turtlesim_TaskGoTo SHARED tasks/TaskGoTo.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskGoTo ${catkin_LIBRARIES} dl)
 ADD_DEPENDENCIES(turtlesim_TaskGoTo ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+ADD_LIBRARY( turtlesim_TaskFollowPath SHARED tasks/TaskFollowPath.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskFollowPath ${catkin_LIBRARIES} dl)
+ADD_DEPENDENCIES(turtlesim_TaskFollowPath ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ADD_LIBRARY( turtlesim_TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskReachAngle ${catkin_LIBRARIES} dl)

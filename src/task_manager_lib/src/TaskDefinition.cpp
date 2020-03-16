@@ -158,6 +158,8 @@ void TaskInstanceBase::doIterate()
         boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
         taskStatus = this->iterate();
     } else {
+        // Forcing status to RUNNING to avoid task not appearing in task client
+        taskStatus = task_manager_msgs::TaskStatus::TASK_RUNNING;
         taskStatus = this->iterate();
     }
 }

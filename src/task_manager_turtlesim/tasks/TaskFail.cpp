@@ -5,7 +5,7 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-TaskIndicator TaskFactoryFail::configure(const TaskParameters & parameters) throw (InvalidParameter) {
+TaskIndicator TaskFactoryFail::configure(const TaskParameters & parameters){
     TaskIndicator ti = Parent::configure(parameters);
     if (ti != TaskStatus::TASK_CONFIGURED) {
         return ti;

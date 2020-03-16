@@ -8,7 +8,10 @@ import std_msgs.msg
 from task_manager_msgs.msg import *
 from task_manager_lib.srv import *
 from dynamic_reconfigure.encoding import *
+from task_manager_lib.parameter_generator import ParameterListAction
 import argparse
+import threading
+import importlib
 
 import time
 import socket
@@ -103,6 +106,9 @@ class TaskClient:
     def registerStatusFunction(self,f):
         self.status_functions.append(f)
 
+    def getParameterListAction(self):
+        return ParameterListAction()
+
     class TaskDefinition:
         name = ""
         help = ""
@@ -123,6 +129,26 @@ class TaskClient:
                 if p["type"]=="bool":
                     p["conv"]=bool
             self.client = client
+
+        def getActionDict(self, pkg, task=None, cfg=None):
+            """
+            Ugly helper function to get simple parameter names for tasks whose 
+            config includes a task_action (TaskParameterListGenerator)
+            Although this has the advantage of depending only
+            on the constants defined in the task parameter module, one should
+            use TaskClient.getParameterListAction() 
+            """
+            if task is None:
+                task="Task"+self.name
+            if cfg is None:
+                cfg=task+"Config"
+            d = {}
+            module = "%s.cfg.%s" % (pkg,cfg)
+            mod = importlib.import_module(module)
+            d["Clear"] = eval("mod.%s_Clear" % task)
+            d["Push"] = eval("mod.%s_Push" % task)
+            d["Execute"] = eval("mod.%s_Execute" % task)
+            return d
 
         def prepareParams(self,paramdict):
             for p in paramdict:
@@ -176,6 +202,7 @@ class TaskClient:
             return output
 
     def __init__(self,server_node,default_period):
+        self.serviceLock = threading.RLock()
         self.statusLock = threading.RLock()
         self.statusCond = threading.Condition(self.statusLock)
         parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
@@ -244,7 +271,8 @@ class TaskClient:
 
     def updateTaskList(self):
         try:
-            resp = self.get_task_list()
+            with self.serviceLock:
+                resp = self.get_task_list()
             self.tasklist = {}
             for t in resp.tlist:
                 self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.config,self)
@@ -278,6 +306,8 @@ class TaskClient:
             # print config
             rospy.loginfo("Starting task %s" % name)
             resp = self.start_task(name,config)
+            with self.serviceLock:
+                resp = self.start_task(name,config)
             self.keepAlive = True
             return resp.id
         except rospy.ServiceException, e:
@@ -294,7 +324,8 @@ class TaskClient:
 
     def stopTask(self,id):
         try:
-            resp = self.stop_task(id)
+            with self.serviceLock:
+                resp = self.stop_task(id)
             return 0
         except rospy.ServiceException, e:
             rospy.logerr( "Service call failed: %s"%e)
@@ -302,7 +333,8 @@ class TaskClient:
 
     def idle(self):
         try:
-            resp = self.stop_task(-1)
+            with self.serviceLock:
+                resp = self.stop_task(-1)
             return 0
         except rospy.ServiceException, e:
             rospy.logerr( "Service call failed: %s"%e)
@@ -359,7 +391,8 @@ class TaskClient:
     def updateTaskStatus(self):
         try:
             with self.statusLock:
-                resp = self.get_status()
+                with self.serviceLock:
+                    resp = self.get_status()
                 for t in resp.running_tasks + resp.zombie_tasks:
                     ts = self.TaskStatus(self)
                     ts.id = t.id
