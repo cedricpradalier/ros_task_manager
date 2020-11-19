@@ -443,6 +443,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 
         tp->running = true;
         try {
+            // ROS_INFO("Initialising task %s",tp->task->getName().c_str());
             tp->task->doInitialise(tp->tpid,tp->params);
             tp->updateStatus(ros::Time::now());
             if (tp->status != TaskStatus::TASK_INITIALISED) {
@@ -456,7 +457,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             return ;
         }
         tp->running = true;
-        ROS_INFO("Running task '%s' at period %f main %d timeout %f",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
+        ROS_INFO("Running task '%s' at period %f main %d timeout %f periodic %d",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
 
         if (tp->task->isPeriodic()) {
             ros::Rate rate(1. / tp->period);

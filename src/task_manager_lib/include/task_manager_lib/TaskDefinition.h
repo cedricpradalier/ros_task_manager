@@ -459,15 +459,21 @@ namespace task_manager_lib {
             // Set of functions that must be implemented by any inheriting class
 
             // Initialise is called once every time the task is launched
-            virtual TaskIndicator initialise() = 0;
+            virtual TaskIndicator initialise() {
+                ROS_INFO("Initialising task %s: default function",this->getName().c_str());
+            }
 
             // iterate is called only once for non periodic tasks. It is called
             // iteratively with period 'task_period' for periodic class. 
-            virtual TaskIndicator iterate() = 0;
+            virtual TaskIndicator iterate() {
+                ROS_INFO("Task %s: default iteration",this->getName().c_str());
+            }
 
             // Terminate is called once when the task is completed, cancelled or
             // interrupted.
-            virtual TaskIndicator terminate() = 0;
+            virtual TaskIndicator terminate() {
+                ROS_INFO("Terminating task %s: default function",this->getName().c_str());
+            }
 
     };
 
