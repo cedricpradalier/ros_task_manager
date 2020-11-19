@@ -521,7 +521,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                 // timed_wait is in real time
                 do {
                     double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
-                    boost::posix_time::milliseconds dtimeout(ttimeout*1000);
+                    boost::posix_time::milliseconds dtimeout(int(ttimeout*1000));
                     tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
                     t1 = ros::Time::now().toSec();
                     // printf("%f / %f\n",t1-t0,tp->period);
@@ -626,7 +626,7 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
         ROS_ERROR("Cannot find reference to task %d",id);
         return -1;
     }
-    boost::posix_time::milliseconds dtimeout(timeout*1000);
+    boost::posix_time::milliseconds dtimeout(int(timeout*1000));
     it->second->task_condition.timed_wait(lock,dtimeout);
     return 0;
 }
@@ -703,7 +703,7 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
                 } else {
                     // wait for the right time or another action to be inserted
                     PRINTF(3,"gna:Cond TWait");
-                    boost::posix_time::milliseconds dtimeout((it->first-t.toSec())*1000);
+                    boost::posix_time::milliseconds dtimeout(int((it->first-t.toSec())*1000));
                     aqCond.timed_wait(lock,dtimeout);
                     PRINTF(3,"gna:Locked");
                     continue;
