@@ -305,7 +305,6 @@ class TaskClient:
             config = encode_config(paramdict)
             # print config
             rospy.loginfo("Starting task %s" % name)
-            resp = self.start_task(name,config)
             with self.serviceLock:
                 resp = self.start_task(name,config)
             self.keepAlive = True
