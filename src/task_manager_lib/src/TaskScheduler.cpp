@@ -132,7 +132,6 @@ TaskScheduler::~TaskScheduler()
 bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
         task_manager_lib::StartTask::Response &res )
 {
-    ROS_INFO("StartTask service request");
     lastKeepAlive = ros::Time::now();
     TaskId id = launchTask(req.name,TaskParameters(req.config));
     res.id = id;
@@ -574,7 +573,7 @@ void TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
     if (tp == NULL) return ;
     PRINTF(1,"Cleaning up task %d:%s",tp->tpid,tp->task->getName().c_str());
     tp->task->doTerminate();
-    ROS_INFO("Task '%s' terminated",tp->task->getName().c_str());
+    PRINTF(1, "Task '%s' terminated",tp->task->getName().c_str());
     tp->status |= task_manager_msgs::TaskStatus::TASK_TERMINATED;
     tp->statusTime = now();
     tp->statusString = "terminated";
