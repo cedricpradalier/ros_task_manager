@@ -9,7 +9,17 @@
 #include "task_manager_action/TaskActionMoveGoalConfig.h"
 
 namespace task_manager_action {
-    template <class TaskEnvironment>
+
+    struct DefautGetGoalPublisher {
+        DefautGetGoalPublisher() {}
+        ros::Publisher operator()(task_manager_lib::TaskEnvironmentPtr env, const std::string & topic_name) {
+            ros::NodeHandle & nh = env->getNodeHandle();
+            return nh.advertise<geometry_msgs::PoseStamped>(topic_name,1);
+        }
+    };
+
+
+    template <class TaskEnvironment, class GetGoalPublisher=DefautGetGoalPublisher>
     class TaskActionMoveGoal : 
         public task_manager_lib::TaskInstance<TaskActionMoveGoalConfig, TaskEnvironment>
     {
@@ -26,8 +36,8 @@ namespace task_manager_action {
 
             virtual task_manager_lib::TaskIndicator initialise() {
                 const TaskActionMoveGoalConfig & cfg = Parent::cfg;
-                ros::NodeHandle & nh = Parent::env->getNodeHandle();
-                goal_pub = nh.advertise<geometry_msgs::PoseStamped>(cfg.topic_name,1);
+                GetGoalPublisher ggp;
+                goal_pub = ggp(Parent::env, cfg.topic_name) ; 
                 // Let the publisher start
                 ros::Duration(0.05).sleep();
                 init_time = ros::Time::now();

@@ -132,6 +132,7 @@ TaskScheduler::~TaskScheduler()
 bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
         task_manager_lib::StartTask::Response &res )
 {
+    ROS_INFO("StartTask service request");
     lastKeepAlive = ros::Time::now();
     TaskId id = launchTask(req.name,TaskParameters(req.config));
     res.id = id;
@@ -334,10 +335,11 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
 {
 
     if (tp->foreground) {
+        PRINTF(3,"lt:terminate mainThread %s",mainThread->task->getName().c_str());
         terminateTask(mainThread);
     }
 
-    PRINTF(3,"lt:Locking");
+    PRINTF(3,"lt:Locking (param)");
     {
         boost::unique_lock<boost::mutex> lock(scheduler_mutex);
         PRINTF(3,"lt:Locked");
@@ -348,7 +350,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
         runningThreads[tp->tpid] = tp;
         if (debug>=3) printTaskSet("After launch",runningThreads);
     }
-    PRINTF(3,"lt:Unlocked");
+    PRINTF(3,"lt:Unlocked (param)");
 
     boost::unique_lock<boost::mutex> lock(tp->task_mutex);
     try {
@@ -398,7 +400,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     tparam->foreground = foreground;
     tparam->running = false;
 
-    PRINTF(3,"lt:Locking");
+    PRINTF(3,"lt:Locking (name)");
     {
         boost::unique_lock<boost::mutex> lock(tparam->task_mutex);
         PRINTF(3,"lt:Locked");
@@ -409,7 +411,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
         tparam->task_condition.wait(lock);
         PRINTF(3,"lt:Locked");
     }
-    PRINTF(3,"lt:Unlocked");
+    PRINTF(3,"lt:Unlocked (name)");
 
     return tparam->tpid;
 }
@@ -441,6 +443,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 
         tp->running = true;
         try {
+            // ROS_INFO("Initialising task %s",tp->task->getName().c_str());
             tp->task->doInitialise(tp->tpid,tp->params);
             tp->updateStatus(ros::Time::now());
             if (tp->status != TaskStatus::TASK_INITIALISED) {
@@ -454,7 +457,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             return ;
         }
         tp->running = true;
-        ROS_INFO("Running task '%s' at period %f main %d timeout %f",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
+        ROS_INFO("Running task '%s' at period %f main %d timeout %f periodic %d",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
 
         if (tp->task->isPeriodic()) {
             ros::Rate rate(1. / tp->period);
@@ -521,7 +524,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                 // timed_wait is in real time
                 do {
                     double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
-                    boost::posix_time::milliseconds dtimeout(ttimeout*1000);
+                    boost::posix_time::milliseconds dtimeout(int(ttimeout*1000));
                     tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
                     t1 = ros::Time::now().toSec();
                     // printf("%f / %f\n",t1-t0,tp->period);
@@ -535,6 +538,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
         }
         // tp->task->debug("Out of the loop");
     } catch (const boost::thread_interrupted & e) {
+        ROS_WARN("Task %s interrupted",tp->task->getName().c_str());
         // Ignore, we just want to make sure we get to the next line
         tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",ros::Time::now());
     }
@@ -626,7 +630,7 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
         ROS_ERROR("Cannot find reference to task %d",id);
         return -1;
     }
-    boost::posix_time::milliseconds dtimeout(timeout*1000);
+    boost::posix_time::milliseconds dtimeout(int(timeout*1000));
     it->second->task_condition.timed_wait(lock,dtimeout);
     return 0;
 }
@@ -703,7 +707,7 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
                 } else {
                     // wait for the right time or another action to be inserted
                     PRINTF(3,"gna:Cond TWait");
-                    boost::posix_time::milliseconds dtimeout((it->first-t.toSec())*1000);
+                    boost::posix_time::milliseconds dtimeout(int((it->first-t.toSec())*1000));
                     aqCond.timed_wait(lock,dtimeout);
                     PRINTF(3,"gna:Locked");
                     continue;
