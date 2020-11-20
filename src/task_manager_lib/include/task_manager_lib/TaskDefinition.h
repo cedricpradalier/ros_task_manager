@@ -461,18 +461,21 @@ namespace task_manager_lib {
             // Initialise is called once every time the task is launched
             virtual TaskIndicator initialise() {
                 ROS_INFO("Initialising task %s: default function",this->getName().c_str());
+                return task_manager_msgs::TaskStatus::TASK_INITIALISED;
             }
 
             // iterate is called only once for non periodic tasks. It is called
             // iteratively with period 'task_period' for periodic class. 
             virtual TaskIndicator iterate() {
                 ROS_INFO("Task %s: default iteration",this->getName().c_str());
+                return task_manager_msgs::TaskStatus::TASK_COMPLETED;
             }
 
             // Terminate is called once when the task is completed, cancelled or
             // interrupted.
             virtual TaskIndicator terminate() {
                 ROS_INFO("Terminating task %s: default function",this->getName().c_str());
+                return task_manager_msgs::TaskStatus::TASK_TERMINATED;
             }
 
     };
