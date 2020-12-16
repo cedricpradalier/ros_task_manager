@@ -36,7 +36,7 @@ while True:
             tc.GoTo(goal_x=p[0],goal_y=p[1])
         # Clear the conditions if we reach this point
         tc.clearConditions()
-    except TaskConditionException, e:
+    except TaskConditionException as e:
         rospy.loginfo("Path following interrupted on condition: %s" % \
                 " or ".join([str(c) for c in e.conditions]))
         # This means the conditions were triggered. We need to react to it

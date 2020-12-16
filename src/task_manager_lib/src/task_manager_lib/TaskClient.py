@@ -9,6 +9,9 @@ from task_manager_msgs.msg import *
 from task_manager_lib.srv import *
 from dynamic_reconfigure.encoding import *
 from task_manager_lib.parameter_generator import ParameterListAction
+
+# python3
+from functools import reduce
 import argparse
 import threading
 import importlib
@@ -19,10 +22,10 @@ import sys
 
 class TaskException(Exception):
     def __init__(self, value,id=None,status=None,statusString=""):
+        self.id = id
         self.value = value
-	self.id = id
-	self.status = status
-	self.statusString = statusString
+        self.status = status
+        self.statusString = statusString
     def __str__(self):
         return repr(self.value)
 
@@ -82,7 +85,7 @@ class TaskClient:
     status_functions = []
 
     taskStatusStrings = dict([( TaskStatus.__dict__[k],k) for k in TaskStatus.__dict__.keys() if k[0:5]=="TASK_"])
-    taskStatusId = dict([(v,k) for k,v in taskStatusStrings.iteritems()])
+    taskStatusId = dict([(v,k) for k,v in taskStatusStrings.items()])
 
     def addCondition(self,cond):
         self.conditions.append(cond)
@@ -233,7 +236,7 @@ class TaskClient:
             self.stop_task = rospy.ServiceProxy(self.server_node + '/stop_task', StopTask)
             rospy.wait_for_service(self.server_node + '/get_all_status')
             self.get_status = rospy.ServiceProxy(self.server_node + '/get_all_status', GetAllTaskStatus)
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr("%s: Service initialisation failed: %s"%(self.server_node,e))
             raise
 
@@ -251,7 +254,8 @@ class TaskClient:
 
 
     def __del__(self):
-        self.idle()
+        if not rospy.is_shutdown():
+            self.idle()
 
     def __getattr__(self,name):
         if name=="__dir__":
@@ -265,7 +269,7 @@ class TaskClient:
                 header = std_msgs.msg.Header()
                 header.stamp = rospy.Time.now()
                 self.keepAlivePub.publish(header)
-            except rospy.ROSException, e:
+            except rospy.ROSException as e:
                 # Ignore, this sometimes happens on shutdown
                 pass
 
@@ -276,12 +280,12 @@ class TaskClient:
             self.tasklist = {}
             for t in resp.tlist:
                 self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.config,self)
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr("Service call failed: %s"%e)
 
     def printTaskList(self):
-        for k,v in self.tasklist.iteritems():
-            print "Task %s: %s" % (k,v.help)
+        for k,v in self.tasklist.items():
+            print("Task %s: %s" % (k,v.help))
 
 
     def startTask(self,paramdict,name="",foreground=True,period=-1):
@@ -304,12 +308,12 @@ class TaskClient:
                 paramdict['task_period'] = float(period)
             config = encode_config(paramdict)
             # print config
-            # rospy.loginfo("Starting task %s" % name)
+            rospy.loginfo("Starting task %s" % name)
             with self.serviceLock:
                 resp = self.start_task(name,config)
             self.keepAlive = True
             return resp.id
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
@@ -326,7 +330,7 @@ class TaskClient:
             with self.serviceLock:
                 resp = self.stop_task(id)
             return 0
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
@@ -335,7 +339,7 @@ class TaskClient:
             with self.serviceLock:
                 resp = self.stop_task(-1)
             return 0
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
@@ -352,7 +356,7 @@ class TaskClient:
             ts.id = t.id
             ts.name = t.name
             status = t.status
-            ts.status = status & 0xFFL
+            ts.status = status & 0x000000FF
             ts.foreground = bool(status & 0x100)
             ts.statusString = t.status_string
             ts.statusTime = t.status_time.to_sec()
@@ -360,7 +364,7 @@ class TaskClient:
 
             t = rospy.Time.now().to_sec()
             to_be_deleted = []
-            for k,v in self.taskstatus.iteritems():
+            for k,v in self.taskstatus.items():
                 if (t - v.statusTime) > 10.0:
                     to_be_deleted.append(k)
             for k in to_be_deleted:
@@ -397,7 +401,7 @@ class TaskClient:
                     ts.id = t.id
                     ts.name = t.name
                     status = t.status
-                    ts.status = status & 0xFFL
+                    ts.status = status & 0x000000FF
                     ts.foreground = bool(status & 0x100)
                     ts.statusString = t.status_string
                     ts.statusTime = t.status_time.to_sec()
@@ -407,7 +411,7 @@ class TaskClient:
             except RuntimeError:
                 # Nobody is waiting
                 pass
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr( "%s: Service call failed: %s"%(self.server_node,e))
             raise
 
@@ -439,7 +443,7 @@ class TaskClient:
                             raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
                     else:
                         if self.verbose>1:
-                            print "%s: %d: %02X - %s\n%s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status),self.taskstatus[id].statusString)
+                            print("%s: %d: %02X - %s\n%s" % (self.server_node,id, self.taskstatus[id].status,self.status_string(self.taskstatus[id].status),self.taskstatus[id].statusString))
                         if not (self.taskstatus[id].status & statusTerminated):
                             continue
                         status = self.taskstatus[id].status & (~statusTerminated)
@@ -455,7 +459,7 @@ class TaskClient:
                             # completed[id] = True
                 if reduce(red_fun,completed.values()):
                     if stop_others:
-                        for k,v in completed.iteritems():
+                        for k,v in completed.items():
                             if not v:
                                 self.stopTask(k)
                     return True
@@ -485,8 +489,8 @@ class TaskClient:
 
     def printTaskStatus(self):
         with self.statusLock:
-            for k,v in self.taskstatus.iteritems():
-                print "Task %d: %s" % (k,str(v))
+            for k,v in self.taskstatus.items():
+                print("Task %d: %s" % (k,str(v)))
 
 
 
