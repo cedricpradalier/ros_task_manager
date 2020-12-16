@@ -132,6 +132,7 @@ TaskScheduler::~TaskScheduler()
 bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
         task_manager_lib::StartTask::Response &res )
 {
+    ROS_INFO("StartTask service request");
     lastKeepAlive = ros::Time::now();
     TaskId id = launchTask(req.name,TaskParameters(req.config));
     res.id = id;
@@ -334,10 +335,11 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
 {
 
     if (tp->foreground) {
+        PRINTF(3,"lt:terminate mainThread %s",mainThread->task->getName().c_str());
         terminateTask(mainThread);
     }
 
-    PRINTF(3,"lt:Locking");
+    PRINTF(3,"lt:Locking (param)");
     {
         boost::unique_lock<boost::mutex> lock(scheduler_mutex);
         PRINTF(3,"lt:Locked");
@@ -348,7 +350,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
         runningThreads[tp->tpid] = tp;
         if (debug>=3) printTaskSet("After launch",runningThreads);
     }
-    PRINTF(3,"lt:Unlocked");
+    PRINTF(3,"lt:Unlocked (param)");
 
     boost::unique_lock<boost::mutex> lock(tp->task_mutex);
     try {
@@ -398,7 +400,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     tparam->foreground = foreground;
     tparam->running = false;
 
-    PRINTF(3,"lt:Locking");
+    PRINTF(3,"lt:Locking (name)");
     {
         boost::unique_lock<boost::mutex> lock(tparam->task_mutex);
         PRINTF(3,"lt:Locked");
@@ -409,7 +411,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
         tparam->task_condition.wait(lock);
         PRINTF(3,"lt:Locked");
     }
-    PRINTF(3,"lt:Unlocked");
+    PRINTF(3,"lt:Unlocked (name)");
 
     return tparam->tpid;
 }
@@ -441,6 +443,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
 
         tp->running = true;
         try {
+            // ROS_INFO("Initialising task %s",tp->task->getName().c_str());
             tp->task->doInitialise(tp->tpid,tp->params);
             tp->updateStatus(ros::Time::now());
             if (tp->status != TaskStatus::TASK_INITIALISED) {
@@ -454,7 +457,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             return ;
         }
         tp->running = true;
-        ROS_INFO("Running task '%s' at period %f main %d timeout %f",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout());
+        ROS_INFO("Running task '%s' at period %f main %d timeout %f periodic %d",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
 
         if (tp->task->isPeriodic()) {
             ros::Rate rate(1. / tp->period);
@@ -535,6 +538,7 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
         }
         // tp->task->debug("Out of the loop");
     } catch (const boost::thread_interrupted & e) {
+        ROS_WARN("Task %s interrupted",tp->task->getName().c_str());
         // Ignore, we just want to make sure we get to the next line
         tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",ros::Time::now());
     }
