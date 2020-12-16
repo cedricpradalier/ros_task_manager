@@ -11,12 +11,36 @@ using namespace task_manager_action;
 // There is no move_goal for turtlesim, this is to test the principle of the
 // generic TaskActionMoveGoal
 namespace task_manager_turtlesim {
+
+    struct TurtleSimGetGoalPublisher {
+        TurtleSimGetGoalPublisher() {}
+        ros::Publisher operator()(task_manager_lib::TaskEnvironmentPtr env, const std::string & topic_name) {
+#if 1
+            ros::NodeHandle & nh = env->getNodeHandle();
+            return nh.advertise<geometry_msgs::PoseStamped>(topic_name,1);
+#else
+            TurtleSimEnvPtr tenv = boost::dynamic_pointer_cast<TurtleSimEnv>(env);
+            return tenv->getGoalPublisher();
+#endif
+        }
+    };
+
+
+#if 0
+    class TaskMoveGoal : public TaskActionMoveGoal<TurtleSimEnv,TurtleSimGetGoalPublisher>
+    {
+            TaskMoveGoal(TaskDefinitionPtr def, TaskEnvironmentPtr env) :
+                TaskActionMoveGoal<TurtleSimEnv,TurtleSimGetGoalPublisher>(def,env) {}
+            virtual ~TaskMoveGoal() {};
+    };
+#else
     class TaskMoveGoal : public TaskActionMoveGoal<TurtleSimEnv>
     {
             TaskMoveGoal(TaskDefinitionPtr def, TaskEnvironmentPtr env) :
                 TaskActionMoveGoal<TurtleSimEnv>(def,env) {}
             virtual ~TaskMoveGoal() {};
     };
+#endif
 
     class TaskFactoryMoveGoal : public TaskFactoryActionMoveGoal<TurtleSimEnv>
     {
