@@ -12,6 +12,8 @@
 #include <string>
 #include <task_manager_msgs/TaskStatus.h>
 #include <task_manager_msgs/TaskDescription.h>
+#include <task_manager_msgs/EncapsulatedMessage.h>
+#include <task_manager_msgs/encapsulate_message.h>
 #include <dynamic_reconfigure/ConfigDescription.h>
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_reconfigure/Config.h>
@@ -70,14 +72,18 @@ namespace task_manager_lib {
                     return false;
                 }
 
+            task_manager_msgs::EncapsulatedMessage argv;
 
         public:
             TaskParameters() 
                 : dynamic_reconfigure::Config() { setDefaultParameters(); }
             TaskParameters(const dynamic_reconfigure::Config & cfg) 
                 : dynamic_reconfigure::Config(cfg) {}
+            TaskParameters(const dynamic_reconfigure::Config & cfg,
+                    const task_manager_msgs::EncapsulatedMessage & argv) 
+                : dynamic_reconfigure::Config(cfg), argv(argv) {}
             TaskParameters(const TaskParameters & cfg) 
-                : dynamic_reconfigure::Config(cfg) {}
+                : dynamic_reconfigure::Config(cfg), argv(cfg.argv) {}
 
             // The default values that all tasks will be expected. In most cases,
             // this is actually overwritten by the values in in the .cfg file if
@@ -160,6 +166,10 @@ namespace task_manager_lib {
                 for (unsigned int i = 0; i < strs.size(); i++) {
                     fprintf(fp,"str : %s = '%s'\n",strs[i].name.c_str(),strs[i].value.c_str());
                 }
+            }
+
+            const task_manager_msgs::EncapsulatedMessage & getEncapsulated() const {
+                return argv;
             }
     };
 
@@ -370,7 +380,9 @@ namespace task_manager_lib {
             unsigned int runId;
 
             TaskEnvironmentPtr env_gen;
-            virtual void parseParameters(const TaskParameters & parameters) /*throw (InvalidParameter)*/ {
+            virtual void parseParameters(const TaskParameters & parameters)  {
+            }
+            virtual void setEncapsulatedMessage(const task_manager_msgs::EncapsulatedMessage & m) {
             }
         public:
             // All the class below are intended for generic use
@@ -574,6 +586,7 @@ namespace task_manager_lib {
 
                 CFG cfg;
                 boost::shared_ptr<ENV> env;
+                task_manager_msgs::EncapsulatedMessage argv;
 
                 // Callback function to be bound to the server. It just calls
                 // the virtualised function in case it has been overloaded.
@@ -588,10 +601,17 @@ namespace task_manager_lib {
                     cfg = config;
                 }
 
-                virtual void parseParameters(const TaskParameters & parameters) /*throw (InvalidParameter)*/ {
+                virtual void parseParameters(const TaskParameters & parameters) {
                     cfg = parameters.toConfig<CFG>();
+                    argv = parameters.getEncapsulated();
                     recfg.reset(new DynRecfgData(this, cfg));
                 }
+
+                template <class Msg> 
+                    bool extractEncapsulatedMessage(Msg & m) {
+                        return task_manager_msgs::decapsulate<Msg>(m, argv);
+                    }
+
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskInstance(TaskDefinitionPtr def, TaskEnvironmentPtr ev) 

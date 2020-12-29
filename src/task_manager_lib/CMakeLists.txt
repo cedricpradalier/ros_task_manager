@@ -98,9 +98,9 @@ add_library(task_manager_lib
     src/TaskHistory.cpp
 )
 add_dependencies(task_manager_lib 
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    task_manager_lib_generate_message_cpp
-    task_manager_msgs_generate_message_cpp)
+    ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# task_manager_lib_generate_message_cpp
+#    task_manager_msgs_generate_message_cpp)
 target_link_libraries(task_manager_lib
   ${catkin_LIBRARIES} dl
 )
