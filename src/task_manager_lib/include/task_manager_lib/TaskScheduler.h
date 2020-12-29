@@ -22,6 +22,7 @@
 #include "task_manager_msgs/TaskStatus.h"
 #include "task_manager_msgs/TaskDescriptionLight.h"
 #include "task_manager_msgs/TaskHistory.h"
+#include "task_manager_msgs/EncapsulatedMessage.h"
 
 #include <iostream>
 

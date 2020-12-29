@@ -133,7 +133,7 @@ bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
         task_manager_lib::StartTask::Response &res )
 {
     lastKeepAlive = ros::Time::now();
-    TaskId id = launchTask(req.name,TaskParameters(req.config));
+    TaskId id = launchTask(req.name,TaskParameters(req.config, req.argv));
     res.id = id;
     return true;
 }

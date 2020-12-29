@@ -1,4 +1,5 @@
 string name
 dynamic_reconfigure/Config config
+task_manager_msgs/EncapsulatedMessage argv
 ---
 int32 id

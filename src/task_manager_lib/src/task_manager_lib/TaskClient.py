@@ -6,6 +6,7 @@ import rospy.core
 import rospy.timer
 import std_msgs.msg
 from task_manager_msgs.msg import *
+from task_manager_msgs.encapsulate_message import encapsulate
 from task_manager_lib.srv import *
 from dynamic_reconfigure.encoding import *
 from task_manager_lib.parameter_generator import ParameterListAction
@@ -167,21 +168,29 @@ class TaskClient:
             return paramdict
 
         def start(self,**paramdict):
+            argv = None
+            if ('argv' in paramdict):
+                argv = paramdict['argv']
+                del paramdict['argv']
             paramdict = self.prepareParams(paramdict)
-            id = self.client.startTask(paramdict)
+            id = self.client.startTask(paramdict,argv=argv)
             return id
 
         def __call__(self,**paramdict):
+            argx = None
+            if ('argv' in paramdict):
+                argx = paramdict['argv']
+                del paramdict['argv']
             paramdict = self.prepareParams(paramdict)
             foreground = True
             if ('foreground' in paramdict):
                 foreground = bool(paramdict['foreground'])
             if (foreground):
                 rospy.loginfo("%s: Starting task %s in foreground" % (self.client.server_node,self.name))
-                res = self.client.startTaskAndWait(paramdict)
+                res = self.client.startTaskAndWait(paramdict,argv=argx)
                 return res
             else:
-                id = self.client.startTask(paramdict)
+                id = self.client.startTask(paramdict,argv=argx)
                 rospy.loginfo("%s: Starting task %s in background: %d" % (self.client.server_node,self.name,id))
                 return id
 
@@ -288,7 +297,7 @@ class TaskClient:
             print("Task %s: %s" % (k,v.help))
 
 
-    def startTask(self,paramdict,name="",foreground=True,period=-1):
+    def startTask(self,paramdict,name="",foreground=True,period=-1,argv=None):
         if rospy.is_shutdown():
             raise TaskException("Aborting due to ROS shutdown")
         if self.check_only:
@@ -307,18 +316,22 @@ class TaskClient:
             if (period>0) and ('task_period' not in paramdict):
                 paramdict['task_period'] = float(period)
             config = encode_config(paramdict)
+            if argv:
+                extra = encapsulate(argv)
+            else:
+                extra = EncapsulatedMessage()
             # print config
             rospy.loginfo("Starting task %s" % name)
             with self.serviceLock:
-                resp = self.start_task(name,config)
+                resp = self.start_task(name,config,extra)
             self.keepAlive = True
             return resp.id
         except rospy.ServiceException as e:
             rospy.logerr( "Service call failed: %s"%e)
             raise
 
-    def startTaskAndWait(self,paramdict,name="",foreground=True,period=-1.):
-        tid = self.startTask(paramdict,name,foreground,period)
+    def startTaskAndWait(self,paramdict,name="",foreground=True,period=-1.,argv=None):
+        tid = self.startTask(paramdict,name,foreground,period,argv)
         if (self.verbose):
             rospy.logdebug( "Waiting task %d" % tid)
         if self.check_only:

@@ -3,6 +3,7 @@
 import roslib; roslib.load_manifest('task_manager_turtlesim')
 import rospy
 from math import *
+from std_msgs.msg import Header,Float32
 from task_manager_lib.TaskClient import *
 
 rospy.init_node('task_client')
@@ -16,10 +17,15 @@ wp = [ [1., 9., pi/2, 0, 0, 255],
     [1., 1., -pi, 255, 255, 0]]
 
 while True:
+    h = Header()
+    h.frame_id = "Hello"
+    tc.Clear(argv=h)
+    f = Float32(data = 1.0)
+    tc.Clear(argv=f)
+
     tc.Wait(duration=1.)
     tc.SetPen(on=False)
     tc.GoTo(goal_x=1.0,goal_y=1.0)
-    tc.Clear()
 
     for p in wp:
         tc.Wait(duration=0.2)
