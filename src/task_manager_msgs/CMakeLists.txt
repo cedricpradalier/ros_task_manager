@@ -88,13 +88,13 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(task_manager_msgs_encapsulate src/test_encapsulate.cpp)
+add_dependencies(task_manager_msgs_encapsulate task_manager_msgs_generate_messages_cpp)
 target_link_libraries(task_manager_msgs_encapsulate ${catkin_LIBRARIES})
 
 # add_executable(boost_ver src/boost_ver.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(task_manager_msgs_node task_manager_msgs_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(task_manager_msgs_node
