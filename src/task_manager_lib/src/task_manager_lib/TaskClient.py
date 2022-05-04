@@ -63,6 +63,14 @@ class ConditionIsCompleted(Condition):
             return False
         return self.tc.isCompleted(self.taskId) 
 
+class ConditionVariable(Condition):
+    def __init__(self, name, var):
+        self.name = name
+        self.var = var
+
+    def isVerified(self):
+        return self.var
+
 class ConditionIsRunning(Condition):
     def __init__(self, name, tc, taskId):
         self.name = name
