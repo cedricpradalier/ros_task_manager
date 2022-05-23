@@ -2,5 +2,10 @@
 
 path=`rospack find task_manager_lib`
 
-ipython --no-banner -i $path/node/console.py -- $*
+if which ipython
+then
+    ipython --no-banner -i $path/node/console.py -- $*
+else 
+    ipython3 --no-banner -i $path/node/console.py -- $*
+fi
 
