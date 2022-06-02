@@ -14,13 +14,13 @@ namespace task_manager_lib {
     class ServiceStorage {
         private:
 
-            ros::NodeHandle nh;
+            ros::NodeHandle service_storage_nh;
             ServiceMap serviceMap;
             mutable std::mutex serviceMapMtx;
 
 
         public:
-            ServiceStorage(ros::NodeHandle & nh) : nh(nh) {}
+            ServiceStorage(ros::NodeHandle & nh) : service_storage_nh(nh) {}
 
             bool hasService(const std::string & s) const {
                 const std::lock_guard<std::mutex> lock(serviceMapMtx);
@@ -35,7 +35,7 @@ namespace task_manager_lib {
                     ServiceMap::iterator it = serviceMap.find(s);
                     if (replace || (it == serviceMap.end())) {
                         ServiceClientPtr clientp(new ros::ServiceClient);
-                        *clientp = nh.serviceClient<srv>(s);
+                        *clientp = service_storage_nh.serviceClient<srv>(s);
                         serviceMap[s] = clientp;
                         return clientp;
                     } else {
