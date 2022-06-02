@@ -12,7 +12,7 @@ namespace task_manager_lib {
     typedef std::map<std::string,ServiceClientPtr> ServiceMap;
 
     class ServiceStorage {
-        protected:
+        private:
 
             ros::NodeHandle nh;
             ServiceMap serviceMap;
