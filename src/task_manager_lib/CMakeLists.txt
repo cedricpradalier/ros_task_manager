@@ -96,6 +96,7 @@ add_library(task_manager_lib
     src/TaskWaitDefault.cpp
     src/TaskServerInterface.cpp
     src/TaskHistory.cpp
+    src/ServiceStorage.cpp
 )
 add_dependencies(task_manager_lib 
     ${${PROJECT_NAME}_EXPORTED_TARGETS})
