@@ -17,5 +17,5 @@ uint32 id
 string name
 uint8 status
 string status_string
-time status_time
-dynamic_reconfigure/Config plist
+builtin_interfaces/Time status_time
+rcl_interfaces/ParameterValue[] plist

@@ -5,19 +5,33 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ros/ros.h>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread.hpp>
 
 #include <string>
-#include <task_manager_msgs/TaskStatus.h>
-#include <task_manager_msgs/TaskDescription.h>
+#include <rclcpp/rclcpp.hpp>
+#include <task_manager_msgs/msg/task_status.hpp>
+#include <task_manager_msgs/msg/task_description.hpp>
+#include <task_manager_msgs/msg/task_config.hpp>
+
+// #define USE_ENCAPSULATED
+#ifdef USE_ENCAPSULATED
 #include <task_manager_msgs/EncapsulatedMessage.h>
 #include <task_manager_msgs/encapsulate_message.h>
-#include <dynamic_reconfigure/ConfigDescription.h>
-#include <dynamic_reconfigure/server.h>
-#include <dynamic_reconfigure/Config.h>
-#include <dynamic_reconfigure/config_tools.h>
+#else
+namespace task_manager_msgs {
+    // Placeholder
+    namespace msg {
+        struct EncapsulatedMessage {
+        };
+    }
+}
+#endif
+
+// #include <dynamic_reconfigure/ConfigDescription.h>
+// #include <dynamic_reconfigure/server.h>
+// #include <dynamic_reconfigure/Config.h>
+// #include <dynamic_reconfigure/config_tools.h>
 
 namespace task_manager_lib {
     class DynamicTask;
@@ -30,7 +44,7 @@ namespace task_manager_lib {
      * the class provides an easy way to use the dynamic_cast to check the type of
      * the argument.\
      * */
-    class TaskEnvironment {
+    class TaskEnvironment : public rclcpp::Node {
         public:
             // This mutex will be locked in all the task instance function
             // (initialize, iterate, terminate) for periodic tasks. However, 
@@ -41,13 +55,11 @@ namespace task_manager_lib {
             // boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
             // boost::unique_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
             boost::shared_mutex environment_mutex;
-        protected:
-            ros::NodeHandle nh;
         public:
-            TaskEnvironment(ros::NodeHandle & _nh) : nh(_nh) {}
+            TaskEnvironment(const std::string & envNodeName) : rclcpp::Node(envNodeName) {}
             virtual ~TaskEnvironment() {}
-            ros::NodeHandle & getNodeHandle() {return nh;}
     };
+
     typedef boost::shared_ptr<TaskEnvironment> TaskEnvironmentPtr;
     typedef boost::shared_ptr<TaskEnvironment const> TaskEnvironmentConstPtr;
 
@@ -55,102 +67,85 @@ namespace task_manager_lib {
     typedef boost::shared_ptr<TaskInstanceBase> TaskInstancePtr;
     typedef boost::shared_ptr<TaskInstanceBase const> TaskInstanceConstPtr;
 
-    // Extension of the dynamic_reconfigure::Config class to add more 
+    // Extension of the task_manager_msgs::TaskConfig class to add more 
     // object like functions and conversion
-    class TaskParameters: public dynamic_reconfigure::Config {
-        protected:
-            // Copy-pasted from dynamic_reconfigure::ConfigTools::getParameter
-            template <class VT, class T>
-                bool setParameter(std::vector<VT> &vec, const std::string &name, const T &val)
-                {
-                    for (typename std::vector<VT>::iterator i = vec.begin(); i != vec.end(); i++)
-                        if (i->name == name)
-                        {
-                            i->value = val;
-                            return true;
-                        }
-                    return false;
-                }
-
-            task_manager_msgs::EncapsulatedMessage argv;
-
+    typedef std::map<std::string,rclcpp::Parameter> ParameterMap;
+    class TaskParameters: public ParameterMap {
         public:
-            TaskParameters() 
-                : dynamic_reconfigure::Config() { setDefaultParameters(); }
-            TaskParameters(const dynamic_reconfigure::Config & cfg) 
-                : dynamic_reconfigure::Config(cfg) {}
-            TaskParameters(const dynamic_reconfigure::Config & cfg,
-                    const task_manager_msgs::EncapsulatedMessage & argv) 
-                : dynamic_reconfigure::Config(cfg), argv(argv) {}
+            TaskParameters() { }
+            TaskParameters(const task_manager_msgs::msg::TaskConfig & cfg) {
+                loadConfig(cfg);
+            }
             TaskParameters(const TaskParameters & cfg) 
-                : dynamic_reconfigure::Config(cfg), argv(cfg.argv) {}
+                : ParameterMap(cfg) {}
 
-            // The default values that all tasks will be expected. In most cases,
-            // this is actually overwritten by the values in in the .cfg file if
-            // one is used
-            void setDefaultParameters() {
-                setParameter("task_rename",std::string());
-                setParameter("foreground",true);
-                setParameter("task_period",1.);
-                setParameter("task_timeout",-1.);
+            void loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) {
+                for (size_t i=0;i<cfg.plist.size();i++) {
+                    insert(ParameterMap::value_type(cfg.plist[i].name,
+                                rclcpp::Parameter(cfg.plist[i].name,cfg.plist[i].value)));
+                }
             }
 
-            // Convert the parameter to a XXXConfig class, as generated by an .cfg
-            // file. See dynamic_reconfigure/templates/TypeConfig.h
-            template <class CFG>
-                CFG toConfig() const {
-                    CFG cfg = CFG::__getDefault__();
-                    dynamic_reconfigure::Config drc = *this;
-                    cfg.__fromMessage__(drc);
-                    return cfg;
+            void loadConfig(const TaskParameters & cfg) {
+                for (ParameterMap::const_iterator it=cfg.begin();it!=cfg.end();it++) {
+                    insert(*it);
                 }
+            }
 
-            // Convert the data from a XXXConfig class, to a parameter structure
-            // suitable for sending as a ROS message. A bit too much copies in this
-            // functions.
-            template <class CFG>
-                void fromConfig(const CFG & cfg) {
-                    dynamic_reconfigure::Config drc = *this;
-                    cfg.__toMessage__(drc);
-                    *this = drc;
-                }
 
             // Read a parameter from the structure, and return false if it is
             // missing. Mostly a convenience function to avoid the long namespaces.
             template <class T>
                 bool getParameter(const std::string &name, T &val) const
                 {
-                    return dynamic_reconfigure::ConfigTools::getParameter(
-                            dynamic_reconfigure::ConfigTools::getVectorForType(*this, val), name, val);
+                    ParameterMap::const_iterator it = find(name); 
+                    if (it==end()) {
+                        return false;
+                    }
+                    val = it->second.get_value<T>();
+                    return true;
                 }
 
-            // Set a parameter int the structure. This is missing in the
+            // Set a parameter ino the structure. This is missing in the
             // ConfigTools class.
             template <class T>
                 void setParameter(const std::string &name, const T &val)
                 {
-                    if (!setParameter(dynamic_reconfigure::ConfigTools::getVectorForType(*this, val), name, val)) {
-                        dynamic_reconfigure::ConfigTools::appendParameter(*this,name,val);
-                    }
+                    insert(ParameterMap::value_type(name,rclcpp::Parameter(val)));
                 }
+
+            void setParameter(rclcpp::Parameter &val)
+            {
+                insert(ParameterMap::value_type(val.get_name(),val));
+            }
 
             // Merge a set of parameters with the current one. Any parameter in
             // tnew that is already in 'this' is updated. If it is not there yet,
             // it is inserted.
             void update(const TaskParameters & tnew) {
-                for (unsigned int i = 0; i < tnew.bools.size(); i++) {
-                    setParameter(tnew.bools[i].name,(bool)tnew.bools[i].value);
-                }
-                for (unsigned int i = 0; i < tnew.ints.size(); i++) {
-                    setParameter(tnew.ints[i].name,(int)tnew.ints[i].value);
-                }
-                for (unsigned int i = 0; i < tnew.doubles.size(); i++) {
-                    setParameter(tnew.doubles[i].name,(double)tnew.doubles[i].value);
-                }
-                for (unsigned int i = 0; i < tnew.strs.size(); i++) {
-                    setParameter(tnew.strs[i].name,tnew.strs[i].value);
-                }
+                loadConfig(tnew);
             }
+
+#if 0
+            // Convert the parameter to a XXXConfig class, as generated by an .cfg
+            // file. See dynamic_reconfigure/templates/TypeConfig.h
+            template <class CFG>
+                CFG toConfig() const {
+                    CFG cfg = CFG::__getDefault__();
+                    task_manager_msgs::TaskConfig drc = *this;
+                    cfg.__fromMessage__(drc);
+                    return cfg;
+                }
+
+            // Convert the data from a XXXConfig class, to a parameter structure
+            // suitable for sending as a ROS message. A bit too many copies in this
+            // functions.
+            template <class CFG>
+                void fromConfig(const CFG & cfg) {
+                    task_manager_msgs::TaskConfig drc = *this;
+                    cfg.__toMessage__(drc);
+                    *this = drc;
+                }
 
             // Dump the content of the parameters. Mostly for debug
             void print(FILE * fp=stdout) const {
@@ -168,9 +163,7 @@ namespace task_manager_lib {
                 }
             }
 
-            const task_manager_msgs::EncapsulatedMessage & getEncapsulated() const {
-                return argv;
-            }
+#endif
     };
 
     /**
@@ -197,13 +190,14 @@ namespace task_manager_lib {
     // Forward declaration for getInstance
     class TaskInstanceBase;
 
+
     /**
      *
      * Mother class of all tasks. Contains all the generic tools to define a task.
      * Must be inherited. Such a task can be periodic or aperiodic
      * 
      * */
-    class TaskDefinitionBase : public boost::enable_shared_from_this<TaskDefinitionBase>
+    class TaskDefinitionBase : public rclcpp::Node
     {
         protected:
             /**
@@ -222,19 +216,6 @@ namespace task_manager_lib {
              * */
             bool periodic;
 
-            /**
-             * Storage for some task status string, if required. Can only be set
-             * with setStatusString
-             * */
-            std::string statusString;
-
-            /**
-             * Storage for the current status of the task. Automatically updated
-             * from the output of the configure, initialise, iterate and terminate
-             * functions
-             * */
-            TaskIndicator taskStatus;
-
             TaskEnvironmentPtr env_gen;
 
             /**
@@ -246,17 +227,33 @@ namespace task_manager_lib {
             // All the class below are intended for generic use
 
             // Default constructor:
+            //
             // tname: the task name
             // thelp: the task description
             // isperiodic: tells if the class will be executed recurringly
             // (isperiodic = true), or if the class will be executed in its own
             // thread and will report its status on its own. 
             // task parameters.
+            TaskDefinitionBase(const std::string & node_name, const std::string & tname, const std::string & thelp, 
+                    bool isperiodic, TaskEnvironmentPtr ev) :
+                rclcpp::Node(node_name), name(tname), help(thelp), periodic(isperiodic), 
+                env_gen(ev), taskId(-1) {
+                    this->declare_parameter("task_rename","");
+                    this->declare_parameter("foreground",true);
+                    this->declare_parameter("task_period",1.f);
+                    this->declare_parameter("task_timeout",-1.f);
+                }
             TaskDefinitionBase(const std::string & tname, const std::string & thelp, 
                     bool isperiodic, TaskEnvironmentPtr ev) :
-                name(tname), help(thelp), periodic(isperiodic), 
-                taskStatus(task_manager_msgs::TaskStatus::TASK_NEWBORN), 
-                env_gen(ev), taskId(-1){}
+                rclcpp::Node(tname), name(tname), help(thelp), periodic(isperiodic), 
+                env_gen(ev), taskId(-1) {
+
+                    this->declare_parameter("task_rename","");
+                    this->declare_parameter("foreground",true);
+                    this->declare_parameter("task_period",1.f);
+                    this->declare_parameter("task_timeout",-1.f);
+
+                }
             virtual ~TaskDefinitionBase() {
                 // printf("Delete task '%s'\n",name.c_str());
                 // fflush(stdout);
@@ -281,17 +278,6 @@ namespace task_manager_lib {
             // Has to be virtual because it is overloaded by the dynamic class proxy.
             virtual bool isPeriodic() const;
 
-            // Get the status indicator 
-            // Has to be virtual because it is overloaded by the dynamic class proxy.
-            virtual TaskIndicator getStatus() const;
-            // Update the task status
-            virtual void setStatus(const TaskIndicator & ti);
-            // Get the status string 
-            // Has to be virtual because it is overloaded by the dynamic class proxy.
-            virtual const std::string & getStatusString() const;
-            // Update the task status string
-            virtual void setStatusString(const std::string & s); 
-
             // Provide an instance of the class (or a derivative of it), with
             // its own internal variables that can be run multiple time. 
             virtual TaskInstancePtr instantiate() = 0; 
@@ -303,30 +289,22 @@ namespace task_manager_lib {
             // the dynamic class proxy.
             virtual void setTaskId(unsigned int id);
 
-            // Call the virtual configure function, but prepare the class before
-            // hand.
-            void doConfigure(unsigned int taskId, const TaskParameters & parameters);
-
             // Output a debut string, prefixed by the task name
             void debug(const char *stemplate,...) const; 
 
             // Get the task description as a combination of task-specific
             // information and dynamic_reconfigure::ConfigDescription (assuming the
             // task as a config file)
-            virtual task_manager_msgs::TaskDescription getDescription() const;
+            virtual task_manager_msgs::msg::TaskDescription getDescription() const;
 
             // Return the parameters as read from the parameter server. Returns the
             // default parameters otherwise.
-            virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh) = 0;
-
-            // Return the default parameters, typically from the default value
-            // defined in the .cfg file.
-            virtual TaskParameters getDefaultParameters() const = 0;
+            virtual TaskParameters getParameters() const;
 
             /**
              * description of the parameters
              * */
-            virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const = 0;
+            virtual std::vector<rcl_interfaces::msg::ParameterDescriptor> getParameterDescription() const;
 
         protected:
             // Set of functions only useful for derived classes
@@ -337,21 +315,18 @@ namespace task_manager_lib {
         protected:
             // Set of functions that must be implemented by any inheriting class
 
-            // Configure is called only once when the task scheduler is started.
-            virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/ = 0;
-
     };
 
     typedef boost::shared_ptr<TaskDefinitionBase> TaskDefinitionPtr;
     typedef boost::shared_ptr<TaskDefinitionBase const> TaskDefinitionConstPtr;
-    
+
     /**
      *
      * Mother class of all tasks. Contains all the generic tools to define a task.
      * Must be inherited. Such a task can be periodic or aperiodic
      * 
      * */
-    class TaskInstanceBase
+    class TaskInstanceBase : public rclcpp::Node
     {
         protected:
             TaskDefinitionPtr definition;
@@ -380,17 +355,15 @@ namespace task_manager_lib {
             unsigned int runId;
 
             TaskEnvironmentPtr env_gen;
-            virtual void parseParameters(const TaskParameters & parameters)  {
-            }
-            virtual void setEncapsulatedMessage(const task_manager_msgs::EncapsulatedMessage & m) {
+            virtual void parseParameters(const TaskParameters & /*parameters*/)  {
             }
         public:
             // All the class below are intended for generic use
 
             // Default constructor:
             // task parameters.
-            TaskInstanceBase(TaskDefinitionPtr def, TaskEnvironmentPtr ev) :
-                definition(def), taskStatus(task_manager_msgs::TaskStatus::TASK_CONFIGURED), 
+            TaskInstanceBase(const std::string & node_name, TaskDefinitionPtr def, TaskEnvironmentPtr ev) :
+                rclcpp::Node(node_name), definition(def), taskStatus(task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED), 
                 timeout(-1.0), runId(-1), env_gen(ev) {}
             virtual ~TaskInstanceBase() {
                 // printf("Delete task instance'%s'\n",name.c_str());
@@ -456,7 +429,7 @@ namespace task_manager_lib {
             void debug(const char *stemplate,...) const; 
 
             // Get the status as a message ready to be published over ROS
-            task_manager_msgs::TaskStatus getRosStatus() const;
+            task_manager_msgs::msg::TaskStatus getRosStatus() const;
 
         public:
             // The functions below are virtual pure and must be implemented by the
@@ -472,27 +445,28 @@ namespace task_manager_lib {
 
             // Initialise is called once every time the task is launched
             virtual TaskIndicator initialise() {
-                ROS_INFO("Initialising task %s: default function",this->getName().c_str());
-                return task_manager_msgs::TaskStatus::TASK_INITIALISED;
+                RCLCPP_INFO(this->get_logger(),"Initialising task %s: default function",this->getName().c_str());
+                return task_manager_msgs::msg::TaskStatus::TASK_INITIALISED;
             }
 
             // iterate is called only once for non periodic tasks. It is called
             // iteratively with period 'task_period' for periodic class. 
             virtual TaskIndicator iterate() {
-                ROS_INFO("Task %s: default iteration",this->getName().c_str());
-                return task_manager_msgs::TaskStatus::TASK_COMPLETED;
+                RCLCPP_INFO(this->get_logger(),"Task %s: default iteration",this->getName().c_str());
+                return task_manager_msgs::msg::TaskStatus::TASK_COMPLETED;
             }
 
             // Terminate is called once when the task is completed, cancelled or
             // interrupted.
             virtual TaskIndicator terminate() {
-                ROS_INFO("Terminating task %s: default function",this->getName().c_str());
-                return task_manager_msgs::TaskStatus::TASK_TERMINATED;
+                RCLCPP_INFO(this->get_logger(),"Terminating task %s: default function",this->getName().c_str());
+                return task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
             }
 
     };
 
-    
+#if 0
+
 
     // Templated class specialising some of the virtual functions of a
     // TaskDefinition based on the data available in a XXXConfig class generated
@@ -507,7 +481,7 @@ namespace task_manager_lib {
                 // Same constructor as the normal TaskDefinition
                 TaskDefinition(const std::string & tname, const std::string & thelp, bool isperiodic, 
                         TaskEnvironmentPtr ev) : TaskDefinitionBase(tname,thelp,isperiodic,ev) {
-                        env = castEnvironment();
+                    env = castEnvironment();
                 }
                 virtual ~TaskDefinition() {}
 
@@ -543,7 +517,7 @@ namespace task_manager_lib {
 
                 virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/
                 {
-                    return task_manager_msgs::TaskStatus::TASK_CONFIGURED;
+                    return task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED;
                 }
 
                 virtual TaskInstancePtr instantiate() {
@@ -622,12 +596,12 @@ namespace task_manager_lib {
 
                 virtual TaskIndicator initialise() 
                 {
-                    return task_manager_msgs::TaskStatus::TASK_INITIALISED;
+                    return task_manager_msgs::msg::TaskStatus::TASK_INITIALISED;
                 }
 
                 virtual TaskIndicator terminate()
                 {
-                    return task_manager_msgs::TaskStatus::TASK_TERMINATED;
+                    return task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
                 }
 
                 template <class SPECIALIZED>
@@ -660,7 +634,8 @@ namespace task_manager_lib {
     } \
 }
 
-    };
 
+#endif
+}
 
 #endif // TASK_DEFINITION_H

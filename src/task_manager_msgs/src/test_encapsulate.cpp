@@ -1,13 +1,17 @@
 
-#include <task_manager_msgs/EncapsulatedMessage.h>
+#include <task_manager_msgs/msg/encapsulated_message.hpp>
 #include <task_manager_msgs/encapsulate_message.h>
+#include <ostream>
 
-
+std::ostream& operator<<(std::ostream& s, const task_manager_msgs::msg::EncapsulatedMessage & v) {
+    s << "Type: " << v.type << " md5sum '" << v.md5sum << "' - ";
+    return s;
+}
 
 int main(int argc, char *argv[]) {
-    ros::init(argc,argv, "test_encaps");
+    // ros::init(argc,argv, "test_encaps");
 
-    task_manager_msgs::EncapsulatedMessage E1, E2, E3;
+    task_manager_msgs::msg::EncapsulatedMessage E1, E2, E3;
     E1.type = "test/test";
     E1.md5sum = "0123456";
     E1.data.resize(10);
@@ -37,6 +41,9 @@ int main(int argc, char *argv[]) {
         printf("%02X ",E3.data[i]);
     }
     printf("\n");
+
+    // This is not working at this stage (E3.data is not reinitialized
+    // correctly by the deserializer)
 
     return 0;
 }

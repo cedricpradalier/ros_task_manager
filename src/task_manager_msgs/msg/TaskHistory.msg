@@ -12,7 +12,7 @@ uint8 TASK_INITIALISATION_FAILED = 10
 
 uint32 tid
 string name
-time start_time
-time end_time
+builtin_interfaces/Time start_time
+builtin_interfaces/Time end_time
 TaskParameter[] parameters
 uint8 status

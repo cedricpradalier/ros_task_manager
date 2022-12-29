@@ -1,7 +1,8 @@
 
-#include <dynamic_reconfigure/config_tools.h>
+// #include <dynamic_reconfigure/config_tools.h>
 #include "task_manager_lib/TaskDefinition.h"
 using namespace task_manager_lib;
+
 
 void TaskDefinitionBase::setName(const std::string & n) {
 	name = n;
@@ -11,16 +12,8 @@ void TaskDefinitionBase::setTaskId(unsigned int id) {
 	taskId = id;
 }
 
-void TaskInstanceBase::setRuntimeId(unsigned int id) {
-	runId = id;
-}
-
 unsigned int TaskDefinitionBase::getTaskId() const {
     return taskId;
-}
-
-unsigned int TaskInstanceBase::getRuntimeId() const {
-    return runId;
 }
 
 const std::string & TaskDefinitionBase::getName() const {
@@ -34,46 +27,32 @@ const std::string & TaskDefinitionBase::getHelp() const {
 bool TaskDefinitionBase::isPeriodic() const {
 	return periodic;
 }
-
-
-TaskIndicator TaskDefinitionBase::getStatus() const {
-	return taskStatus;
+std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskDefinitionBase::getParameterDescription() const {
+    std::vector<std::string> prefixes;
+    rcl_interfaces::msg::ListParametersResult lparams = this->list_parameters(prefixes,0);
+    return this->describe_parameters(lparams.names);
 }
 
-void TaskDefinitionBase::setStatus(const TaskIndicator & ti) {
-	taskStatus = ti;
-}
-
-task_manager_msgs::TaskDescription TaskDefinitionBase::getDescription() const {
-    task_manager_msgs::TaskDescription td;
+task_manager_msgs::msg::TaskDescription TaskDefinitionBase::getDescription() const {
+    task_manager_msgs::msg::TaskDescription td;
     td.name = this->getName();
     td.description = this->getHelp();
     td.periodic = this->isPeriodic();
-    td.config = this->getParameterDescription();
+    td.config = getParameterDescription();
     return td;
 }
 
-void TaskDefinitionBase::doConfigure(unsigned int id, const TaskParameters & parameters)
-{
-    taskId = id;
-    // printf("Configure %s: default values\n",this->getName().c_str());
-    // config.print(stdout);
-    // printf("Configure %s: proposed values\n",this->getName().c_str());
-    // parameters.print(stdout);
-    // printf("Configure %s: after update\n",this->getName().c_str());
-    // config.print(stdout);
 
-	statusString.clear();
-	taskStatus = this->configure(parameters);
-}
-
-
-const std::string & TaskDefinitionBase::getStatusString() const {
-	return statusString;
-}
-
-void TaskDefinitionBase::setStatusString(const std::string & s) {
-    statusString = s;
+TaskParameters TaskDefinitionBase::getParameters() const {
+    std::vector<std::string> prefixes;
+    rcl_interfaces::msg::ListParametersResult lparams = this->list_parameters(prefixes,0);
+    
+    TaskParameters cfg;
+    std::vector<rclcpp::Parameter> params = this->get_parameters(lparams.names);
+    for (size_t i=0;i<params.size();i++) {
+        cfg.setParameter(params[i]);
+    }
+    return cfg;
 }
 
 
@@ -84,7 +63,16 @@ void TaskDefinitionBase::debug(const char *stemplate,...) const {
 	vsnprintf(buffer,1023, stemplate,args);
 	va_end(args);
     buffer[1023]=0;
-	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
+    RCLCPP_INFO(this->get_logger(),"%s: %s",this->getName().c_str(),buffer);
+}
+
+#if 1
+unsigned int TaskInstanceBase::getRuntimeId() const {
+    return runId;
+}
+
+void TaskInstanceBase::setRuntimeId(unsigned int id) {
+	runId = id;
 }
 
 TaskIndicator TaskInstanceBase::getStatus() const {
@@ -99,8 +87,8 @@ TaskDefinitionPtr TaskInstanceBase::getDefinition() {
     return definition;
 }
 
-task_manager_msgs::TaskStatus TaskInstanceBase::getRosStatus() const {
-    task_manager_msgs::TaskStatus st;
+task_manager_msgs::msg::TaskStatus TaskInstanceBase::getRosStatus() const {
+    task_manager_msgs::msg::TaskStatus st;
     st.name = this->getName();
     st.status = this->getStatus();
     st.status_string = this->getStatusString();
@@ -127,7 +115,7 @@ void TaskInstanceBase::debug(const char *stemplate,...) const {
 	vsnprintf(buffer,1023, stemplate,args);
 	va_end(args);
     buffer[1023]=0;
-	ROS_INFO("%s: %s",this->getName().c_str(),buffer);
+	RCLCPP_INFO(this->get_logger(),"%s: %s",this->getName().c_str(),buffer);
 }
 
 bool TaskInstanceBase::isAnInstanceOf(const TaskDefinitionBase & def) {
@@ -159,7 +147,7 @@ void TaskInstanceBase::doIterate()
         taskStatus = this->iterate();
     } else {
         // Forcing status to RUNNING to avoid task not appearing in task client
-        taskStatus = task_manager_msgs::TaskStatus::TASK_RUNNING;
+        taskStatus = task_manager_msgs::msg::TaskStatus::TASK_RUNNING;
         taskStatus = this->iterate();
     }
 }
@@ -169,45 +157,46 @@ void TaskInstanceBase::doTerminate()
     boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
 	statusString.clear();
     TaskIndicator ti = this->terminate();
-    if (ti == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
-        taskStatus |= task_manager_msgs::TaskStatus::TASK_TERMINATED; 
+    if (ti == task_manager_msgs::msg::TaskStatus::TASK_TERMINATED) {
+        taskStatus |= task_manager_msgs::msg::TaskStatus::TASK_TERMINATED; 
     } else {
-        taskStatus = ti | task_manager_msgs::TaskStatus::TASK_TERMINATED;
+        taskStatus = ti | task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
     }
 }
 
 const char * task_manager_lib::taskStatusToString(TaskIndicator ts)
 {
-    unsigned int te = task_manager_msgs::TaskStatus::TASK_TERMINATED;
+    unsigned int te = task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
     if (ts == te) {
 		return "TERMINATED";
     } else if (ts & te) {
         // Terminated
         ts = ts & (~te);
         switch (ts) {
-            case task_manager_msgs::TaskStatus::TASK_COMPLETED: return "TERMINATED:COMPLETED";
-            case task_manager_msgs::TaskStatus::TASK_FAILED: return "TERMINATED:FAILED";
-            case task_manager_msgs::TaskStatus::TASK_INTERRUPTED: return "TERMINATED:INTERRUPTED";
-            case task_manager_msgs::TaskStatus::TASK_TIMEOUT: return "TERMINATED:TIMEOUT";
-            case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED: return "TERMINATED:CONFIGURATION FAILED";
-            case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED: return "TERMINATED:INITIALISATION FAILED";
+            case task_manager_msgs::msg::TaskStatus::TASK_COMPLETED: return "TERMINATED:COMPLETED";
+            case task_manager_msgs::msg::TaskStatus::TASK_FAILED: return "TERMINATED:FAILED";
+            case task_manager_msgs::msg::TaskStatus::TASK_INTERRUPTED: return "TERMINATED:INTERRUPTED";
+            case task_manager_msgs::msg::TaskStatus::TASK_TIMEOUT: return "TERMINATED:TIMEOUT";
+            case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURATION_FAILED: return "TERMINATED:CONFIGURATION FAILED";
+            case task_manager_msgs::msg::TaskStatus::TASK_INITIALISATION_FAILED: return "TERMINATED:INITIALISATION FAILED";
             default: return "INVALID STATUS";
         }
     } else {
         // Not terminated
         switch (ts) {
-            case task_manager_msgs::TaskStatus::TASK_NEWBORN: return "NEWBORN"; 
-            case task_manager_msgs::TaskStatus::TASK_CONFIGURED: return "CONFIGURED";
-            case task_manager_msgs::TaskStatus::TASK_INITIALISED: return "INITIALISED";
-            case task_manager_msgs::TaskStatus::TASK_RUNNING: return "RUNNING";
-            case task_manager_msgs::TaskStatus::TASK_COMPLETED: return "COMPLETED";
-            case task_manager_msgs::TaskStatus::TASK_FAILED: return "FAILED";
-            case task_manager_msgs::TaskStatus::TASK_TIMEOUT: return "TIMEOUT";
-            case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED: return "CONFIGURATION FAILED";
-            case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED: return "INITIALISATION FAILED";
+            case task_manager_msgs::msg::TaskStatus::TASK_NEWBORN: return "NEWBORN"; 
+            case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED: return "CONFIGURED";
+            case task_manager_msgs::msg::TaskStatus::TASK_INITIALISED: return "INITIALISED";
+            case task_manager_msgs::msg::TaskStatus::TASK_RUNNING: return "RUNNING";
+            case task_manager_msgs::msg::TaskStatus::TASK_COMPLETED: return "COMPLETED";
+            case task_manager_msgs::msg::TaskStatus::TASK_FAILED: return "FAILED";
+            case task_manager_msgs::msg::TaskStatus::TASK_TIMEOUT: return "TIMEOUT";
+            case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURATION_FAILED: return "CONFIGURATION FAILED";
+            case task_manager_msgs::msg::TaskStatus::TASK_INITIALISATION_FAILED: return "INITIALISATION FAILED";
             default: return "INVALID STATUS";
         }
     }
 	return NULL;
 }
+#endif
 
