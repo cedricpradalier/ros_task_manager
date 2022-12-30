@@ -1,5 +1,5 @@
 #include "task_manager_lib/TaskIdleDefault.h"
-using namespace task_manager_msgs;
+using namespace task_manager_msgs::msg;
 using namespace task_manager_lib;
 
 TaskIndicator TaskIdleDefault::iterate()

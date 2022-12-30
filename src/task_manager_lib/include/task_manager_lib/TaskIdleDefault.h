@@ -1,7 +1,6 @@
 #ifndef TASK_IDLE_DEFAULT_H
 #define TASK_IDLE_DEFAULT_H
 
-#include "task_manager_lib/MinimalTaskConfig.h"
 #include "task_manager_lib/TaskDefinition.h"
 
 namespace task_manager_lib {
@@ -9,7 +8,7 @@ namespace task_manager_lib {
     // Basic class to implement the idle behaviour.
     // This task does not do anything.
 
-    class TaskIdleDefault : public TaskInstance<MinimalTaskConfig,TaskEnvironment>
+    class TaskIdleDefault : public TaskInstance<TaskConfig,TaskEnvironment>
     {
         protected:
         public:
@@ -22,7 +21,7 @@ namespace task_manager_lib {
 
     };
 
-    class TaskFactoryIdleDefault : public TaskDefinition<MinimalTaskConfig,TaskEnvironment,TaskIdleDefault>
+    class TaskFactoryIdleDefault : public TaskDefinition<TaskConfig,TaskEnvironment,TaskIdleDefault>
     {
         protected:
         public:
@@ -34,6 +33,6 @@ namespace task_manager_lib {
             virtual ~TaskFactoryIdleDefault() {};
     };
 
-};
+}
 
 #endif // TASK_IDLE_DEFAULT_H

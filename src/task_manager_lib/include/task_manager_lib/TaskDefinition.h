@@ -8,6 +8,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread.hpp>
 
+#include <memory>
 #include <string>
 #include <rclcpp/rclcpp.hpp>
 #include <task_manager_msgs/msg/task_status.hpp>
@@ -60,17 +61,162 @@ namespace task_manager_lib {
             virtual ~TaskEnvironment() {}
     };
 
-    typedef boost::shared_ptr<TaskEnvironment> TaskEnvironmentPtr;
-    typedef boost::shared_ptr<TaskEnvironment const> TaskEnvironmentConstPtr;
+    typedef std::shared_ptr<TaskEnvironment> TaskEnvironmentPtr;
+    typedef std::shared_ptr<TaskEnvironment const> TaskEnvironmentConstPtr;
 
     class TaskInstanceBase;
-    typedef boost::shared_ptr<TaskInstanceBase> TaskInstancePtr;
-    typedef boost::shared_ptr<TaskInstanceBase const> TaskInstanceConstPtr;
+    typedef std::shared_ptr<TaskInstanceBase> TaskInstancePtr;
+    typedef std::shared_ptr<TaskInstanceBase const> TaskInstanceConstPtr;
+    
+    
 
+    class TaskParameterDefinitionBase {
+        protected:
+            rclcpp::ParameterValue value;
+            rclcpp::ParameterValue defaultValue;
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+        public:
+            template <class ParameterT> 
+                TaskParameterDefinitionBase(const std::string & name,
+                        const ParameterT & val,
+                        const std::string & description,
+                        bool read_only) : value(val), defaultValue(val) {
+                    descriptor.name = name;
+                    descriptor.type = value.get_type();
+                    descriptor.description = description;
+                    descriptor.read_only = read_only;
+                }
+            
+            template <class ParameterT> 
+                ParameterT get() const {
+                    return value.get<ParameterT>();
+                }
+
+            void setDefaultValue() {
+                value = defaultValue;
+            }
+
+            const rclcpp::ParameterValue & getValue() const {
+                return value;
+            }
+            void setValue(const rclcpp::ParameterValue & val) {
+                value = val;
+            }
+            void setValue(const rcl_interfaces::msg::ParameterValue & val) {
+                value = rclcpp::ParameterValue(val);
+            }
+            template <class ParameterT>
+                void setValue(const ParameterT & val) {
+                    value = rclcpp::ParameterValue(val);
+                }
+
+            rclcpp::ParameterValue & getValue() {
+                return value;
+            }
+            const rclcpp::ParameterValue & getDefaultValue() const {
+                return defaultValue;
+            }
+            const rcl_interfaces::msg::ParameterDescriptor getDescription() const {
+                return descriptor;
+            }
+    };
+
+    class TaskConfig {
+        protected:
+            typedef std::map<std::string,TaskParameterDefinitionBase*> TaskConfigMap;
+            TaskConfigMap definitions;
+
+        public:
+            TaskParameterDefinitionBase task_rename;
+            TaskParameterDefinitionBase foreground;
+            TaskParameterDefinitionBase task_period;
+            TaskParameterDefinitionBase task_timeout;
+
+        public:
+            TaskConfig() : 
+                task_rename("task_rename","","used to rename a task at runtime [deprecated]",true),
+                foreground("foreground",true,"run this task in foreground or not",true),
+                task_period("task_period",1.0,"default task period for periodic task",true),
+                task_timeout("task_timeout",-1.0,"if positive, maximum time this task can run for",true) {
+                    definitions["task_rename"]=&task_rename;
+                    definitions["foreground"]=&foreground;
+                    definitions["task_period"]=&task_period;
+                    definitions["task_timeout"]=&task_timeout;
+                }
+            virtual ~TaskConfig() {}
+
+            bool registerParameter(const std::string & name, TaskParameterDefinitionBase * definition) {
+                definitions[name] = definition;
+                return true;
+            }
+
+            bool declareParameters(rclcpp::Node * node);
+            void updateParameters(rclcpp::Node * node);
+            void publishParameters(rclcpp::Node * node);
+
+            std::vector<rcl_interfaces::msg::ParameterDescriptor> getParameterDescriptions();
+
+            void loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) {
+                for (size_t i=0;i<cfg.plist.size();i++) {
+                    std::string name = cfg.plist[i].name;
+                    TaskConfigMap::iterator it = definitions.find(name);
+                    if (it == definitions.end()) {
+                        continue;
+                    }
+                    it->second->setValue(cfg.plist[i].value);
+                }
+            }
+
+            void loadConfig(const TaskConfig & cfg) {
+                for (TaskConfigMap::const_iterator it=cfg.definitions.begin();it!=cfg.definitions.end();it++) {
+                    definitions.insert(*it);
+                }
+            }
+
+            void loadConfig(const std::vector<rclcpp::Parameter> & cfg) {
+                for (std::vector<rclcpp::Parameter>::const_iterator it=cfg.begin();it!=cfg.end();it++) {
+                    std::string name = it->get_name();
+                    TaskConfigMap::iterator dit = definitions.find(name);
+                    if (dit == definitions.end()) {
+                        continue;
+                    }
+                    dit->second->setValue(it->get_parameter_value());
+                }
+            }
+
+            bool getDefinition(const std::string & name,TaskParameterDefinitionBase & def) {
+                TaskConfigMap::iterator it = definitions.find(name);
+                if (it == definitions.end()) {
+                    return false;
+                }
+                def = *(it->second);
+                return true;
+            }
+    };
+
+    class TaskParameterDefinition : public TaskParameterDefinitionBase {
+        public:
+            template <class ParameterT> 
+                TaskParameterDefinition(TaskConfig*config,
+                        const std::string & name,
+                        const ParameterT & defaultValue,
+                        const std::string & description,
+                        bool read_only) : TaskParameterDefinitionBase(name,defaultValue,description,read_only) {
+                    config->registerParameter(name,this);
+                }
+    };
+
+    typedef std::shared_ptr<TaskConfig> TaskConfigPtr;
+    typedef std::shared_ptr<TaskConfig const> TaskConfigConstPtr;
+
+
+#if 0
     // Extension of the task_manager_msgs::TaskConfig class to add more 
     // object like functions and conversion
-    typedef std::map<std::string,rclcpp::Parameter> ParameterMap;
+    typedef std::map<std::string,rclcpp::ParameterValue> ParameterMap;
     class TaskParameters: public ParameterMap {
+        protected:
+            std::string prefix;
         public:
             TaskParameters() { }
             TaskParameters(const task_manager_msgs::msg::TaskConfig & cfg) {
@@ -79,44 +225,82 @@ namespace task_manager_lib {
             TaskParameters(const TaskParameters & cfg) 
                 : ParameterMap(cfg) {}
 
-            void loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) {
+            void loadConfig(const task_manager_msgs::msg::TaskConfig & cfg,bool append_prefix=false) {
                 for (size_t i=0;i<cfg.plist.size();i++) {
-                    insert(ParameterMap::value_type(cfg.plist[i].name,
-                                rclcpp::Parameter(cfg.plist[i].name,cfg.plist[i].value)));
+                    std::string name = cfg.plist[i].name;
+                    if (append_prefix) {
+                        name = prefix + name;
+                    }
+                    insert(ParameterMap::value_type(name, cfg.plist[i].value));
                 }
             }
 
-            void loadConfig(const TaskParameters & cfg) {
+            void loadConfig(const TaskParameters & cfg,bool append_prefix=false) {
                 for (ParameterMap::const_iterator it=cfg.begin();it!=cfg.end();it++) {
-                    insert(*it);
+                    if (append_prefix) {
+                        std::string name = it->first;
+                        name = prefix + name;
+                        insert(ParameterMap::value_type(name,it->second));
+                    } else {
+                        insert(*it);
+                    }
                 }
             }
 
+            void loadConfig(const std::vector<rclcpp::Parameter> & cfg,bool append_prefix=false) {
+                for (std::vector<rclcpp::Parameter>::const_iterator it=cfg.begin();it!=cfg.end();it++) {
+                    if (append_prefix) {
+                        set(prefix+it->get_name(),it->get_parameter_value());
+                    } else {
+                        set(it->get_name(),it->get_parameter_value());
+                    }
+                }
+            }
+
+            void setPrefix(const std::string & pfix) {
+                prefix = pfix;
+            }
+
+            const std::string & getPrefix() const {
+                return prefix;
+            }
+
+            iterator find(const std::string & name, bool append_prefix) {
+                return ParameterMap::find(append_prefix?(prefix+name):name);
+            }
+
+            const_iterator find(const std::string & name, bool append_prefix) const {
+                return ParameterMap::find(append_prefix?(prefix+name):name);
+            }
 
             // Read a parameter from the structure, and return false if it is
             // missing. Mostly a convenience function to avoid the long namespaces.
             template <class T>
-                bool getParameter(const std::string &name, T &val) const
+                bool get(const std::string &name, T &val) const
                 {
-                    ParameterMap::const_iterator it = find(name); 
+                    ParameterMap::const_iterator it = ParameterMap::find(prefix+name); 
                     if (it==end()) {
                         return false;
                     }
-                    val = it->second.get_value<T>();
+                    val = it->second.get<T>();
                     return true;
                 }
 
             // Set a parameter ino the structure. This is missing in the
             // ConfigTools class.
             template <class T>
-                void setParameter(const std::string &name, const T &val)
+                void set(const std::string &name, const T &val)
                 {
-                    insert(ParameterMap::value_type(name,rclcpp::Parameter(val)));
+                    insert(ParameterMap::value_type(prefix+name,rclcpp::ParameterValue(val)));
                 }
 
-            void setParameter(rclcpp::Parameter &val)
+            void set(const rclcpp::Parameter &val, bool append_prefix=false)
             {
-                insert(ParameterMap::value_type(val.get_name(),val));
+                if (append_prefix) {
+                    insert(ParameterMap::value_type(prefix+val.get_name(),val.get_parameter_value()));
+                } else {
+                    insert(ParameterMap::value_type(val.get_name(),val.get_parameter_value()));
+                }
             }
 
             // Merge a set of parameters with the current one. Any parameter in
@@ -165,6 +349,7 @@ namespace task_manager_lib {
 
 #endif
     };
+#endif
 
     /**
      * Basic function to build the string representation of one of the status above
@@ -217,12 +402,16 @@ namespace task_manager_lib {
             bool periodic;
 
             TaskEnvironmentPtr env_gen;
+            TaskConfigPtr cfg_gen;
 
             /**
              * Id of the task, set by the scheduler in the list of known task.
              * Should be unique for a given name
              * */
             unsigned int taskId;
+
+
+            unsigned int instanceCounter;
         public:
             // All the class below are intended for generic use
 
@@ -234,29 +423,21 @@ namespace task_manager_lib {
             // (isperiodic = true), or if the class will be executed in its own
             // thread and will report its status on its own. 
             // task parameters.
-            TaskDefinitionBase(const std::string & node_name, const std::string & tname, const std::string & thelp, 
-                    bool isperiodic, TaskEnvironmentPtr ev) :
-                rclcpp::Node(node_name), name(tname), help(thelp), periodic(isperiodic), 
-                env_gen(ev), taskId(-1) {
-                    this->declare_parameter("task_rename","");
-                    this->declare_parameter("foreground",true);
-                    this->declare_parameter("task_period",1.f);
-                    this->declare_parameter("task_timeout",-1.f);
-                }
             TaskDefinitionBase(const std::string & tname, const std::string & thelp, 
-                    bool isperiodic, TaskEnvironmentPtr ev) :
+                    bool isperiodic, TaskEnvironmentPtr ev, TaskConfigPtr cfg) :
                 rclcpp::Node(tname), name(tname), help(thelp), periodic(isperiodic), 
-                env_gen(ev), taskId(-1) {
-
-                    this->declare_parameter("task_rename","");
-                    this->declare_parameter("foreground",true);
-                    this->declare_parameter("task_period",1.f);
-                    this->declare_parameter("task_timeout",-1.f);
-
+                env_gen(ev), cfg_gen(cfg), taskId(-1) {
+                    cfg_gen->declareParameters(this);
                 }
             virtual ~TaskDefinitionBase() {
                 // printf("Delete task '%s'\n",name.c_str());
                 // fflush(stdout);
+            }
+
+            std::string getInstanceName() {
+                char counter[128];
+                sprintf(counter,"%8d",instanceCounter++);
+                return name + counter;
             }
 
 
@@ -283,6 +464,7 @@ namespace task_manager_lib {
             virtual TaskInstancePtr instantiate() = 0; 
 
             TaskEnvironmentPtr getEnvironment() {return env_gen;}
+            TaskConfigPtr getConfig() {return cfg_gen;}
         public:
             // All the functions below are intended for the TaskScheduler.
             // Set the task id . Has to be virtual because it is overloaded by
@@ -291,20 +473,6 @@ namespace task_manager_lib {
 
             // Output a debut string, prefixed by the task name
             void debug(const char *stemplate,...) const; 
-
-            // Get the task description as a combination of task-specific
-            // information and dynamic_reconfigure::ConfigDescription (assuming the
-            // task as a config file)
-            virtual task_manager_msgs::msg::TaskDescription getDescription() const;
-
-            // Return the parameters as read from the parameter server. Returns the
-            // default parameters otherwise.
-            virtual TaskParameters getParameters() const;
-
-            /**
-             * description of the parameters
-             * */
-            virtual std::vector<rcl_interfaces::msg::ParameterDescriptor> getParameterDescription() const;
 
         protected:
             // Set of functions only useful for derived classes
@@ -317,8 +485,8 @@ namespace task_manager_lib {
 
     };
 
-    typedef boost::shared_ptr<TaskDefinitionBase> TaskDefinitionPtr;
-    typedef boost::shared_ptr<TaskDefinitionBase const> TaskDefinitionConstPtr;
+    typedef std::shared_ptr<TaskDefinitionBase> TaskDefinitionPtr;
+    typedef std::shared_ptr<TaskDefinitionBase const> TaskDefinitionConstPtr;
 
     /**
      *
@@ -355,16 +523,48 @@ namespace task_manager_lib {
             unsigned int runId;
 
             TaskEnvironmentPtr env_gen;
-            virtual void parseParameters(const TaskParameters & /*parameters*/)  {
+            TaskConfigPtr cfg_gen;
+
+            OnSetParametersCallbackHandle::SharedPtr setParamHandle;
+            rcl_interfaces::msg::SetParametersResult
+                reconfigure_callback(const std::vector<rclcpp::Parameter> & parameters)
+                {
+                    rcl_interfaces::msg::SetParametersResult result;
+                    result.successful = true;
+                    // for (const auto & parameter : parameters) {
+                    //     if (!some_condition) {
+                    //         result.successful = false;
+                    //         result.reason = "the reason it could not be allowed";
+                    //     }
+                    // }
+                    cfg_gen->loadConfig(parameters); 
+                    this->reconfigure();
+                    return result;
+                }
+
+            // Setup a dynamic reconfigure server that just update all the
+            // config. To be updated 
+            virtual void reconfigure() {
             }
+
+
+
+            // Return the parameters as read from the parameter server. Returns the
+            // default parameters otherwise.
+            void updateParameters() ;
+
         public:
             // All the class below are intended for generic use
 
             // Default constructor:
             // task parameters.
-            TaskInstanceBase(const std::string & node_name, TaskDefinitionPtr def, TaskEnvironmentPtr ev) :
-                rclcpp::Node(node_name), definition(def), taskStatus(task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED), 
-                timeout(-1.0), runId(-1), env_gen(ev) {}
+            TaskInstanceBase(TaskDefinitionPtr def, TaskEnvironmentPtr ev) :
+                rclcpp::Node(def->getInstanceName()), definition(def), taskStatus(task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED), 
+                timeout(-1.0), runId(-1), env_gen(ev), cfg_gen(def->getConfig()) {
+                    cfg_gen->declareParameters(this);
+                    setParamHandle = this->add_on_set_parameters_callback(std::bind(&TaskInstanceBase::reconfigure_callback, this, std::placeholders::_1));
+
+                }
             virtual ~TaskInstanceBase() {
                 // printf("Delete task instance'%s'\n",name.c_str());
                 // fflush(stdout);
@@ -395,6 +595,7 @@ namespace task_manager_lib {
 
 
             TaskEnvironmentPtr getEnvironment() {return env_gen;}
+            TaskConfigPtr getConfig() {return cfg_gen;}
         public:
             const std::string & getName() const {
                 return definition->getName();
@@ -415,7 +616,7 @@ namespace task_manager_lib {
 
             // Call the virtual initialise function, but prepare the class before
             // hand.
-            void doInitialise(unsigned int runtimeId, const TaskParameters & parameters);
+            void doInitialise(unsigned int runtimeId, const task_manager_msgs::msg::TaskConfig & parameters);
 
             // Call the virtual iterate function, but prepare the class before
             // hand.
@@ -465,8 +666,6 @@ namespace task_manager_lib {
 
     };
 
-#if 0
-
 
     // Templated class specialising some of the virtual functions of a
     // TaskDefinition based on the data available in a XXXConfig class generated
@@ -475,60 +674,36 @@ namespace task_manager_lib {
         class TaskDefinition: public TaskDefinitionBase {
             protected:
                 typedef TaskDefinition<CFG,ENV,INSTANCE> Parent;
-                boost::shared_ptr<ENV> env;
+                std::shared_ptr<ENV> env;
+                std::shared_ptr<CFG> cfg;
+
+                std::shared_ptr<ENV> castEnvironment() {
+                    std::shared_ptr<ENV> e = std::dynamic_pointer_cast<ENV,TaskEnvironment>(env_gen);
+                    assert(e);
+                    return e;
+                }
+                std::shared_ptr<CFG> castConfig() {
+                    std::shared_ptr<CFG> e = std::dynamic_pointer_cast<CFG,TaskConfig>(cfg_gen);
+                    assert(e);
+                    return e;
+                }
 
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskDefinition(const std::string & tname, const std::string & thelp, bool isperiodic, 
-                        TaskEnvironmentPtr ev) : TaskDefinitionBase(tname,thelp,isperiodic,ev) {
+                        TaskEnvironmentPtr ev) : TaskDefinitionBase(tname,thelp,isperiodic,ev,std::shared_ptr<CFG>(new CFG)) {
                     env = castEnvironment();
+                    cfg = castConfig();
                 }
                 virtual ~TaskDefinition() {}
 
-                // Returns the parameter description from the Config class.
-                virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {
-                    return CFG::__getDescriptionMessage__();
-                }
-
-                // Return the default parameters from the Config class.
-                virtual TaskParameters getDefaultParameters() const {
-                    TaskParameters tp;
-                    CFG c = CFG::__getDefault__();
-                    c.__toMessage__(tp);
-                    return tp;
-                }
-
-
-                // Read the parameter from the parameter server using the Config class.
-                virtual TaskParameters getParametersFromServer(const ros::NodeHandle & nh) {
-                    TaskParameters tp;
-                    CFG c = CFG::__getDefault__();
-                    c.__fromServer__(nh);
-                    c.__toMessage__(tp);
-                    return tp;
-                }
-
-                // Read the parameter from the parameter server using the Config class.
-                CFG getConfigFromServer(const ros::NodeHandle & nh) {
-                    CFG c = CFG::__getDefault__();
-                    c.__fromServer__(nh);
-                    return c;
-                }
-
-                virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/
-                {
-                    return task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED;
-                }
 
                 virtual TaskInstancePtr instantiate() {
-                    return TaskInstancePtr(new INSTANCE(shared_from_this(),env_gen));
+                    TaskDefinitionPtr def = std::dynamic_pointer_cast<TaskDefinition,rclcpp::Node>(shared_from_this());
+                    return TaskInstancePtr(new INSTANCE(def,env_gen));
                 }
 
-                boost::shared_ptr<ENV> castEnvironment() {
-                    boost::shared_ptr<ENV> e = boost::dynamic_pointer_cast<ENV,TaskEnvironment>(env_gen);
-                    assert(e);
-                    return e;
-                }
+
         };
 
     // Templated class specialising some of the virtual functions of a
@@ -539,58 +714,25 @@ namespace task_manager_lib {
             public:
                 typedef TaskInstance<CFG,ENV> Parent;
             protected:
-                class DynRecfgData {
-                    protected:
-                        boost::shared_ptr< dynamic_reconfigure::Server<CFG> > srv;
-                        boost::recursive_mutex mutex;
-                        typename dynamic_reconfigure::Server<CFG>::CallbackType f;               
-                    public:
-                        DynRecfgData(TaskInstance * td, const CFG & cfg) {
-                            char node_name[td->getName().size()+64];
-                            sprintf(node_name,"~%s_%d",td->getName().c_str(),
-                                    td->getRuntimeId());
-                            f = boost::bind(&Parent::reconfigureCallback,td, _1, _2);
-                            srv.reset(new dynamic_reconfigure::Server<CFG>(mutex,ros::NodeHandle(node_name)));
-                            srv->updateConfig(cfg);
-                            srv->setCallback(f);
-                        }
-                };
-                friend class DynRecfgData;
-                boost::shared_ptr<DynRecfgData> recfg;
+                std::shared_ptr<ENV> env;
+                std::shared_ptr<CFG> cfg;
 
-                CFG cfg;
-                boost::shared_ptr<ENV> env;
-                task_manager_msgs::EncapsulatedMessage argv;
-
-                // Callback function to be bound to the server. It just calls
-                // the virtualised function in case it has been overloaded.
-                void reconfigureCallback(CFG &config, uint32_t level) {
-                    this->reconfigure(config, level);
+                std::shared_ptr<ENV> castEnvironment() {
+                    std::shared_ptr<ENV> e = std::dynamic_pointer_cast<ENV,TaskEnvironment>(env_gen);
+                    assert(e);
+                    return e;
                 }
-
-
-                // Setup a dynamic reconfigure server that just update all the
-                // config. To be updated 
-                virtual void reconfigure(CFG &config, uint32_t level) {
-                    cfg = config;
+                std::shared_ptr<CFG> castConfig() {
+                    std::shared_ptr<CFG> e = std::dynamic_pointer_cast<CFG,TaskConfig>(cfg_gen);
+                    assert(e);
+                    return e;
                 }
-
-                virtual void parseParameters(const TaskParameters & parameters) {
-                    cfg = parameters.toConfig<CFG>();
-                    argv = parameters.getEncapsulated();
-                    recfg.reset(new DynRecfgData(this, cfg));
-                }
-
-                template <class Msg> 
-                    bool extractEncapsulatedMessage(Msg & m) {
-                        return task_manager_msgs::decapsulate<Msg>(m, argv);
-                    }
-
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskInstance(TaskDefinitionPtr def, TaskEnvironmentPtr ev) 
                     : TaskInstanceBase(def,ev) {
                         env = castEnvironment();
+                        cfg = castConfig();
                     }
                 virtual ~TaskInstance() {}
 
@@ -605,17 +747,12 @@ namespace task_manager_lib {
                 }
 
                 template <class SPECIALIZED>
-                    boost::shared_ptr<SPECIALIZED> castDefinition() {
-                        boost::shared_ptr<SPECIALIZED> d = boost::dynamic_pointer_cast<SPECIALIZED,TaskDefinitionBase>(definition);
+                    std::shared_ptr<SPECIALIZED> castDefinition() {
+                        std::shared_ptr<SPECIALIZED> d = boost::dynamic_pointer_cast<SPECIALIZED,TaskDefinitionBase>(definition);
                         assert(d);
                         return d;
                     }
 
-                boost::shared_ptr<ENV> castEnvironment() {
-                    boost::shared_ptr<ENV> e = boost::dynamic_pointer_cast<ENV,TaskEnvironment>(env_gen);
-                    assert(e);
-                    return e;
-                }
         };
 
 
@@ -625,9 +762,9 @@ namespace task_manager_lib {
     // Note that a class inherited from TaskDefinition and meant to be used with
     // the dynamic loading mecanism must have a constructor with the following
     // profile:
-    //  TaskXXX(boost::shared_ptr<TaskEnvironment> env)
+    //  TaskXXX(std::shared_ptr<TaskEnvironment> env)
     //
-    typedef TaskDefinitionPtr (*TaskFactory)(boost::shared_ptr<TaskEnvironment>&);
+    typedef TaskDefinitionPtr (*TaskFactory)(std::shared_ptr<TaskEnvironment>&);
 #define DYNAMIC_TASK(T) extern "C" {\
     task_manager_lib::TaskDefinitionPtr TaskFactoryObject(task_manager_lib::TaskEnvironmentPtr environment) {\
         return TaskDefinitionPtr(new T(environment));\
@@ -635,7 +772,6 @@ namespace task_manager_lib {
 }
 
 
-#endif
 }
 
 #endif // TASK_DEFINITION_H

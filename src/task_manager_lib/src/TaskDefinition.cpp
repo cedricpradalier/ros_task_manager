@@ -2,6 +2,42 @@
 // #include <dynamic_reconfigure/config_tools.h>
 #include "task_manager_lib/TaskDefinition.h"
 using namespace task_manager_lib;
+using std::placeholders::_1;
+
+
+bool TaskConfig::declareParameters(rclcpp::Node * node) {
+    for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        node->declare_parameter(it->first,it->second->getDefaultValue(),it->second->getDescription());
+    }
+    return true;
+}
+
+
+void TaskConfig::updateParameters(rclcpp::Node * node) {
+    for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        if (!node->get_parameter(it->first,it->second->getValue())) {
+            it->second->setDefaultValue();
+        }
+    }
+}
+
+void TaskConfig::publishParameters(rclcpp::Node * node) {
+    for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        rclcpp::Parameter p(it->first,it->second->getValue());
+        node->set_parameter(p);
+    }
+}
+
+std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskConfig::getParameterDescriptions() {
+    std::vector<rcl_interfaces::msg::ParameterDescriptor> res;
+    for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        res.push_back(it->second->getDescription());
+    }
+    return res;
+}
+
+
+
 
 
 void TaskDefinitionBase::setName(const std::string & n) {
@@ -27,34 +63,6 @@ const std::string & TaskDefinitionBase::getHelp() const {
 bool TaskDefinitionBase::isPeriodic() const {
 	return periodic;
 }
-std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskDefinitionBase::getParameterDescription() const {
-    std::vector<std::string> prefixes;
-    rcl_interfaces::msg::ListParametersResult lparams = this->list_parameters(prefixes,0);
-    return this->describe_parameters(lparams.names);
-}
-
-task_manager_msgs::msg::TaskDescription TaskDefinitionBase::getDescription() const {
-    task_manager_msgs::msg::TaskDescription td;
-    td.name = this->getName();
-    td.description = this->getHelp();
-    td.periodic = this->isPeriodic();
-    td.config = getParameterDescription();
-    return td;
-}
-
-
-TaskParameters TaskDefinitionBase::getParameters() const {
-    std::vector<std::string> prefixes;
-    rcl_interfaces::msg::ListParametersResult lparams = this->list_parameters(prefixes,0);
-    
-    TaskParameters cfg;
-    std::vector<rclcpp::Parameter> params = this->get_parameters(lparams.names);
-    for (size_t i=0;i<params.size();i++) {
-        cfg.setParameter(params[i]);
-    }
-    return cfg;
-}
-
 
 void TaskDefinitionBase::debug(const char *stemplate,...) const {
 	va_list args;
@@ -126,20 +134,29 @@ bool TaskInstanceBase::isAnInstanceOf(TaskDefinitionConstPtr def) {
     return this->getDefinition()->getTaskId() == def->getTaskId();
 }
 
-void TaskInstanceBase::doInitialise(unsigned int runtimeId, const TaskParameters & parameters)
+void TaskInstanceBase::doInitialise(unsigned int runtimeId, const task_manager_msgs::msg::TaskConfig & parameters)
 {
     boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
     runId = runtimeId;
     // printf("Initialise %s: after update\n",this->getName().c_str());
     // config.print(stdout);
-    parameters.getParameter("task_timeout",timeout);
+    cfg_gen->loadConfig(parameters);
+    cfg_gen->publishParameters(this);
+    timeout = cfg_gen->task_timeout.get<double>();
 	statusString.clear();
-    this->parseParameters(parameters);
-	taskStatus = this->initialise();
+
+    
+    taskStatus = this->initialise();
+
+}
+
+void TaskInstanceBase::updateParameters() {
+    cfg_gen->updateParameters(this);
 }
 
 void TaskInstanceBase::doIterate()
 {
+    cfg_gen->updateParameters(this);
 	statusString.clear();
     // TODO: improve ways to specify what requires locking
     if (this->isPeriodic()) {
@@ -154,6 +171,7 @@ void TaskInstanceBase::doIterate()
 
 void TaskInstanceBase::doTerminate()
 {
+    cfg_gen->updateParameters(this);
     boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
 	statusString.clear();
     TaskIndicator ti = this->terminate();
@@ -162,6 +180,13 @@ void TaskInstanceBase::doTerminate()
     } else {
         taskStatus = ti | task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
     }
+
+    std::vector<std::string> prefixes;
+    rcl_interfaces::msg::ListParametersResult lparams = this->list_parameters(prefixes,0);
+    for (size_t i=0;i<lparams.names.size();i++) {
+        this->undeclare_parameter(lparams.names[i]);
+    }
+
 }
 
 const char * task_manager_lib::taskStatusToString(TaskIndicator ts)

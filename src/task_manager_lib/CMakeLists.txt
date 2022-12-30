@@ -45,8 +45,8 @@ add_library(task_manager_lib
     src/TaskDefinition.cpp
     # src/TaskScheduler.cpp
     # src/SequenceTask.cpp
-    # src/TaskIdleDefault.cpp
-    # src/TaskWaitDefault.cpp
+    src/TaskIdleDefault.cpp
+    src/TaskWaitDefault.cpp
     # src/TaskServerInterface.cpp
     # src/TaskHistory.cpp
     # src/ServiceStorage.cpp
