@@ -18,4 +18,4 @@ string name
 uint8 status
 string status_string
 builtin_interfaces/Time status_time
-rcl_interfaces/ParameterValue[] plist
+rcl_interfaces/Parameter[] plist

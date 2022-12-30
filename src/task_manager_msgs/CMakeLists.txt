@@ -37,17 +37,16 @@ endif()
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-    #"msg/BasicMission.msg"
-    #"msg/ComplexMission.msg"
-    "msg/EncapsulatedMessage.msg"
-    #"msg/TaskDescriptionLight.msg"
+    "srv/GetAllTaskStatus.srv"
+    "srv/StartTask.srv"
+    "srv/StopTask.srv"
+    "srv/GetTaskList.srv"
     "msg/TaskDescription.msg"
-    #"msg/TaskHistory.msg"
-    #"msg/TaskMission.msg"
     "msg/TaskParameter.msg"
     "msg/TaskStatus.msg"
     "msg/TaskConfig.msg"
-  DEPENDENCIES std_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+    "msg/EncapsulatedMessage.msg"
+  DEPENDENCIES std_msgs rcl_interfaces # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
 )
 
 ament_export_dependencies(rosidl_default_runtime)

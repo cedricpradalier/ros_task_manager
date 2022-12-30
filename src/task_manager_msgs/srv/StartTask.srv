@@ -1,0 +1,4 @@
+string name
+rcl_interfaces/Parameter[] config
+---
+int32 id
