@@ -4,7 +4,7 @@
 #include <string>
 
 
-#include "TaskDefinition.h"
+#include "task_manager_lib/TaskDefinition.h"
 
 namespace task_manager_lib {
     // Specialisation of the TaskDefinition to use a task dynamically loaded from a
@@ -31,12 +31,12 @@ namespace task_manager_lib {
             // Pointer to the dll object
             void * handle;
             // Shared pointer on the loaded task
-            boost::shared_ptr<TaskDefinitionBase> task;
+            TaskDefinitionPtr task;
 
         public:
             // Load a class from a library file fname, and pass env to its
             // constructor. 
-            DynamicTask(const std::string & fname, boost::shared_ptr<TaskEnvironment> env);
+            DynamicTask(const std::string & fname, TaskEnvironmentPtr env);
             virtual ~DynamicTask();
 
             //
@@ -55,57 +55,11 @@ namespace task_manager_lib {
             virtual void setTaskId(unsigned int id) {task->setTaskId(id);}
             virtual unsigned int getTaskId() {return task->getTaskId();}
 
-            virtual TaskIndicator getStatus() const {
-                //printf("DynamicTask: status of %s: %s\n",name.c_str(),taskStatusToString(task->getStatus()));
-                return task->getStatus();
-            }
-            virtual void setStatus(const TaskIndicator & ti) {
-                task->setStatus(ti);
-            }
-
-            virtual const std::string & getStatusString() const {
-                return task->getStatusString();
-            }
-            virtual void setStatusString(const std::string & s) {
-                task->setStatusString(s);
-            }
-
-            virtual TaskIndicator configure(const TaskParameters & parameters) /*throw (InvalidParameter)*/ {
-                task->doConfigure(taskId,parameters);
-                return task->getStatus();
-            }
-
-            // Get the task description as a combination of task-specific
-            // information and dynamic_reconfigure::ConfigDescription (assuming the
-            // task as a config file)
-            virtual task_manager_msgs::TaskDescription getDescription() const {
-                return task->getDescription();
-            }
-
-            // Return the parameters as read from the parameter server. Returns the
-            // default parameters otherwise.
-            virtual TaskParameters getParametersFromServer(const ros::NodeHandle &nh) {
-                return task->getParametersFromServer(nh);
-            }
-
-            // Return the default parameters, typically from the default value
-            // defined in the .cfg file.
-            virtual TaskParameters getDefaultParameters() const {
-                return task->getDefaultParameters();
-            }
-
-            /**
-             * description of the parameters
-             * */
-            virtual dynamic_reconfigure::ConfigDescription getParameterDescription() const {
-                return task->getParameterDescription();
-            }
-
 
     };
 
 
-};
+}
 
 
 #endif // DYNAMIC_TASK_DEFINITION_H

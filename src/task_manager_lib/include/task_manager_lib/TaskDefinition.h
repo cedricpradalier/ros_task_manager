@@ -153,7 +153,7 @@ namespace task_manager_lib {
             void updateParameters(rclcpp::Node * node);
             void publishParameters(rclcpp::Node * node);
 
-            std::vector<rcl_interfaces::msg::ParameterDescriptor> getParameterDescriptions();
+            std::vector<rcl_interfaces::msg::ParameterDescriptor> getParameterDescriptions() const;
 
             void loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) {
                 for (size_t i=0;i<cfg.plist.size();i++) {
@@ -183,6 +183,17 @@ namespace task_manager_lib {
                 }
             }
 
+            void loadConfig(const std::vector<rcl_interfaces::msg::Parameter> & cfg) {
+                for (std::vector<rcl_interfaces::msg::Parameter>::const_iterator it=cfg.begin();it!=cfg.end();it++) {
+                    std::string name = it->name;
+                    TaskConfigMap::iterator dit = definitions.find(name);
+                    if (dit == definitions.end()) {
+                        continue;
+                    }
+                    dit->second->setValue(rclcpp::ParameterValue(it->value));
+                }
+            }
+
             bool getDefinition(const std::string & name,TaskParameterDefinitionBase & def) {
                 TaskConfigMap::iterator it = definitions.find(name);
                 if (it == definitions.end()) {
@@ -191,6 +202,7 @@ namespace task_manager_lib {
                 def = *(it->second);
                 return true;
             }
+            bool exportToMessage(std::vector<rcl_interfaces::msg::Parameter> & plist) const ;
     };
 
     class TaskParameterDefinition : public TaskParameterDefinitionBase {
@@ -426,7 +438,11 @@ namespace task_manager_lib {
                     bool isperiodic, TaskEnvironmentPtr ev, TaskConfigPtr cfg) :
                 rclcpp::Node(tname), name(tname), help(thelp), periodic(isperiodic), 
                 env_gen(ev), cfg_gen(cfg), taskId(-1) {
-                    cfg_gen->declareParameters(this);
+                    if (cfg_gen) {
+                        cfg_gen->declareParameters(this);
+                    } else {
+                        // Only use case is DynamicTask
+                    }
                 }
             virtual ~TaskDefinitionBase() {
                 // printf("Delete task '%s'\n",name.c_str());
@@ -458,12 +474,18 @@ namespace task_manager_lib {
             // Has to be virtual because it is overloaded by the dynamic class proxy.
             virtual bool isPeriodic() const;
 
+            // Get the task description as a combination of task-specific
+            // information and dynamic_reconfigure::ConfigDescription (assuming the
+            // task as a config file)
+            virtual task_manager_msgs::msg::TaskDescription getDescription() const;
+
             // Provide an instance of the class (or a derivative of it), with
             // its own internal variables that can be run multiple time. 
             virtual TaskInstancePtr instantiate() = 0; 
 
             TaskEnvironmentPtr getEnvironment() {return env_gen;}
             TaskConfigPtr getConfig() {return cfg_gen;}
+            TaskConfigConstPtr getConfig() const {return cfg_gen;}
         public:
             // All the functions below are intended for the TaskScheduler.
             // Set the task id . Has to be virtual because it is overloaded by
@@ -615,7 +637,7 @@ namespace task_manager_lib {
 
             // Call the virtual initialise function, but prepare the class before
             // hand.
-            void doInitialise(unsigned int runtimeId, const task_manager_msgs::msg::TaskConfig & parameters);
+            void doInitialise(unsigned int runtimeId, const TaskConfig & parameters);
 
             // Call the virtual iterate function, but prepare the class before
             // hand.

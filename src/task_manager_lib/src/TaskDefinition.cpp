@@ -28,7 +28,7 @@ void TaskConfig::publishParameters(rclcpp::Node * node) {
     }
 }
 
-std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskConfig::getParameterDescriptions() {
+std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskConfig::getParameterDescriptions() const {
     std::vector<rcl_interfaces::msg::ParameterDescriptor> res;
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
         res.push_back(it->second->getDescription());
@@ -37,6 +37,16 @@ std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskConfig::getParameterDe
 }
 
 
+bool TaskConfig::exportToMessage(std::vector<rcl_interfaces::msg::Parameter> & plist) const {
+    plist.clear();
+    for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        rcl_interfaces::msg::Parameter P;
+        P.name = it->first;
+        P.value = it->second->getValue().to_value_msg();
+        plist.push_back(P);
+    }
+    return true;
+}
 
 
 
@@ -73,6 +83,17 @@ void TaskDefinitionBase::debug(const char *stemplate,...) const {
     buffer[1023]=0;
     RCLCPP_INFO(this->get_logger(),"%s: %s",this->getName().c_str(),buffer);
 }
+
+task_manager_msgs::msg::TaskDescription TaskDefinitionBase::getDescription() const {
+    task_manager_msgs::msg::TaskDescription td;
+    td.name = this->getName();
+    td.description = this->getHelp();
+    td.periodic = this->isPeriodic();
+    td.config = this->getConfig()->getParameterDescriptions();
+    return td;
+}
+
+
 
 #if 1
 unsigned int TaskInstanceBase::getRuntimeId() const {
@@ -134,7 +155,7 @@ bool TaskInstanceBase::isAnInstanceOf(TaskDefinitionConstPtr def) {
     return this->getDefinition()->getTaskId() == def->getTaskId();
 }
 
-void TaskInstanceBase::doInitialise(unsigned int runtimeId, const task_manager_msgs::msg::TaskConfig & parameters)
+void TaskInstanceBase::doInitialise(unsigned int runtimeId, const task_manager_lib::TaskConfig & parameters)
 {
     std::unique_lock<std::mutex> guard(env_gen->environment_mutex);
     runId = runtimeId;
@@ -179,12 +200,6 @@ void TaskInstanceBase::doTerminate()
         taskStatus |= task_manager_msgs::msg::TaskStatus::TASK_TERMINATED; 
     } else {
         taskStatus = ti | task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
-    }
-
-    std::vector<std::string> prefixes;
-    rcl_interfaces::msg::ListParametersResult lparams = this->list_parameters(prefixes,0);
-    for (size_t i=0;i<lparams.names.size();i++) {
-        this->undeclare_parameter(lparams.names[i]);
     }
 
 }

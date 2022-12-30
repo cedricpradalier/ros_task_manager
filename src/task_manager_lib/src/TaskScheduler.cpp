@@ -4,19 +4,20 @@
 #include <assert.h>
 #include <errno.h>
 #include <sys/time.h>
-#include <ros/ros.h>
-#include <ros/common.h>
+#include <rclcpp/rclcpp.hpp>
+#include <chrono>
 
-#include "task_manager_lib/SequenceTask.h"
-#include "task_manager_lib/DynamicTask.h"
+
 #include "task_manager_lib/TaskScheduler.h"
-#include "task_manager_lib/TaskHistory.h"
-#include <dynamic_reconfigure/config_tools.h>
+#include "task_manager_lib/DynamicTask.h"
 
 using namespace std;
 using namespace task_manager_lib;
+using namespace std::chrono_literals;
 
-
+using std::placeholders::_1;
+using std::placeholders::_2;
+typedef task_manager_msgs::msg::TaskStatus TaskStatus;
 
 unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
 unsigned int TaskScheduler::debug = 1;
@@ -24,8 +25,8 @@ const double TaskScheduler::DELETE_TIMEOUT=2.0;
 const double TaskScheduler::IDLE_TIMEOUT=0.5;
 const unsigned int TaskScheduler::history_size=10;
 
-TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskScheduler *ts, 
-        boost::shared_ptr<TaskDefinitionBase> td, double tperiod) : statusPub(pub)
+TaskScheduler::ThreadParameters::ThreadParameters(rclcpp::Publisher<task_manager_msgs::msg::TaskStatus>::SharedPtr pub, TaskScheduler *ts, 
+        TaskDefinitionPtr td, double tperiod) : statusPub(pub)
 {
     gtpid += 1;
     tpid = gtpid;
@@ -39,11 +40,11 @@ TaskScheduler::ThreadParameters::ThreadParameters(ros::Publisher pub, TaskSchedu
 TaskScheduler::ThreadParameters::ThreadParameters(
         const TaskScheduler::ThreadParameters &tp)
 {
-    ROS_ERROR("ThreadParameters copy constructor called");
+    that = tp.that;
+    RCLCPP_ERROR(that->node->get_logger(), "ThreadParameters copy constructor called");
     tpid = tp.tpid;
     tid = tp.tid;
     task = tp.task;
-    that = tp.that;
     period = tp.period;
     status = tp.status;
     foreground = true;
@@ -56,22 +57,23 @@ TaskScheduler::ThreadParameters::~ThreadParameters()
 {
     if (TaskScheduler::debug >= 3) {
         if (!task_mutex.try_lock()) {
-            ROS_ERROR("Task '%s': task_mutex locked on tp destructor",task->getName().c_str());
+            RCLCPP_ERROR(that->node->get_logger(), "Task '%s': task_mutex locked on tp destructor",task->getName().c_str());
         } else {
-            ROS_INFO("Task '%s': task_mutex unlocked on tp destructor",task->getName().c_str());
+            RCLCPP_INFO(that->node->get_logger(), "Task '%s': task_mutex unlocked on tp destructor",task->getName().c_str());
         }
         task_mutex.unlock();
 
         if (!aperiodic_task_mutex.try_lock()) {
-            ROS_ERROR("Task '%s': aperiodic_task_mutex locked on tp destructor",task->getName().c_str());
+            RCLCPP_ERROR(that->node->get_logger(), "Task '%s': aperiodic_task_mutex locked on tp destructor",task->getName().c_str());
         } else {
-            ROS_INFO("Task '%s': aperiodic_task_mutex unlocked on tp destructor",task->getName().c_str());
+            RCLCPP_INFO(that->node->get_logger(), "Task '%s': aperiodic_task_mutex unlocked on tp destructor",task->getName().c_str());
         }
         aperiodic_task_mutex.unlock();
     }
 }
 
-TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinitionBase> tidle, double deftPeriod)
+TaskScheduler::TaskScheduler(std::shared_ptr<rclcpp::Node> node, TaskDefinitionPtr tidle, double deftPeriod) :
+    node(node)
 {
     runScheduler = false;
 
@@ -80,28 +82,29 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
 
     tasks["idle"] = idle;
     defaultPeriod = deftPeriod;
-    startingTime = ros::Time::now().toSec();
+    startingTime = now().seconds();
 
     mainThread.reset();
 
-    ROS_INFO("Task scheduler created: debug %d",debug);
+    RCLCPP_INFO(node->get_logger(), "Task scheduler created: debug %d",debug);
 
-    n = nh;
-    startTaskSrv = nh.advertiseService("start_task", &TaskScheduler::startTask,this);
-    stopTaskSrv = nh.advertiseService("stop_task", &TaskScheduler::stopTask,this);
-    getTaskListSrv = nh.advertiseService("get_all_tasks", &TaskScheduler::getTaskList,this);
+    startTaskSrv = node->create_service<task_manager_msgs::srv::StartTask>("start_task", std::bind(&TaskScheduler::startTask,this,std::placeholders::_1,std::placeholders::_2));
+    stopTaskSrv = node->create_service<task_manager_msgs::srv::StopTask>("stop_task", std::bind(&TaskScheduler::stopTask,this,std::placeholders::_1,std::placeholders::_2));
+    getTaskListSrv = node->create_service<task_manager_msgs::srv::GetTaskList>("get_all_tasks", std::bind(&TaskScheduler::getTaskList,this,std::placeholders::_1,std::placeholders::_2));
+    getAllTaskStatusSrv = node->create_service<task_manager_msgs::srv::GetAllTaskStatus>("get_all_status", std::bind(&TaskScheduler::getAllTaskStatus,this,std::placeholders::_1,std::placeholders::_2));
+#if 0
     getTaskListLightSrv =nh.advertiseService("get_all_tasks_light", &TaskScheduler::getTaskListLight,this);
-    getAllTaskStatusSrv = nh.advertiseService("get_all_status", &TaskScheduler::getAllTaskStatus,this);
     getHistorySrv = nh.advertiseService("get_history", &TaskScheduler::getHistory,this);
     executeSequenceTasksSrv=nh.advertiseService("execute_sequence", &TaskScheduler::executeTaskSequence ,this);
-    statusPub = nh.advertise<task_manager_msgs::TaskStatus>("status",20);
-    keepAliveSub = nh.subscribe("keep_alive",1,&TaskScheduler::keepAliveCallback,this);
-    lastKeepAlive = ros::Time::now();
+#endif
+    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("status",5);
+    keepAliveSub = node->create_subscription<std_msgs::msg::Header>("keep_alive",1,std::bind(&TaskScheduler::keepAliveCallback,this,std::placeholders::_1));
+    lastKeepAlive = now();
 }
 
-void TaskScheduler::keepAliveCallback(const std_msgs::Header::ConstPtr& msg) 
+void TaskScheduler::keepAliveCallback(const std_msgs::msg::Header::SharedPtr) 
 {
-    lastKeepAlive = ros::Time::now();
+    lastKeepAlive = now();
 }
 
 TaskScheduler::~TaskScheduler()
@@ -129,43 +132,53 @@ TaskScheduler::~TaskScheduler()
     }
 }
 
-bool TaskScheduler::startTask(task_manager_lib::StartTask::Request  &req,
-        task_manager_lib::StartTask::Response &res )
+bool TaskScheduler::startTask(const std::shared_ptr<task_manager_msgs::srv::StartTask::Request>  req,
+        const std::shared_ptr<task_manager_msgs::srv::StartTask::Response> res )
 {
-    lastKeepAlive = ros::Time::now();
-    TaskId id = launchTask(req.name,TaskParameters(req.config, req.argv));
-    res.id = id;
+    lastKeepAlive = now();
+    TaskId id = launchTask(req->name,req->config);
+    res->id = id;
     return true;
 }
 
-bool TaskScheduler::stopTask(task_manager_lib::StopTask::Request  &req,
-        task_manager_lib::StopTask::Response &res )
+bool TaskScheduler::stopTask(const std::shared_ptr<task_manager_msgs::srv::StopTask::Request>  req,
+        const std::shared_ptr<task_manager_msgs::srv::StopTask::Response> res )
 {
-    lastKeepAlive = ros::Time::now();
-    if (req.id == -1) {
+    lastKeepAlive = now();
+    if (req->id == -1) {
         TaskId id = launchIdleTask();
-        res.id = id;
+        res->id = id;
     } else {
-        TaskSet::iterator it = runningThreads.find(req.id);
+        TaskSet::iterator it = runningThreads.find(req->id);
         if (it != runningThreads.end()) {
             terminateTask(it->second);
         }
-        res.id = 0;
+        res->id = 0;
     }
     return true;
 }
 
-bool TaskScheduler::getTaskList(task_manager_lib::GetTaskList::Request  &req,
-        task_manager_lib::GetTaskList::Response &res )
+bool TaskScheduler::getTaskList(const std::shared_ptr<task_manager_msgs::srv::GetTaskList::Request>  ,
+        const std::shared_ptr<task_manager_msgs::srv::GetTaskList::Response> res )
 {
-    lastKeepAlive = ros::Time::now();
-    generateTaskList(res.tlist);
+    lastKeepAlive = now();
+    generateTaskList(res->tlist);
     return true;
 }
 
+
+bool TaskScheduler::getAllTaskStatus(const std::shared_ptr<task_manager_msgs::srv::GetAllTaskStatus::Request>  ,
+        const std::shared_ptr<task_manager_msgs::srv::GetAllTaskStatus::Response> res )
+{
+    lastKeepAlive = now();
+    generateTaskStatus(res->running_tasks,res->zombie_tasks);
+    return true;
+}
+
+#if 0
 bool TaskScheduler::getTaskListLight(task_manager_lib::GetTaskListLight::Request  &req, task_manager_lib::GetTaskListLight::Response &res )
 {
-    lastKeepAlive = ros::Time::now();
+    lastKeepAlive = now();
     task_manager_lib::GetTaskList::Response res1;
     generateTaskList(res1.tlist);
     generateTaskListLight(res1.tlist,res.tlist);
@@ -173,35 +186,27 @@ bool TaskScheduler::getTaskListLight(task_manager_lib::GetTaskListLight::Request
 }
 
 
-
-bool TaskScheduler::getAllTaskStatus(task_manager_lib::GetAllTaskStatus::Request  &req,
-        task_manager_lib::GetAllTaskStatus::Response &res )
-{
-    lastKeepAlive = ros::Time::now();
-    generateTaskStatus(res.running_tasks,res.zombie_tasks);
-    return true;
-}
-
 bool TaskScheduler::executeTaskSequence(task_manager_lib::ExeTaskSequence::Request  &req,task_manager_lib::ExeTaskSequence::Response &res)
 {
-    lastKeepAlive = ros::Time::now();
+    lastKeepAlive = now();
     launchTaskSequence(req.sequence,res.id);
     return true;
 }
 
 bool TaskScheduler::getHistory(task_manager_lib::GetHistory::Request  &req, task_manager_lib::GetHistory::Response &res)
 {
-    lastKeepAlive = ros::Time::now();
+    lastKeepAlive = now();
     generateHistory(res.history);
     return true;
 }
+#endif
 
 
 int TaskScheduler::terminateAllTasks()
 {
     TaskSet copy = runningThreads;
     TaskSet::iterator it;
-    PRINTF(1,"Terminating all tasks");
+    RCLCPP_DEBUG(node->get_logger(), "Terminating all tasks");
     for (it = copy.begin();it!=copy.end();it++) {
         // delete pointer and empty the list of running tasks
         terminateTask(it->second);
@@ -211,41 +216,24 @@ int TaskScheduler::terminateAllTasks()
     return 0;
 }
 
-void TaskScheduler::addTask(boost::shared_ptr<TaskDefinitionBase> td) 
+void TaskScheduler::addTask(TaskDefinitionPtr td) 
 {
-    PRINTF(1,"Adding task %s",td->getName().c_str());
+    RCLCPP_DEBUG(node->get_logger(), "Adding task %s",td->getName().c_str());
     TaskDirectory::const_iterator tit = tasks.find(td->getName());
     if (tit != tasks.end()) {
-        ROS_WARN("Warning: overwriting task '%s'",td->getName().c_str());
+        RCLCPP_WARN(node->get_logger(), "Warning: overwriting task '%s'",td->getName().c_str());
     }
-    tasks.insert(std::pair< std::string,boost::shared_ptr<TaskDefinitionBase> >(td->getName(),td));
+    tasks.insert(std::pair< std::string,TaskDefinitionPtr >(td->getName(),td));
 }
 
-void TaskScheduler::loadTask(const std::string & filename, boost::shared_ptr<TaskEnvironment> env)
+void TaskScheduler::loadTask(const std::string & filename, TaskEnvironmentPtr env)
 {
     try {
-    boost::shared_ptr<TaskDefinitionBase> td(new DynamicTask(filename, env));
+        TaskDefinitionPtr td(new DynamicTask(filename, env));
 
-    addTask(td);
+        addTask(td);
     } catch (DynamicTask::DLLoadError & e) {
-        ROS_ERROR("Ignoring file '%s': '%s'",filename.c_str(),e.what());
-    }
-}
-
-void TaskScheduler::configureTasks()
-{
-    TaskDirectory::const_iterator tit;
-    unsigned int taskId = 0;
-    for (tit = tasks.begin();tit!=tasks.end();tit++,taskId++) {
-        // Try loading from the parameter server / launch file
-        TaskParameters tp = tit->second->getParametersFromServer(n);
-        // printf("TS %s param from server\n",tit->second->getName().c_str());
-        // tp.print();
-        std::string rename;
-        if (tp.getParameter("task_rename",rename) && !rename.empty()) {
-            tit->second->setName(rename);
-        }
-        tit->second->doConfigure(taskId, tp);
+        RCLCPP_ERROR(node->get_logger(), "Ignoring file '%s': '%s'",filename.c_str(),e.what());
     }
 }
 
@@ -262,7 +250,7 @@ static int dllfilter(const struct dirent * d) {
 }
 
 void TaskScheduler::loadAllTasks(const std::string & dirname, 
-        boost::shared_ptr<TaskEnvironment> env)
+        TaskEnvironmentPtr env)
 {
     struct dirent **namelist;
     int n;
@@ -271,7 +259,7 @@ void TaskScheduler::loadAllTasks(const std::string & dirname,
         perror("scandir");
     else {
         while(n--) {
-	    PRINTF(2,"Scandir: %s / %s",dirname.c_str(),namelist[n]->d_name);
+	    RCLCPP_DEBUG(node->get_logger(), "Scandir: %s / %s",dirname.c_str(),namelist[n]->d_name);
             std::string fname = dirname + "/" + namelist[n]->d_name;
             loadTask(fname,env);
             free(namelist[n]);
@@ -290,7 +278,7 @@ void TaskScheduler::clearAllDynamicTasks() {
     }
 
     for (it=tasks.begin();it!=tasks.end();it++) {
-        boost::shared_ptr<DynamicTask> dt = boost::dynamic_pointer_cast<DynamicTask>(it->second);
+        std::shared_ptr<DynamicTask> dt = std::dynamic_pointer_cast<DynamicTask,TaskDefinitionBase>(it->second);
         if (dt) {
             tbd.push_back(it);
         }
@@ -314,34 +302,34 @@ TaskScheduler::TaskId TaskScheduler::launchIdleTask()
     }
 
     // Finally create the thread responsible for running the task
-    PRINTF(3,"lit:Locking");
+    RCLCPP_DEBUG(node->get_logger(), "lit:Locking");
     {
-        boost::unique_lock<boost::mutex> lock(scheduler_mutex);
-        PRINTF(3,"lit:Locked");
-        mainThread = boost::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, idle, period));
+        std::unique_lock<std::mutex> lock(scheduler_mutex);
+        RCLCPP_DEBUG(node->get_logger(), "lit:Locked");
+        mainThread = std::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, idle, period));
         mainThread->foreground = true;
         runningThreads[mainThread->tpid] = mainThread;
         if (debug>=3) printTaskSet("After launch idle",runningThreads);
     }
-    PRINTF(3,"lit:Unlocked");
+    RCLCPP_DEBUG(node->get_logger(), "lit:Unlocked");
 
-    mainThread->tid = boost::shared_ptr<boost::thread>(new boost::thread(&TaskScheduler::runTask,this,mainThread));
+    mainThread->tid = std::shared_ptr<boost::thread>(new boost::thread(&TaskScheduler::runTask,this,mainThread));
 
     return mainThread->tpid;
 }
 
-TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParameters> tp)
+TaskScheduler::TaskId TaskScheduler::launchTask(std::shared_ptr<ThreadParameters> tp)
 {
 
     if (tp->foreground) {
-        PRINTF(3,"lt:terminate mainThread %s",mainThread->task->getName().c_str());
+        RCLCPP_DEBUG(node->get_logger(), "lt:terminate mainThread %s",mainThread->task->getName().c_str());
         terminateTask(mainThread);
     }
 
-    PRINTF(3,"lt:Locking (param)");
+    RCLCPP_DEBUG(node->get_logger(), "lt:Locking (param)");
     {
-        boost::unique_lock<boost::mutex> lock(scheduler_mutex);
-        PRINTF(3,"lt:Locked");
+        std::unique_lock<std::mutex> lock(scheduler_mutex);
+        RCLCPP_DEBUG(node->get_logger(), "lt:Locked");
 
         if (tp->foreground) {
             mainThread = tp;
@@ -349,11 +337,11 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
         runningThreads[tp->tpid] = tp;
         if (debug>=3) printTaskSet("After launch",runningThreads);
     }
-    PRINTF(3,"lt:Unlocked (param)");
+    RCLCPP_DEBUG(node->get_logger(), "lt:Unlocked (param)");
 
-    boost::unique_lock<boost::mutex> lock(tp->task_mutex);
+    std::unique_lock<std::mutex> lock(tp->task_mutex);
     try {
-        tp->tid = boost::shared_ptr<boost::thread>(new boost::thread(&TaskScheduler::runTask,this,tp));
+        tp->tid = std::shared_ptr<boost::thread>(new boost::thread(&TaskScheduler::runTask,this,tp));
         if (tp->foreground) {
             removeConditionalIdle();
         }
@@ -363,7 +351,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(boost::shared_ptr<ThreadParamete
         if (tp->foreground) {
             launchIdleTask();
         }
-        enqueueAction(ros::Time::now()+ros::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
+        enqueueAction(now()+rclcpp::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
         return 0;
     }
     return tp->tpid;
@@ -377,45 +365,39 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     TaskDirectory::const_iterator tdit;
     tdit = tasks.find(taskname);
     if (tdit==tasks.end()) {
-        ROS_ERROR("Impossible to find task '%s'",taskname.c_str());
+        RCLCPP_ERROR(node->get_logger(), "Impossible to find task '%s'",taskname.c_str());
         return -1;
     }
-    if (tdit->second->getStatus() != TaskStatus::TASK_CONFIGURED) {
-        ROS_ERROR("Refusing to run task '%s' because it is not CONFIGURED",taskname.c_str());
-        return -1;
-    }
-
+    TaskConfig cfg;
+    cfg.loadConfig(tp);
     // See if some runtime period has been defined in the parameters
-    if (!tp.getParameter("task_period",period)) {
-        ROS_ERROR("Missing required parameter task_period");
-        return -1;
-    }
-    tp.getParameter("foreground",foreground); // ignore return
+    period = cfg.task_period.get<double>();
+    foreground = cfg.foreground.get<bool>();
 
     // Finally create the thread responsible for running the task
-    boost::shared_ptr<ThreadParameters> tparam =
-        boost::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, tdit->second, period));
-    tparam->params = tp;
+    std::shared_ptr<ThreadParameters> tparam =
+        std::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, tdit->second, period));
+    tparam->params = cfg;
     tparam->foreground = foreground;
     tparam->running = false;
 
-    PRINTF(3,"lt:Locking (name)");
+    RCLCPP_DEBUG(node->get_logger(), "lt:Locking (name)");
     {
-        boost::unique_lock<boost::mutex> lock(tparam->task_mutex);
-        PRINTF(3,"lt:Locked");
+        std::unique_lock<std::mutex> lock(tparam->task_mutex);
+        RCLCPP_DEBUG(node->get_logger(), "lt:Locked");
 
         enqueueAction(START_TASK,tparam);
 
-        PRINTF(3,"lt:Wait condition");
+        RCLCPP_DEBUG(node->get_logger(), "lt:Wait condition");
         tparam->task_condition.wait(lock);
-        PRINTF(3,"lt:Locked");
+        RCLCPP_DEBUG(node->get_logger(), "lt:Locked");
     }
-    PRINTF(3,"lt:Unlocked (name)");
+    RCLCPP_DEBUG(node->get_logger(), "lt:Unlocked (name)");
 
     return tparam->tpid;
 }
 
-void TaskScheduler::runAperiodicTask(boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::runAperiodicTask(std::shared_ptr<ThreadParameters> tp)
 {
     // Just a barrier...
     tp->aperiodic_task_mutex.lock();
@@ -428,50 +410,50 @@ void TaskScheduler::runAperiodicTask(boost::shared_ptr<ThreadParameters> tp)
     tp->aperiodic_task_condition.notify_all();
 }
 
-void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
 {
     try {
-        double tstart = ros::Time::now().toSec();
-        PRINTF(3,"lt:Signaling and unlocking");
+        double tstart = now().seconds();
+        RCLCPP_DEBUG(node->get_logger(), "lt:Signaling and unlocking");
         {
-            boost::unique_lock<boost::mutex> lock(tp->task_mutex);
+            std::unique_lock<std::mutex> lock(tp->task_mutex);
             tp->task_condition.notify_all();
         }
-        PRINTF(3,"lt:Unlocked");
-        tp->updateStatus(ros::Time::now());
+        RCLCPP_DEBUG(node->get_logger(), "lt:Unlocked");
+        tp->updateStatus(now());
 
         tp->running = true;
         try {
-            // ROS_INFO("Initialising task %s",tp->task->getName().c_str());
+            // RCLCPP_INFO(node->get_logger(), "Initialising task %s",tp->task->getName().c_str());
             tp->task->doInitialise(tp->tpid,tp->params);
-            tp->updateStatus(ros::Time::now());
+            tp->updateStatus(now());
             if (tp->status != TaskStatus::TASK_INITIALISED) {
                 cleanupTask(tp);
                 return;
             }
         } catch (const std::exception & e) {
             tp->task->debug("Exception %s",e.what());
-            tp->updateStatus(ros::Time::now());
+            tp->updateStatus(now());
             cleanupTask(tp);
             return ;
         }
         tp->running = true;
-        ROS_INFO("Running task '%s' at period %f main %d timeout %f periodic %d",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
+        RCLCPP_INFO(node->get_logger(), "Running task '%s' at period %f main %d timeout %f periodic %d",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
 
         if (tp->task->isPeriodic()) {
-            ros::Rate rate(1. / tp->period);
-            PRINTF(2,"Initialisation done");
+            rclcpp::Rate rate(1. / tp->period);
+            RCLCPP_DEBUG(node->get_logger(), "Initialisation done");
             while (1) {
-                double t0 = ros::Time::now().toSec();
-                if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+                double t0 = now().seconds();
+                if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.seconds() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed");
-                    tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",rclcpp::Time(t0));
                     break;
                 }
 
                 if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
                     tp->task->debug("TIMEOUT");
-                    tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",rclcpp::Time(t0));
                     break;
                 }
 
@@ -481,13 +463,13 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
                     tp->updateStatus(now());
                 } catch (const std::exception & e) {
                     tp->task->debug("Exception %s",e.what());
-                    tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",ros::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",rclcpp::Time(t0));
                     tp->updateStatus(now());
                     cleanupTask(tp);
                     return ;
                 }
-                if (tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
-                    ROS_INFO("Task '%s' not running anymore (%d)",tp->task->getName().c_str(),tp->status);
+                if (tp->status != TaskStatus::TASK_RUNNING) {
+                    RCLCPP_INFO(node->get_logger(), "Task '%s' not running anymore (%d)",tp->task->getName().c_str(),tp->status);
                     break;
                 }
                 boost::this_thread::interruption_point();
@@ -495,64 +477,63 @@ void TaskScheduler::runTask(boost::shared_ptr<ThreadParameters> tp)
             }
         } else {
             bool first = true;
-            boost::unique_lock<boost::mutex> lock(tp->aperiodic_task_mutex);
+            std::unique_lock<std::mutex> lock(tp->aperiodic_task_mutex);
             boost::thread id(&TaskScheduler::runAperiodicTask,this,tp);
             while (1) {
-                double t0 = ros::Time::now().toSec();
-                if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.toSec() > 1.0)) {
+                double t0 = now().seconds();
+                if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.seconds() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed");
-                    tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",ros::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",rclcpp::Time(t0));
                     break;
                 }
                 if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
                     tp->task->debug("TIMEOUT");
-                    tp->setStatus(task_manager_msgs::TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",ros::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",rclcpp::Time(t0));
                     break;
                 }
-                tp->updateStatus(ros::Time::now());
-                if (tp->status == task_manager_msgs::TaskStatus::TASK_COMPLETED) {
+                tp->updateStatus(now());
+                if (tp->status == TaskStatus::TASK_COMPLETED) {
                     break;
                 }
-                if (!first && tp->status != task_manager_msgs::TaskStatus::TASK_RUNNING) {
-                    ROS_INFO("Task '%s' not running anymore or not reporting itself running in time",tp->task->getName().c_str());
+                if (!first && tp->status != TaskStatus::TASK_RUNNING) {
+                    RCLCPP_INFO(node->get_logger(), "Task '%s' not running anymore or not reporting itself running in time",tp->task->getName().c_str());
                     break;
                 }
 
-                double t1 = ros::Time::now().toSec();
+                double t1 = now().seconds();
                 // Adding a while loop here to account for the fact that we may be running in sim time but the 
                 // timed_wait is in real time
                 do {
                     double ttimeout = std::max(1e-3,(tp->period - (t1-t0)));
-                    boost::posix_time::milliseconds dtimeout(int(ttimeout*1000));
-                    tp->aperiodic_task_condition.timed_wait(lock,dtimeout);
-                    t1 = ros::Time::now().toSec();
+                    tp->aperiodic_task_condition.wait_for(lock,int(ttimeout*1000)*1ms);
+                    t1 = now().seconds();
                     // printf("%f / %f\n",t1-t0,tp->period);
                 } while ((t1 - t0) < tp->period);
                 first = false;
             }
-            if (tp->status != task_manager_msgs::TaskStatus::TASK_COMPLETED) {
+            if (tp->status != TaskStatus::TASK_COMPLETED) {
                 id.interrupt();
             }
             id.join();
         }
         // tp->task->debug("Out of the loop");
     } catch (const boost::thread_interrupted & e) {
-        ROS_WARN("Task %s interrupted",tp->task->getName().c_str());
+        RCLCPP_WARN(node->get_logger(), "Task %s interrupted",tp->task->getName().c_str());
         // Ignore, we just want to make sure we get to the next line
-        tp->setStatus(task_manager_msgs::TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",ros::Time::now());
+        tp->setStatus(TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",now());
     }
     cleanupTask(tp);
 }
 
-void TaskScheduler::terminateTask(boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::terminateTask(std::shared_ptr<ThreadParameters> tp)
 {
     if (!tp) return;
-    PRINTF(1,"Terminating thread %s",tp->task->getName().c_str());
+    RCLCPP_DEBUG(node->get_logger(), "Terminating thread %s",tp->task->getName().c_str());
     tp->tid->interrupt();
     tp->tid->join();
     tp->running = false;
 
-    PRINTF(2,"Thread cancelled");
+    RCLCPP_DEBUG(node->get_logger(), "Thread cancelled");
     return;
 }
 
@@ -568,18 +549,18 @@ void TaskScheduler::printTaskSet(const std::string & name, const TaskScheduler::
     printf("-------------------\n");
 }
 
-void TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::cleanupTask(std::shared_ptr<ThreadParameters> tp)
 {
     if (tp == NULL) return ;
-    PRINTF(1,"Cleaning up task %d:%s",tp->tpid,tp->task->getName().c_str());
+    RCLCPP_DEBUG(node->get_logger(), "Cleaning up task %d:%s",tp->tpid,tp->task->getName().c_str());
     tp->task->doTerminate();
-    PRINTF(1, "Task '%s' terminated",tp->task->getName().c_str());
-    tp->status |= task_manager_msgs::TaskStatus::TASK_TERMINATED;
+    RCLCPP_DEBUG(node->get_logger(),  "Task '%s' terminated",tp->task->getName().c_str());
+    tp->status |= TaskStatus::TASK_TERMINATED;
     tp->statusTime = now();
     tp->statusString = "terminated";
     tp->updateStatus(now());
 
-    boost::unique_lock<boost::mutex> lock(scheduler_mutex);
+    std::unique_lock<std::mutex> lock(scheduler_mutex);
     zombieThreads.insert(TaskSetItem(tp->tpid,tp));
     TaskSet::iterator tsit = runningThreads.find(tp->tpid);
     assert(tsit != runningThreads.end());
@@ -592,17 +573,17 @@ void TaskScheduler::cleanupTask(boost::shared_ptr<ThreadParameters> tp)
     if (tp->foreground) {
         mainThread.reset();
         if (!tp->task->isAnInstanceOf(idle)) {
-            enqueueAction(ros::Time::now()+ros::Duration(IDLE_TIMEOUT),CONDITIONALLY_IDLE,tp);
+            enqueueAction(now()+rclcpp::Duration(IDLE_TIMEOUT),CONDITIONALLY_IDLE,tp);
         }
     }
-    enqueueAction(ros::Time::now()+ros::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
+    enqueueAction(now()+rclcpp::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
 
     // There is a risk that we trigger the execution of a new task before
     // starting idle here. In addition, we need one condition per task
     tp->task_condition.notify_all();
 }
 
-void TaskScheduler::deleteTask(boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::deleteTask(std::shared_ptr<ThreadParameters> tp)
 {
     TaskSet::iterator it = zombieThreads.find(tp->tpid);
     assert(it != zombieThreads.end());
@@ -616,7 +597,7 @@ void TaskScheduler::deleteTask(boost::shared_ptr<ThreadParameters> tp)
 int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
 {
     TaskSet::iterator it;
-    boost::unique_lock<boost::mutex> lock(scheduler_mutex);
+    std::unique_lock<std::mutex> lock(scheduler_mutex);
     if (debug>=3) printTaskSet("Zombies when waiting",zombieThreads);
     if (debug>=3) printTaskSet("Running when waiting",runningThreads);
 
@@ -626,11 +607,10 @@ int TaskScheduler::waitTaskCompletion(TaskId id, double timeout)
     }
     it = runningThreads.find(id);
     if (it == runningThreads.end()) {
-        ROS_ERROR("Cannot find reference to task %d",id);
+        RCLCPP_ERROR(node->get_logger(), "Cannot find reference to task %d",id);
         return -1;
     }
-    boost::posix_time::milliseconds dtimeout(int(timeout*1000));
-    it->second->task_condition.timed_wait(lock,dtimeout);
+    it->second->task_condition.wait_for(lock,int(timeout*1000)*1ms);
     return 0;
 }
 
@@ -640,9 +620,9 @@ void TaskScheduler::printTaskDirectory(bool with_ros) const
     unsigned int i = 0;
     TaskDirectory::const_iterator tit;
     if (with_ros) {
-        ROS_INFO("Task Directory:");
+        RCLCPP_INFO(node->get_logger(), "Task Directory:");
         for (tit = tasks.begin();tit!=tasks.end();tit++) {
-            ROS_INFO("%d -- %s: %s",i,tit->second->getName().c_str(),tit->second->getHelp().c_str());
+            RCLCPP_INFO(node->get_logger(), "%d -- %s: %s",i,tit->second->getName().c_str(),tit->second->getHelp().c_str());
             i++;
         }
     } else {
@@ -657,9 +637,9 @@ void TaskScheduler::printTaskDirectory(bool with_ros) const
 
 void TaskScheduler::removeConditionalIdle()
 {
-    PRINTF(3,"rci:Locking");
-    boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"rci:Locked");
+    RCLCPP_DEBUG(node->get_logger(), "rci:Locking");
+    std::unique_lock<std::mutex> lock(aqMutex);
+    RCLCPP_DEBUG(node->get_logger(), "rci:Locked");
 
     ActionQueue::iterator it = actionQueue.begin();
     while (it != actionQueue.end()) {
@@ -672,49 +652,49 @@ void TaskScheduler::removeConditionalIdle()
         }
     }
 
-    PRINTF(3,"rci:Signalling");
+    RCLCPP_DEBUG(node->get_logger(), "rci:Signalling");
     aqCond.notify_all();
-    PRINTF(3,"rci:Unlocked");
+    RCLCPP_DEBUG(node->get_logger(), "rci:Unlocked");
 }
 
 TaskScheduler::ThreadAction TaskScheduler::getNextAction()
 {
     // Warning: add cancel management
-    ros::Time t;
+    rclcpp::Time t;
     ThreadAction ta;
     ActionQueue::iterator it;
-    PRINTF(3,"gna:Locking");
-    boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"gna:Locked");
+    RCLCPP_DEBUG(node->get_logger(), "gna:Locking");
+    std::unique_lock<std::mutex> lock(aqMutex);
+    RCLCPP_DEBUG(node->get_logger(), "gna:Locked");
     try {
         // TODO: this must get the next action in time
         if (actionQueue.empty()) {
-            PRINTF(3,"gna:Cond Wait");
+            RCLCPP_DEBUG(node->get_logger(), "gna:Cond Wait");
             aqCond.wait(lock);
-            PRINTF(3,"gna:Locked");
+            RCLCPP_DEBUG(node->get_logger(), "gna:Locked");
         }
         while (1) {
-            t = ros::Time::now();
+            t = now();
             it = actionQueue.begin();
             assert(it != actionQueue.end());
             if (runScheduler) {
-                if (it->first <= t.toSec()) {
+                if (it->first <= t.seconds()) {
                     ta = it->second;
                     actionQueue.erase(it);
-                    PRINTF(2,"Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
+                    RCLCPP_DEBUG(node->get_logger(), "Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
                             ta.tp?(ta.tp->task->getName().c_str()):"none");
                 } else {
                     // wait for the right time or another action to be inserted
-                    PRINTF(3,"gna:Cond TWait");
-                    boost::posix_time::milliseconds dtimeout(int((it->first-t.toSec())*1000));
-                    aqCond.timed_wait(lock,dtimeout);
-                    PRINTF(3,"gna:Locked");
+                    RCLCPP_DEBUG(node->get_logger(), "gna:Cond TWait");
+                    int dtimeout((it->first-t.seconds())*1000);
+                    aqCond.wait_for(lock,dtimeout*1ms);
+                    RCLCPP_DEBUG(node->get_logger(), "gna:Locked");
                     continue;
                 }
             } else {
                 ta = it->second;
                 actionQueue.erase(it);
-                PRINTF(2,"Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
+                RCLCPP_DEBUG(node->get_logger(), "Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
                         ta.tp?(ta.tp->task->getName().c_str()):"none");
             }
             break;
@@ -723,45 +703,45 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
         ta.type = WAIT_CANCELLED;
         ta.tp.reset();
     }
-    PRINTF(3,"gna:Unlocking");
+    RCLCPP_DEBUG(node->get_logger(), "gna:Unlocking");
     return ta;
 }
 
-void TaskScheduler::enqueueAction(ActionType type,boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::enqueueAction(ActionType type,std::shared_ptr<ThreadParameters> tp)
 {
     ThreadAction ta;
-    PRINTF(3,"ea:Locking");
-    boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"ea:Locked");
+    RCLCPP_DEBUG(node->get_logger(), "ea:Locking");
+    std::unique_lock<std::mutex> lock(aqMutex);
+    RCLCPP_DEBUG(node->get_logger(), "ea:Locked");
     // if (!runScheduler) return;
-    double when = ros::Time::now().toSec();
-    PRINTF(2,"Enqueueing action %.3f %s -- %s",when,actionString(type),
+    double when = now().seconds();
+    RCLCPP_DEBUG(node->get_logger(), "Enqueueing action %.3f %s -- %s",when,actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
     ta.tp = tp;
     actionQueue[when] = ta;
-    PRINTF(3,"ea:Signalling");
+    RCLCPP_DEBUG(node->get_logger(), "ea:Signalling");
     aqCond.notify_all();
-    PRINTF(3,"ea:Unlocking");
+    RCLCPP_DEBUG(node->get_logger(), "ea:Unlocking");
 }
 
-void TaskScheduler::enqueueAction(const ros::Time & when,  ActionType type,boost::shared_ptr<ThreadParameters> tp)
+void TaskScheduler::enqueueAction(const rclcpp::Time & when,  ActionType type,std::shared_ptr<ThreadParameters> tp)
 {
     ThreadAction ta;
-    PRINTF(3,"ea:Locking");
-    boost::unique_lock<boost::mutex> lock(aqMutex);
-    PRINTF(3,"ea:Locked");
+    RCLCPP_DEBUG(node->get_logger(), "ea:Locking");
+    std::unique_lock<std::mutex> lock(aqMutex);
+    RCLCPP_DEBUG(node->get_logger(), "ea:Locked");
     // if (!runScheduler) return;
-    PRINTF(2,"Enqueing action %.3f %s -- %s",when.toSec(),actionString(type),
+    RCLCPP_DEBUG(node->get_logger(), "Enqueing action %.3f %s -- %s",when.seconds(),actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
     ta.tp = tp;
-    actionQueue[when.toSec()] = ta;
-    PRINTF(3,"ea:Signalling");
+    actionQueue[when.seconds()] = ta;
+    RCLCPP_DEBUG(node->get_logger(), "ea:Signalling");
     aqCond.notify_all();
-    PRINTF(3,"ea:Unlocking");
+    RCLCPP_DEBUG(node->get_logger(), "ea:Unlocking");
 }
 
 const char *TaskScheduler::actionString(ActionType at)
@@ -796,30 +776,30 @@ int TaskScheduler::runSchedulerLoop()
     // Default:
     // pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
     while (1) {
-        PRINTF(2,"Waiting next action (%d)",(int)(actionQueue.size()));
+        RCLCPP_DEBUG(node->get_logger(), "Waiting next action (%d)",(int)(actionQueue.size()));
         if (!runScheduler && actionQueue.empty()) {
             break;
         }
 
         ThreadAction ta = getNextAction();
-        PRINTF(2,"%.3f: got action %s %s",ros::Time::now().toSec(),actionString(ta.type),
+        RCLCPP_DEBUG(node->get_logger(), "%.3f: got action %s %s",now().seconds(),actionString(ta.type),
                 ta.tp?(ta.tp->task->getName().c_str()):"none");
-        PRINTF(3,"rsl:Locking");
+        RCLCPP_DEBUG(node->get_logger(), "rsl:Locking");
         switch (ta.type) {
             case START_IDLE_TASK:
-                PRINTF(2,"START_IDLE_TASK");
+                RCLCPP_DEBUG(node->get_logger(), "START_IDLE_TASK");
                 launchIdleTask();
                 break;
             case START_TASK:
-                PRINTF(2,"START_TASK %s",ta.tp->task->getName().c_str());
+                RCLCPP_DEBUG(node->get_logger(), "START_TASK %s",ta.tp->task->getName().c_str());
                 launchTask(ta.tp);
                 break;
             case DELETE_TASK:
-                PRINTF(2,"DELETE_TASK %s",ta.tp->task->getName().c_str());
+                RCLCPP_DEBUG(node->get_logger(), "DELETE_TASK %s",ta.tp->task->getName().c_str());
                 deleteTask(ta.tp);
                 break;
             case CONDITIONALLY_IDLE:
-                PRINTF(2,"CONDITIONALLY_IDLE");
+                RCLCPP_DEBUG(node->get_logger(), "CONDITIONALLY_IDLE");
                 if ((mainThread==NULL) && runScheduler) {
                     // no new task has been created yet, and only this function
                     // can trigger new task creation
@@ -827,13 +807,13 @@ int TaskScheduler::runSchedulerLoop()
                 }
                 break;
             case WAIT_CANCELLED:
-                PRINTF(2,"WAIT_CANCELLED");
+                RCLCPP_DEBUG(node->get_logger(), "WAIT_CANCELLED");
                 break;
             case NO_ACTION:
-                PRINTF(2,"NO_ACTION");
+                RCLCPP_DEBUG(node->get_logger(), "NO_ACTION");
                 break;
         }
-        PRINTF(3,"rsl:Unlocked");
+        RCLCPP_DEBUG(node->get_logger(), "rsl:Unlocked");
     }
     return 0;
 }
@@ -842,28 +822,28 @@ int TaskScheduler::startScheduler()
 {
     assert(!runScheduler);
     runScheduler = true;
-    enqueueAction(START_IDLE_TASK,boost::shared_ptr<ThreadParameters>());
+    enqueueAction(START_IDLE_TASK,std::shared_ptr<ThreadParameters>());
     aqid = boost::thread(&TaskScheduler::runSchedulerLoop,this);
     return 0;
 }
 
 int TaskScheduler::stopScheduler()
 {
-    PRINTF(2,"Stopping scheduler (%d)",runScheduler);
+    RCLCPP_DEBUG(node->get_logger(), "Stopping scheduler (%d)",runScheduler);
     if (!runScheduler) return 0;
     runScheduler = false;
-    enqueueAction(WAIT_CANCELLED,boost::shared_ptr<ThreadParameters>());
+    enqueueAction(WAIT_CANCELLED,std::shared_ptr<ThreadParameters>());
     aqid.join();
-    PRINTF(2,"Cleaning-up action queue (%d)",(int)(actionQueue.size()));
+    RCLCPP_DEBUG(node->get_logger(), "Cleaning-up action queue (%d)",(int)(actionQueue.size()));
 
-    boost::unique_lock<boost::mutex> lock(aqMutex);
+    std::unique_lock<std::mutex> lock(aqMutex);
     actionQueue.clear();
-    PRINTF(2,"Scheduler stopped");
+    RCLCPP_DEBUG(node->get_logger(), "Scheduler stopped");
     return 0;
 }
 
 
-void TaskScheduler::generateTaskList(std::vector<task_manager_msgs::TaskDescription> & tlist) const
+void TaskScheduler::generateTaskList(std::vector<task_manager_msgs::msg::TaskDescription> & tlist) const
 {
     TaskDirectory::const_iterator it;
     unsigned int i = 0;
@@ -873,11 +853,11 @@ void TaskScheduler::generateTaskList(std::vector<task_manager_msgs::TaskDescript
 }
 
 
-void TaskScheduler::generateTaskStatus(std::vector<task_manager_msgs::TaskStatus> & running,
-        std::vector<task_manager_msgs::TaskStatus> & zombies) 
+void TaskScheduler::generateTaskStatus(std::vector<TaskStatus> & running,
+        std::vector<TaskStatus> & zombies) 
 {
     TaskSet::const_iterator it;
-    boost::unique_lock<boost::mutex> lock(scheduler_mutex);
+    std::unique_lock<std::mutex> lock(scheduler_mutex);
     for (it=runningThreads.begin();it!=runningThreads.end();it++) 
     {
         running.push_back(it->second->getRosStatus());
@@ -889,6 +869,7 @@ void TaskScheduler::generateTaskStatus(std::vector<task_manager_msgs::TaskStatus
     // tp.printToFile(stdout);
 }
 
+#if 0
 void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDescription> &input,std::vector<task_manager_msgs::TaskDescriptionLight> &output) const
 {
     std::vector<task_manager_msgs::TaskDescription> tasklist=input; 
@@ -900,300 +881,269 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
         current_task.description=tasklist[i].description;
         current_task.periodic=tasklist[i].periodic;
 
-#if ROS_VERSION_MINIMUM(1, 8, 0)
-// #pragma message("Compiling for ROS Fuerte")
-        for (unsigned int g=0;g<tasklist[i].config.groups.size();g++) {
-            for (unsigned int j = 0;j<tasklist[i].config.groups[g].parameters.size();j++) {
-                if ( (tasklist[i].config.groups[g].parameters[j].name!= "task_rename") 
-                        && (tasklist[i].config.groups[g].parameters[j].name!= "foreground") 
-                        && (tasklist[i].config.groups[g].parameters[j].name!= "task_period") 
-                        && (tasklist[i].config.groups[g].parameters[j].name!= "task_timeout"))
+        for (unsigned int j = 0;j<tasklist[i].config.parameters.size();j++) {
+            if ( (tasklist[i].config.parameters[j].name!= "task_rename") 
+                    && (tasklist[i].config.parameters[j].name!= "foreground") 
+                    && (tasklist[i].config.parameters[j].name!= "task_period") 
+                    && (tasklist[i].config.parameters[j].name!= "task_timeout"))
+            {
+                task_manager_msgs::TaskParameter current_parameter;
+                current_parameter.name=tasklist[i].config.parameters[j].name;
+                current_parameter.description=tasklist[i].config.parameters[j].description;
+                current_parameter.type=tasklist[i].config.parameters[j].type;
+
+
+
+                std::ostringstream ostr;
+                if (current_parameter.type=="double")
                 {
-                    task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=tasklist[i].config.groups[g].parameters[j].name;
-                    current_parameter.description=tasklist[i].config.groups[g].parameters[j].description;
-                    current_parameter.type=tasklist[i].config.groups[g].parameters[j].type;
-#else
-#pragma message("Compiling for ROS Electric Turtle")
-                    for (unsigned int j = 0;j<tasklist[i].config.parameters.size();j++) {
-                        if ( (tasklist[i].config.parameters[j].name!= "task_rename") 
-                                && (tasklist[i].config.parameters[j].name!= "foreground") 
-                                && (tasklist[i].config.parameters[j].name!= "task_period") 
-                                && (tasklist[i].config.parameters[j].name!= "task_timeout"))
-                        {
-                            task_manager_msgs::TaskParameter current_parameter;
-                            current_parameter.name=tasklist[i].config.parameters[j].name;
-                            current_parameter.description=tasklist[i].config.parameters[j].description;
-                            current_parameter.type=tasklist[i].config.parameters[j].type;
+                    unsigned int k=0;
+                    while(tasklist[i].config.max.doubles[k].name != current_parameter.name)
+                    {
+                        k++;
+                    }
+
+                    //max
+                    ostr.str("");
+                    ostr << tasklist[i].config.max.doubles[k].value;
+                    current_parameter.max=ostr.str();
+                    ostr.str("");
+
+                    //min
+                    ostr << tasklist[i].config.min.doubles[k].value;
+                    current_parameter.min=ostr.str();
+                    ostr.str("");
+
+                    //default
+                    ostr << tasklist[i].config.dflt.doubles[k].value;
+                    current_parameter.dflt=ostr.str();
+                    ostr.str("");
+
+                }
+                else if (current_parameter.type=="bool")
+                {
+                    unsigned int k=0;
+                    while(tasklist[i].config.max.bools[k].name!=current_parameter.name)
+                    {
+                        k++;
+                    }
+
+                    //max
+                    if (tasklist[i].config.max.bools[k].value==1)
+                    {
+                        current_parameter.max="True";
+
+                    }
+                    else if (tasklist[i].config.max.bools[k].value==0)
+                    {	
+                        current_parameter.max="False";
+                    }
+
+                    //min
+                    if (tasklist[i].config.min.bools[k].value==1)
+                    {
+                        current_parameter.min="True";
+                    }
+                    else if (tasklist[i].config.min.bools[k].value==0)
+                    {	
+                        current_parameter.min="False";
+                    }
+
+                    //default
+                    if (tasklist[i].config.dflt.bools[k].value==1)
+                    {
+                        current_parameter.dflt="True";
+                    }
+                    else if (tasklist[i].config.dflt.bools[k].value==0)
+                    {	
+                        current_parameter.dflt="False";
+                    }
+
+                }
+                else if(current_parameter.type=="int")
+                {
+                    unsigned int k=0;
+                    while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
+                    {
+                        k++;
+                    }
+                    //max
+                    ostr.str("");
+                    ostr << tasklist[i].config.max.ints[k].value;
+                    current_parameter.max=ostr.str();
+                    ostr.str("");
+
+                    //min
+                    ostr << tasklist[i].config.min.ints[k].value;
+                    current_parameter.min=ostr.str();
+                    ostr.str("");
+
+                    //default
+                    ostr <<tasklist[i].config.dflt.ints[k].value;
+                    current_parameter.dflt=ostr.str();
+                    ostr.str("");
+                } 
+                else if (current_parameter.type=="str")
+                {
+                    unsigned int k=0;
+                    while(tasklist[i].config.max.strs[k].name!=current_parameter.name)
+                    {
+                        k++;
+                    }
+
+
+                    //max
+                    current_parameter.max=tasklist[i].config.max.strs[k].value;
+                    //min
+                    current_parameter.min=tasklist[i].config.min.strs[k].value;
+                    //default
+                    current_parameter.dflt=tasklist[i].config.dflt.strs[k].value;
+                }
+                else
+                {
+                    RCLCPP_DEBUG(node->get_logger(), "TYPE NOT LEGAL");
+                }
+                current_task.parameters.push_back(current_parameter);
+            }
+
+
+
+        }
+    }
+
+
+output.push_back(current_task);
+
+
+}
+
+void TaskScheduler::generateHistory(std::vector<task_manager_msgs::TaskHistory> &output) 
+{
+    std::ostringstream ostr;
+    for (unsigned i=0;i<history.size();i++)
+    {
+        task_manager_msgs::TaskHistory task;
+        task.tid=history[i].getid();
+        task.name=history[i].getname();
+        task.start_time=history[i].getstartTime();
+        task.end_time=history[i].getendTime();
+        task.status=history[i].getstatus();
+
+        //bool
+        for (unsigned int j = 0;j<history[i].getparams().bools.size();j++) 
+        {
+            if (history[i].getparams().bools[j].name!="foreground" && history[i].getparams().bools[j].name!="task_rename" && history[i].getparams().bools[j].name!="task_period" && history[i].getparams().bools[j].name!="task_period")
+            {
+                task_manager_msgs::TaskParameter current_parameter;
+                current_parameter.name=history[i].getparams().bools[j].name;
+                if (history[i].getparams().bools[j].value==1)
+                {
+                    current_parameter.value="True";
+                }
+                else
+                {
+                    current_parameter.value="False";
+                }
+                current_parameter.type="bool";
+                task.parameters.push_back(current_parameter);
+            }
+        }
+
+        //int
+        for (unsigned int j = 0;j<history[i].getparams().ints.size();j++) 
+        {
+            if (history[i].getparams().ints[j].name!="foreground" && history[i].getparams().ints[j].name!="task_rename" && history[i].getparams().ints[j].name!="task_period" && history[i].getparams().ints[j].name!="task_period")
+            {
+
+                task_manager_msgs::TaskParameter current_parameter;
+                current_parameter.name=history[i].getparams().ints[j].name;
+                ostr.str("");
+                ostr <<history[i].getparams().ints[j].value;
+                current_parameter.value=ostr.str();
+                ostr.str("");
+                task.parameters.push_back(current_parameter);
+
+            }
+        }
+
+        //strs
+        for (unsigned int j = 0;j<history[i].getparams().strs.size();j++) 
+        {
+            if (history[i].getparams().strs[j].name!="foreground" && history[i].getparams().strs[j].name!="task_rename" && history[i].getparams().strs[j].name!="task_period" && history[i].getparams().strs[j].name!="task_period")
+            {
+                task_manager_msgs::TaskParameter current_parameter;
+                current_parameter.name=history[i].getparams().strs[j].name;
+                current_parameter.value=history[i].getparams().strs[j].value;
+                current_parameter.type="str";
+                task.parameters.push_back(current_parameter);
+            }
+        }
+
+        //double
+        for (unsigned int j = 0;j<history[i].getparams().doubles.size();j++) 
+        {
+            if (history[i].getparams().doubles[j].name!="foreground" && history[i].getparams().doubles[j].name!="task_rename" && history[i].getparams().doubles[j].name!="task_period" && history[i].getparams().doubles[j].name!="task_period")
+            {
+
+                task_manager_msgs::TaskParameter current_parameter;
+                current_parameter.name=history[i].getparams().doubles[j].name;
+                ostr.str("");
+                ostr <<history[i].getparams().doubles[j].value;
+                current_parameter.value=ostr.str();
+                current_parameter.type="double";
+                task.parameters.push_back(current_parameter);
+            }
+        }
+
+        output.push_back(task);
+    }
+
+}
+
+void TaskScheduler::launchTaskSequence(std::vector<task_manager_msgs::TaskDescriptionLight> &tasks, int &id) 
+{
+    TaskDefinitionPtr st(new SequenceDef(tasks,this));
+    std::shared_ptr<ThreadParameters> tp(new ThreadParameters(statusPub, this, st, defaultPeriod ));
+    tp->foreground = false;
+    id=launchTask(tp);
+}
 #endif
 
-
-
-                            std::ostringstream ostr;
-                            if (current_parameter.type=="double")
-                            {
-                                unsigned int k=0;
-                                while(tasklist[i].config.max.doubles[k].name != current_parameter.name)
-                                {
-                                    k++;
-                                }
-
-                                //max
-                                ostr.str("");
-                                ostr << tasklist[i].config.max.doubles[k].value;
-                                current_parameter.max=ostr.str();
-                                ostr.str("");
-
-                                //min
-                                ostr << tasklist[i].config.min.doubles[k].value;
-                                current_parameter.min=ostr.str();
-                                ostr.str("");
-
-                                //default
-                                ostr << tasklist[i].config.dflt.doubles[k].value;
-                                current_parameter.dflt=ostr.str();
-                                ostr.str("");
-
-                            }
-                            else if (current_parameter.type=="bool")
-                            {
-                                unsigned int k=0;
-                                while(tasklist[i].config.max.bools[k].name!=current_parameter.name)
-                                {
-                                    k++;
-                                }
-
-                                //max
-                                if (tasklist[i].config.max.bools[k].value==1)
-                                {
-                                    current_parameter.max="True";
-
-                                }
-                                else if (tasklist[i].config.max.bools[k].value==0)
-                                {	
-                                    current_parameter.max="False";
-                                }
-
-                                //min
-                                if (tasklist[i].config.min.bools[k].value==1)
-                                {
-                                    current_parameter.min="True";
-                                }
-                                else if (tasklist[i].config.min.bools[k].value==0)
-                                {	
-                                    current_parameter.min="False";
-                                }
-
-                                //default
-                                if (tasklist[i].config.dflt.bools[k].value==1)
-                                {
-                                    current_parameter.dflt="True";
-                                }
-                                else if (tasklist[i].config.dflt.bools[k].value==0)
-                                {	
-                                    current_parameter.dflt="False";
-                                }
-
-                            }
-                            else if(current_parameter.type=="int")
-                            {
-                                unsigned int k=0;
-                                while(tasklist[i].config.max.ints[k].name!=current_parameter.name)
-                                {
-                                    k++;
-                                }
-                                //max
-                                ostr.str("");
-                                ostr << tasklist[i].config.max.ints[k].value;
-                                current_parameter.max=ostr.str();
-                                ostr.str("");
-
-                                //min
-                                ostr << tasklist[i].config.min.ints[k].value;
-                                current_parameter.min=ostr.str();
-                                ostr.str("");
-
-                                //default
-                                ostr <<tasklist[i].config.dflt.ints[k].value;
-                                current_parameter.dflt=ostr.str();
-                                ostr.str("");
-                            } 
-                            else if (current_parameter.type=="str")
-                            {
-                                unsigned int k=0;
-                                while(tasklist[i].config.max.strs[k].name!=current_parameter.name)
-                                {
-                                    k++;
-                                }
-
-
-                                //max
-                                current_parameter.max=tasklist[i].config.max.strs[k].value;
-                                //min
-                                current_parameter.min=tasklist[i].config.min.strs[k].value;
-                                //default
-                                current_parameter.dflt=tasklist[i].config.dflt.strs[k].value;
-                            }
-                            else
-                            {
-                                PRINTF(1,"TYPE NOT LEGAL");
-                            }
-                            current_task.parameters.push_back(current_parameter);
-                        }
-
-
-#if ROS_VERSION_MINIMUM(1, 8, 0)
-
-                    }
-                }
-#else
-            }
-#endif
-
-
-            output.push_back(current_task);
-
-
-
+int TaskScheduler::getStatus(unsigned int &taskid) {
+    TaskSet::const_iterator it;
+    for (it=runningThreads.begin();it!=runningThreads.end();it++) {
+        if (it->first==taskid) {
+            return it->second->getRosStatus().status;
         }
-
     }
+    for (it=zombieThreads.begin();it!=zombieThreads.end();it++) {
+        if (it->first==taskid) {
+            return it->second->getRosStatus().status;
+        }
+    }
+    return -1;
+}
 
-    void TaskScheduler::generateHistory(std::vector<task_manager_msgs::TaskHistory> &output) 
+int TaskScheduler::terminateTask(unsigned int &taskid)
+{
+    std::unique_lock<std::mutex> lock(scheduler_mutex);
+    TaskSet::iterator it;
+    for (it = runningThreads.begin();it!=runningThreads.end();it++) 
     {
-        std::ostringstream ostr;
-        for (unsigned i=0;i<history.size();i++)
+        // delete pointer and empty the list of running tasks
+        if (it->first==taskid)
         {
-            task_manager_msgs::TaskHistory task;
-            task.tid=history[i].getid();
-            task.name=history[i].getname();
-            task.start_time=history[i].getstartTime();
-            task.end_time=history[i].getendTime();
-            task.status=history[i].getstatus();
-
-            //bool
-            for (unsigned int j = 0;j<history[i].getparams().bools.size();j++) 
-            {
-                if (history[i].getparams().bools[j].name!="foreground" && history[i].getparams().bools[j].name!="task_rename" && history[i].getparams().bools[j].name!="task_period" && history[i].getparams().bools[j].name!="task_period")
-                {
-                    task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=history[i].getparams().bools[j].name;
-                    if (history[i].getparams().bools[j].value==1)
-                    {
-                        current_parameter.value="True";
-                    }
-                    else
-                    {
-                        current_parameter.value="False";
-                    }
-                    current_parameter.type="bool";
-                    task.parameters.push_back(current_parameter);
-                }
-            }
-
-            //int
-            for (unsigned int j = 0;j<history[i].getparams().ints.size();j++) 
-            {
-                if (history[i].getparams().ints[j].name!="foreground" && history[i].getparams().ints[j].name!="task_rename" && history[i].getparams().ints[j].name!="task_period" && history[i].getparams().ints[j].name!="task_period")
-                {
-
-                    task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=history[i].getparams().ints[j].name;
-                    ostr.str("");
-                    ostr <<history[i].getparams().ints[j].value;
-                    current_parameter.value=ostr.str();
-                    ostr.str("");
-                    task.parameters.push_back(current_parameter);
-
-                }
-            }
-
-            //strs
-            for (unsigned int j = 0;j<history[i].getparams().strs.size();j++) 
-            {
-                if (history[i].getparams().strs[j].name!="foreground" && history[i].getparams().strs[j].name!="task_rename" && history[i].getparams().strs[j].name!="task_period" && history[i].getparams().strs[j].name!="task_period")
-                {
-                    task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=history[i].getparams().strs[j].name;
-                    current_parameter.value=history[i].getparams().strs[j].value;
-                    current_parameter.type="str";
-                    task.parameters.push_back(current_parameter);
-                }
-            }
-
-            //double
-            for (unsigned int j = 0;j<history[i].getparams().doubles.size();j++) 
-            {
-                if (history[i].getparams().doubles[j].name!="foreground" && history[i].getparams().doubles[j].name!="task_rename" && history[i].getparams().doubles[j].name!="task_period" && history[i].getparams().doubles[j].name!="task_period")
-                {
-
-                    task_manager_msgs::TaskParameter current_parameter;
-                    current_parameter.name=history[i].getparams().doubles[j].name;
-                    ostr.str("");
-                    ostr <<history[i].getparams().doubles[j].value;
-                    current_parameter.value=ostr.str();
-                    current_parameter.type="double";
-                    task.parameters.push_back(current_parameter);
-                }
-            }
-
-            output.push_back(task);
+            lock.unlock();
+            terminateTask(it->second);
+            return 0;
         }
-
     }
+    return 0;
+}
 
-    void TaskScheduler::launchTaskSequence(std::vector<task_manager_msgs::TaskDescriptionLight> &tasks, int &id) 
-    {
-        TaskDefinitionPtr st(new SequenceDef(tasks,this));
-        boost::shared_ptr<ThreadParameters> tp(new ThreadParameters(statusPub, this, st, defaultPeriod ));
-        tp->foreground = false;
-        id=launchTask(tp);
-    }
+void TaskScheduler::keepAliveSequence()
+{
+    lastKeepAlive = now();
+}
 
-    int TaskScheduler::getstatus(unsigned int &taskid)
-    {
-        TaskSet::const_iterator it;
-        for (it=runningThreads.begin();it!=runningThreads.end();it++) 
-        {
-            if (it->first==taskid)
-            {
-                return it->second->getRosStatus().status;
-            }
-        }
-        for (it=zombieThreads.begin();it!=zombieThreads.end();it++) 
-        {
-            if (it->first==taskid)
-            {
-                return it->second->getRosStatus().status;
-            }
-        }
-        return -1;
-    }
-
-    int TaskScheduler::terminateTask(unsigned int &taskid)
-    {
-        boost::unique_lock<boost::mutex> lock(scheduler_mutex);
-        TaskSet::iterator it;
-        for (it = runningThreads.begin();it!=runningThreads.end();it++) 
-        {
-            // delete pointer and empty the list of running tasks
-            if (it->first==taskid)
-            {
-                lock.unlock();
-                terminateTask(it->second);
-                return 0;
-            }
-        }
-        return 0;
-    }
-
-    void TaskScheduler::keepAliveSequence()
-    {
-        lastKeepAlive = ros::Time::now();
-    }
-
-    ros::NodeHandle TaskScheduler::getNodeHandle()
-    {
-        return n;
-    }
 

@@ -40,16 +40,17 @@ include_directories(
 )
 
 add_library(task_manager_lib
-    # src/DynamicTask.cpp
-    # src/TaskClient.cpp
+    src/DynamicTask.cpp
     src/TaskDefinition.cpp
-    # src/TaskScheduler.cpp
-    # src/SequenceTask.cpp
+    src/TaskScheduler.cpp
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
+    # src/ServiceStorage.cpp
+    # The files below are not used in ROS2 version for now.
+    # src/SequenceTask.cpp
     # src/TaskServerInterface.cpp
     # src/TaskHistory.cpp
-    # src/ServiceStorage.cpp
+    # src/TaskClient.cpp
 )
 
 

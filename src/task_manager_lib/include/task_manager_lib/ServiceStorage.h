@@ -4,48 +4,73 @@
 #include <memory>
 #include <mutex>
 #include <map>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace task_manager_lib {
 
-    typedef std::shared_ptr<ros::ServiceClient> ServiceClientPtr;
+    typedef std::shared_ptr<rclcpp::ClientBase> ServiceClientPtr;
     typedef std::map<std::string,ServiceClientPtr> ServiceMap;
 
     class ServiceStorage {
         private:
 
-            ros::NodeHandle service_storage_nh;
+            std::shared_ptr<rclcpp::Node> node;
             ServiceMap serviceMap;
             mutable std::mutex serviceMapMtx;
 
 
         public:
-            ServiceStorage(ros::NodeHandle & nh) : service_storage_nh(nh) {}
+            ServiceStorage(std::shared_ptr<rclcpp::Node> & nh) : node(nh) {}
 
             bool hasService(const std::string & s) const {
                 const std::lock_guard<std::mutex> lock(serviceMapMtx);
                 return serviceMap.find(s) != serviceMap.end();
             }
 
-            ServiceClientPtr getService(const std::string & s);
+            template <class srv> 
+                rclcpp::Client<srv>::SharedPtr getService<(const std::string & s) {
+                    const std::lock_guard<std::mutex> lock(serviceMapMtx);
+                    ServiceMap::iterator it = serviceMap.find(s);
+                    if (it == serviceMap.end()) {
+                        return rclcpp::Client<srv>::SharedPtr();
+                    } else {
+                        rclcpp::Client<srv>::SharedPtr e =
+                            std::dynamic_pointer_cast<rclcpp::Client<srv>,rclcpp::ClientBase>(it->second);
+                        return e;
+                    }
+                }
+
 
             template <class srv>
-                ServiceClientPtr registerServiceClient(const std::string & s, bool replace=false) {
+                rclcpp::Client<srv>::SharedPtr registerServiceClient(const std::string & s, bool replace=false) {
                     const std::lock_guard<std::mutex> lock(serviceMapMtx);
                     ServiceMap::iterator it = serviceMap.find(s);
                     if (replace || (it == serviceMap.end())) {
-                        ServiceClientPtr clientp(new ros::ServiceClient);
-                        *clientp = service_storage_nh.serviceClient<srv>(s);
+                        rclcpp::Client<srv>::SharedPtr clientp = node->create_client<srv>(s);
                         serviceMap[s] = clientp;
                         return clientp;
                     } else {
-                        return it->second;
+                        rclcpp::Client<srv>::SharedPtr e =
+                            std::dynamic_pointer_cast<rclcpp::Client<srv>,rclcpp::ClientBase>(it->second);
+                        return e;
                     }
 
                 }
 
-            void registerServiceClient(const std::string & s, ServiceClientPtr client) ;
-            void registerServiceClient(ServiceClientPtr client) ;
+            template <class srv>
+                void registerServiceClient(const std::string & s, rclcpp::Client<srv>::SharedPtr client) {
+                    assert(client);
+                    const std::lock_guard<std::mutex> lock(serviceMapMtx);
+                    serviceMap[s]=client;
+                }
+
+            template <class srv>
+                void registerServiceClient(const std::string & s, rclcpp::Client<srv>::SharedPtr client) {
+                    assert(client);
+                    const std::lock_guard<std::mutex> lock(serviceMapMtx);
+                    serviceMap[client->get_service_name()]=client;
+                }
+            
 
     };
 
