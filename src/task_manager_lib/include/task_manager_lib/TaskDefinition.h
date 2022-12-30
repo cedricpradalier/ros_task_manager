@@ -5,10 +5,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/thread.hpp>
 
-#include <memory>
+#include <thread>
+#include <mutex>
 #include <string>
 #include <rclcpp/rclcpp.hpp>
 #include <task_manager_msgs/msg/task_status.hpp>
@@ -53,9 +52,9 @@ namespace task_manager_lib {
             // environment forever, so the lock is taken only for initialize and
             // terminate, but the user needs to organise his/her own locking as
             // appropriate, e.g for a reader or a writer
-            // boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
-            // boost::unique_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
-            boost::shared_mutex environment_mutex;
+            // boost::shared_lock<std::shared_mutex> guard(env_gen->environment_mutex);
+            // boost::unique_lock<std::shared_mutex> guard(env_gen->environment_mutex);
+            std::mutex environment_mutex;
         public:
             TaskEnvironment(const std::string & envNodeName) : rclcpp::Node(envNodeName) {}
             virtual ~TaskEnvironment() {}
@@ -748,7 +747,7 @@ namespace task_manager_lib {
 
                 template <class SPECIALIZED>
                     std::shared_ptr<SPECIALIZED> castDefinition() {
-                        std::shared_ptr<SPECIALIZED> d = boost::dynamic_pointer_cast<SPECIALIZED,TaskDefinitionBase>(definition);
+                        std::shared_ptr<SPECIALIZED> d = std::dynamic_pointer_cast<SPECIALIZED,TaskDefinitionBase>(definition);
                         assert(d);
                         return d;
                     }
