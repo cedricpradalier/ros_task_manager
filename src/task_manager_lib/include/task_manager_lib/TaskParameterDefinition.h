@@ -47,6 +47,10 @@ namespace task_manager_lib {
                 value = defaultValue;
             }
 
+            bool readOnly() const {
+                return descriptor.read_only;
+            }
+
             const rclcpp::ParameterValue & getValue() const {
                 return value;
             }

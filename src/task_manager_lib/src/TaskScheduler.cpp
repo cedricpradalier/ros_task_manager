@@ -443,7 +443,7 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
             return ;
         }
         tp->running = true;
-        RCLCPP_INFO(node->get_logger(), "Running %s task '%s' at period %f main %d timeout %f periodic %d",tp->foreground?"foreground":"background",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
+        RCLCPP_INFO(node->get_logger(), "Running %s task %d:'%s' at period %f main %d timeout %f periodic %d",tp->foreground?"foreground":"background",tp->task->getRuntimeId(),tp->task->getConfig()->getNameSpace().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
 
         if (tp->task->isPeriodic()) {
             rclcpp::Rate rate(1. / tp->period);

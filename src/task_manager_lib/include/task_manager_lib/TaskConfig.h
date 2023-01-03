@@ -52,6 +52,7 @@ namespace task_manager_lib {
 
 
             bool declareParameters(rclcpp::Node::SharedPtr node);
+            bool undeclareParameters(rclcpp::Node::SharedPtr node);
             void updateParameters(rclcpp::Node::SharedPtr node);
             void publishParameters(rclcpp::Node::SharedPtr node);
 

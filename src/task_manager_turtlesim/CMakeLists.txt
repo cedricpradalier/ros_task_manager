@@ -63,6 +63,21 @@ TARGET_LINK_LIBRARIES(turtlesim_TaskClear ${ALL_LIBS})
 ADD_LIBRARY( turtlesim_TaskSetPen SHARED tasks/TaskSetPen.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskSetPen ${ALL_LIBS})
 
+ADD_LIBRARY( turtlesim_TaskFail SHARED tasks/TaskFail.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskFail ${ALL_LIBS})
+
+ADD_LIBRARY( turtlesim_TaskGoTo SHARED tasks/TaskGoTo.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskGoTo ${ALL_LIBS})
+
+ADD_LIBRARY( turtlesim_TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskReachAngle ${ALL_LIBS})
+
+ADD_LIBRARY( turtlesim_TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForROI ${ALL_LIBS})
+
+ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${ALL_LIBS})
+
 install(TARGETS
   turtlesim_task_server
   DESTINATION lib/${PROJECT_NAME})
@@ -71,6 +86,11 @@ install(TARGETS
 install(TARGETS
     turtlesim_TaskClear
     turtlesim_TaskSetPen
+    turtlesim_TaskFail
+    turtlesim_TaskGoTo
+    turtlesim_TaskReachAngle
+    turtlesim_TaskWaitForROI
+    turtlesim_TaskWaitForButton
     DESTINATION lib)
 
 install(

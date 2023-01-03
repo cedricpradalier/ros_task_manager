@@ -15,6 +15,7 @@ namespace task_manager_turtlesim {
             define("on",true,"Activate pen",true); 
         }
     };
+
     class TaskSetPen : public TaskInstance<TaskSetPenConfig,TurtleSimEnv>
     {
         protected:

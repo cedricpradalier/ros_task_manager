@@ -1,13 +1,20 @@
 #ifndef TASK_FAIL_H
 #define TASK_FAIL_H
 
-#include "task_manager_lib/TaskDefinition.h"
+#include "task_manager_lib/TaskInstance.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
-#include "task_manager_turtlesim/TaskFailConfig.h"
 
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
+    struct TaskFailConfig : public TaskConfig {
+        TaskFailConfig() {
+            define("error_type",7,"Type of failure case to generate",  true);
+            define("iterations",0,"Number of iteration before failing",  false);
+        }
+    };
+
+
     class TaskFail : public TaskInstance<TaskFailConfig, TurtleSimEnv>
     {
         protected:
@@ -31,8 +38,7 @@ namespace task_manager_turtlesim {
                 Parent("Fail","Fail with a specified condition",true,env) {}
             virtual ~TaskFactoryFail() {};
 
-            virtual TaskIndicator configure(const TaskParameters & parameters);
     };
-};
+}
 
 #endif // TASK_FAIL_H

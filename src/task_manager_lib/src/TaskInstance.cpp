@@ -118,6 +118,7 @@ void TaskInstanceBase::doTerminate()
     } else {
         taskStatus = ti | task_manager_msgs::msg::TaskStatus::TASK_TERMINATED;
     }
+    cfg_gen->undeclareParameters(node);
 
 }
 

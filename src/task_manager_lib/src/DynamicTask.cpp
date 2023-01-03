@@ -31,7 +31,7 @@ DynamicTask::DynamicTask(const std::string & fname, TaskEnvironmentPtr env) :
 	}
     // Do not declare parameters. It has been done in the loaded task. The
     // dynamic task has no parameter of its own.
-    cfg_gen = task->cfg_gen;
+    // cfg_gen = task->cfg_gen;
 }
 
 DynamicTask::~DynamicTask()

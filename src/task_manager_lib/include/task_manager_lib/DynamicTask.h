@@ -51,10 +51,20 @@ namespace task_manager_lib {
             virtual void setName(const std::string & n) {task->setName(n);}
             virtual const std::string & getName() const {return task->getName();}
             virtual const std::string & getHelp() const {return task->getHelp();}
+            virtual void setHelp(const std::string & h) {task->setHelp(h);}
             virtual bool isPeriodic() const {return task->isPeriodic();}
             virtual void setTaskId(unsigned int id) {task->setTaskId(id);}
             virtual unsigned int getTaskId() {return task->getTaskId();}
 
+            virtual task_manager_msgs::msg::TaskDescription getDescription() const {
+                return task->getDescription();
+            }
+            virtual TaskEnvironmentPtr getEnvironment() {return task->getEnvironment();}
+            virtual TaskConfigPtr getConfig() {return task->getConfig();}
+            virtual TaskConfigConstPtr getConfig() const {return task->getConfig();}
+            virtual std::string getInstanceName() {
+                return task->getInstanceName();
+            }
 
     };
 

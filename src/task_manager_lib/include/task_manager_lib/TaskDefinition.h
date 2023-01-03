@@ -118,7 +118,7 @@ namespace task_manager_lib {
                 // fflush(stdout);
             }
 
-            std::string getInstanceName() {
+            virtual std::string getInstanceName() {
                 char counter[128];
                 sprintf(counter,"%08d",instanceCounter++);
                 return name + counter;
@@ -152,9 +152,9 @@ namespace task_manager_lib {
             // its own internal variables that can be run multiple time. 
             virtual TaskInstancePtr instantiate() = 0; 
 
-            TaskEnvironmentPtr getEnvironment() {return env_gen;}
-            TaskConfigPtr getConfig() {return cfg_gen;}
-            TaskConfigConstPtr getConfig() const {return cfg_gen;}
+            virtual TaskEnvironmentPtr getEnvironment() {return env_gen;}
+            virtual TaskConfigPtr getConfig() {return cfg_gen;}
+            virtual TaskConfigConstPtr getConfig() const {return cfg_gen;}
         public:
             // All the functions below are intended for the TaskScheduler.
             // Set the task id . Has to be virtual because it is overloaded by
@@ -169,7 +169,7 @@ namespace task_manager_lib {
             friend class DynamicTask;
 
             // Update the description string
-            void setHelp(const std::string & h) {help = h;}
+            virtual void setHelp(const std::string & h) {help = h;}
         protected:
             // Set of functions that must be implemented by any inheriting class
 

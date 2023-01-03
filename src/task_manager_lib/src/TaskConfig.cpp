@@ -6,37 +6,44 @@ using std::placeholders::_1;
 
 bool TaskConfig::declareParameters(rclcpp::Node::SharedPtr node) {
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," declaring %s",(ns+it->first).c_str());
-        node->declare_parameter(ns+it->first,it->second.getDefaultValue(),it->second.getDescription());
+        if (!it->second.readOnly()) {
+            node->declare_parameter(ns+it->first,it->second.getDefaultValue(),it->second.getDescription());
+        }
+    }
+    return true;
+}
+
+
+bool TaskConfig::undeclareParameters(rclcpp::Node::SharedPtr node) {
+    for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        if (!it->second.readOnly()) {
+            node->undeclare_parameter(ns+it->first);
+        }
     }
     return true;
 }
 
 
 void TaskConfig::updateParameters(rclcpp::Node::SharedPtr node) {
-    // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Updating parameters");
     for (TaskConfigMap::iterator it=definitions.begin();it!=definitions.end();it++) {
-        if (it->second.getDescription().read_only) {
+        if (it->second.readOnly()) {
             // This cannot be updated
             continue;
         }
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," loading param %s",(ns+it->first).c_str());
         if (!node->get_parameter(ns+it->first,it->second.getValue())) {
-            // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"   set to default");
             it->second.setDefaultValue();
         }
     }
-    // printConfig();
 }
 
 void TaskConfig::publishParameters(rclcpp::Node::SharedPtr node) {
-    // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Publishing parameters");
-    // printConfig();
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
+        if (it->second.readOnly()) {
+            // This cannot be updated
+            continue;
+        }
         rclcpp::Parameter p(ns+it->first,it->second.getValue());
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," publishing %s",p.get_name().c_str());
         node->set_parameter(p);
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," res %d %s",int(res.successful),res.reason.c_str());
     }
 }
 

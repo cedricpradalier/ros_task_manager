@@ -1,7 +1,6 @@
 #include <math.h>
 #include "TaskWaitForButton.h"
 #include "boost/algorithm/string.hpp"
-#include "task_manager_turtlesim/TaskWaitForButtonConfig.h"
 using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
@@ -9,15 +8,16 @@ using namespace boost::algorithm;
 
 TaskIndicator TaskWaitForButton::initialise()
 {
-    button_sub = env->getNodeHandle().subscribe("/buttons",10,&TaskWaitForButton::buttonCallback,this);
+    button_sub = node->create_subscription<std_msgs::msg::String>("/buttons",1,
+            std::bind(&TaskWaitForButton::buttonCallback,this,std::placeholders::_1));
     triggered = false;
     expected_string.clear();
     std::vector<std::string> splitted;
-    split( splitted, cfg.text, is_any_of("|"), token_compress_on );
+    split( splitted, cfg->get<std::string>("text"), is_any_of("|"), token_compress_on );
     for (unsigned int i=0;i<splitted.size();i++) {
         expected_string.insert(to_lower_copy(splitted[i]));
     }
-    ROS_INFO("%p: Waiting for button: '%s'",this,cfg.text.c_str());
+    RCLCPP_INFO(node->get_logger(),"%p: Waiting for button: '%s'",this,cfg->get<std::string>("text").c_str());
 	return TaskStatus::TASK_INITIALISED;
 }
 
@@ -30,4 +30,4 @@ TaskIndicator TaskWaitForButton::iterate()
 }
 
 
-DYNAMIC_TASK(TaskFactoryWaitForButton);
+DYNAMIC_TASK(TaskFactoryWaitForButton)
