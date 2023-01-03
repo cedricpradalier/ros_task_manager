@@ -12,7 +12,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -g -ggdb)
 endif()
 
 # find dependencies
@@ -22,6 +22,7 @@ find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(task_manager_msgs REQUIRED)
+find_package(Boost COMPONENTS thread REQUIRED)
 # find_package(dlopen REQUIRED)
 
 if(BUILD_TESTING)
@@ -37,14 +38,17 @@ endif()
 
 include_directories(
   include
+  ${Boost_INCLUDE_DIRS}
   ${rclcpp_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
   ${std_srvs_INCLUDE_DIRS}
   ${task_manager_msgs_INCLUDE_DIRS}
 )
 
-add_library(task_manager_lib
+add_library(task_manager_lib SHARED
     src/DynamicTask.cpp
+    src/TaskConfig.cpp
+    src/TaskInstance.cpp
     src/TaskDefinition.cpp
     src/TaskScheduler.cpp
     src/TaskIdleDefault.cpp
@@ -60,13 +64,26 @@ add_library(task_manager_lib
 
 
 
-target_link_libraries(task_manager_lib ${rclcpp_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(task_manager_lib ${rclcpp_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${Boost_THREAD_LIBRARIES} ${CMAKE_DL_LIBS})
  
+#ament_export_targets(task_manager_lib HAS_LIBRARY_TARGET) 
 
 install(TARGETS
   task_manager_lib
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib)
 
+install(
+  DIRECTORY include/task_manager_lib
+  DESTINATION include
+)
 
+ament_export_dependencies(
+    Boost
+    rclcpp
+    rcl_interfaces
+    task_manager_msgs
+)
+ament_export_include_directories(include)
+ament_export_libraries(task_manager_lib)
 
 ament_package()

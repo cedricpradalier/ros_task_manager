@@ -1,14 +1,14 @@
 #ifndef TASK_WAIT_DEFAULT_H
 #define TASK_WAIT_DEFAULT_H
 
-#include "task_manager_lib/TaskDefinition.h"
+#include "task_manager_lib/TaskInstance.h"
 
 namespace task_manager_lib {
 
     struct TaskWaitConfig : public TaskConfig {
-        TaskParameterDefinition duration;
-        TaskWaitConfig() :
-            duration(this,"duration",1.0,"How long to wait (s)",true) {}
+        TaskWaitConfig() {
+            define("duration",1.0,"How long to wait (s)",true); 
+        }
     };
 
     // Basic class to implement a short pause in a mission 

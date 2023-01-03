@@ -12,9 +12,9 @@ DynamicTask::DynamicTask(const std::string & fname, TaskEnvironmentPtr env) :
 	strncpy(fbuffer,filename.c_str(),1023);
 	fbuffer[1023] = 0;
 
-	handle = dlopen(fbuffer, RTLD_LAZY);
+	handle = dlopen(fbuffer, RTLD_NOW);
 	if (!handle) {
-        printf("dlopen: %s",dlerror());
+        RCLCPP_ERROR(node->get_logger(),"dlopen: %s",dlerror());
 		std::string error("dlopen returned NULL handle for file '");
 		error += filename + "'";
 		throw DLLoadError(error);

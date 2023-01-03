@@ -1,7 +1,7 @@
 #ifndef TASK_IDLE_DEFAULT_H
 #define TASK_IDLE_DEFAULT_H
 
-#include "task_manager_lib/TaskDefinition.h"
+#include "task_manager_lib/TaskInstance.h"
 
 namespace task_manager_lib {
 

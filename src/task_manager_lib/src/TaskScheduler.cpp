@@ -88,17 +88,17 @@ TaskScheduler::TaskScheduler(std::shared_ptr<rclcpp::Node> node, TaskDefinitionP
 
     RCLCPP_INFO(node->get_logger(), "Task scheduler created: debug %d",debug);
 
-    startTaskSrv = node->create_service<task_manager_msgs::srv::StartTask>("start_task", std::bind(&TaskScheduler::startTask,this,std::placeholders::_1,std::placeholders::_2));
-    stopTaskSrv = node->create_service<task_manager_msgs::srv::StopTask>("stop_task", std::bind(&TaskScheduler::stopTask,this,std::placeholders::_1,std::placeholders::_2));
-    getTaskListSrv = node->create_service<task_manager_msgs::srv::GetTaskList>("get_all_tasks", std::bind(&TaskScheduler::getTaskList,this,std::placeholders::_1,std::placeholders::_2));
-    getAllTaskStatusSrv = node->create_service<task_manager_msgs::srv::GetAllTaskStatus>("get_all_status", std::bind(&TaskScheduler::getAllTaskStatus,this,std::placeholders::_1,std::placeholders::_2));
+    startTaskSrv = node->create_service<task_manager_msgs::srv::StartTask>("~/start_task", std::bind(&TaskScheduler::startTask,this,std::placeholders::_1,std::placeholders::_2));
+    stopTaskSrv = node->create_service<task_manager_msgs::srv::StopTask>("~/stop_task", std::bind(&TaskScheduler::stopTask,this,std::placeholders::_1,std::placeholders::_2));
+    getTaskListSrv = node->create_service<task_manager_msgs::srv::GetTaskList>("~/get_all_tasks", std::bind(&TaskScheduler::getTaskList,this,std::placeholders::_1,std::placeholders::_2));
+    getAllTaskStatusSrv = node->create_service<task_manager_msgs::srv::GetAllTaskStatus>("~/get_all_status", std::bind(&TaskScheduler::getAllTaskStatus,this,std::placeholders::_1,std::placeholders::_2));
 #if 0
     getTaskListLightSrv =nh.advertiseService("get_all_tasks_light", &TaskScheduler::getTaskListLight,this);
     getHistorySrv = nh.advertiseService("get_history", &TaskScheduler::getHistory,this);
     executeSequenceTasksSrv=nh.advertiseService("execute_sequence", &TaskScheduler::executeTaskSequence ,this);
 #endif
-    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("status",5);
-    keepAliveSub = node->create_subscription<std_msgs::msg::Header>("keep_alive",1,std::bind(&TaskScheduler::keepAliveCallback,this,std::placeholders::_1));
+    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("~/status",5);
+    keepAliveSub = node->create_subscription<std_msgs::msg::Header>("~/keep_alive",1,std::bind(&TaskScheduler::keepAliveCallback,this,std::placeholders::_1));
     lastKeepAlive = now();
 }
 
@@ -136,6 +136,7 @@ bool TaskScheduler::startTask(const std::shared_ptr<task_manager_msgs::srv::Star
         const std::shared_ptr<task_manager_msgs::srv::StartTask::Response> res )
 {
     lastKeepAlive = now();
+    if (debug>1) RCLCPP_INFO(node->get_logger(),"Start task request %d arguments",int(req->config.size()));
     TaskId id = launchTask(req->name,req->config);
     res->id = id;
     return true;
@@ -206,7 +207,7 @@ int TaskScheduler::terminateAllTasks()
 {
     TaskSet copy = runningThreads;
     TaskSet::iterator it;
-    RCLCPP_DEBUG(node->get_logger(), "Terminating all tasks");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Terminating all tasks");
     for (it = copy.begin();it!=copy.end();it++) {
         // delete pointer and empty the list of running tasks
         terminateTask(it->second);
@@ -218,11 +219,12 @@ int TaskScheduler::terminateAllTasks()
 
 void TaskScheduler::addTask(TaskDefinitionPtr td) 
 {
-    RCLCPP_DEBUG(node->get_logger(), "Adding task %s",td->getName().c_str());
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Adding task %s",td->getName().c_str());
     TaskDirectory::const_iterator tit = tasks.find(td->getName());
     if (tit != tasks.end()) {
         RCLCPP_WARN(node->get_logger(), "Warning: overwriting task '%s'",td->getName().c_str());
     }
+    td->setTaskId(tasks.size());
     tasks.insert(std::pair< std::string,TaskDefinitionPtr >(td->getName(),td));
 }
 
@@ -259,7 +261,7 @@ void TaskScheduler::loadAllTasks(const std::string & dirname,
         perror("scandir");
     else {
         while(n--) {
-	    RCLCPP_DEBUG(node->get_logger(), "Scandir: %s / %s",dirname.c_str(),namelist[n]->d_name);
+	    if (debug>1) RCLCPP_INFO(node->get_logger(), "Scandir: %s / %s",dirname.c_str(),namelist[n]->d_name);
             std::string fname = dirname + "/" + namelist[n]->d_name;
             loadTask(fname,env);
             free(namelist[n]);
@@ -302,16 +304,16 @@ TaskScheduler::TaskId TaskScheduler::launchIdleTask()
     }
 
     // Finally create the thread responsible for running the task
-    RCLCPP_DEBUG(node->get_logger(), "lit:Locking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "lit:Locking");
     {
         std::unique_lock<std::mutex> lock(scheduler_mutex);
-        RCLCPP_DEBUG(node->get_logger(), "lit:Locked");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lit:Locked");
         mainThread = std::shared_ptr<ThreadParameters>(new ThreadParameters(statusPub, this, idle, period));
         mainThread->foreground = true;
         runningThreads[mainThread->tpid] = mainThread;
         if (debug>=3) printTaskSet("After launch idle",runningThreads);
     }
-    RCLCPP_DEBUG(node->get_logger(), "lit:Unlocked");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "lit:Unlocked");
 
     mainThread->tid = std::shared_ptr<boost::thread>(new boost::thread(&TaskScheduler::runTask,this,mainThread));
 
@@ -322,14 +324,14 @@ TaskScheduler::TaskId TaskScheduler::launchTask(std::shared_ptr<ThreadParameters
 {
 
     if (tp->foreground) {
-        RCLCPP_DEBUG(node->get_logger(), "lt:terminate mainThread %s",mainThread->task->getName().c_str());
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:terminate mainThread %s",mainThread->task->getName().c_str());
         terminateTask(mainThread);
     }
 
-    RCLCPP_DEBUG(node->get_logger(), "lt:Locking (param)");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Locking (param)");
     {
         std::unique_lock<std::mutex> lock(scheduler_mutex);
-        RCLCPP_DEBUG(node->get_logger(), "lt:Locked");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Locked");
 
         if (tp->foreground) {
             mainThread = tp;
@@ -337,7 +339,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(std::shared_ptr<ThreadParameters
         runningThreads[tp->tpid] = tp;
         if (debug>=3) printTaskSet("After launch",runningThreads);
     }
-    RCLCPP_DEBUG(node->get_logger(), "lt:Unlocked (param)");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Unlocked (param)");
 
     std::unique_lock<std::mutex> lock(tp->task_mutex);
     try {
@@ -368,11 +370,14 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
         RCLCPP_ERROR(node->get_logger(), "Impossible to find task '%s'",taskname.c_str());
         return -1;
     }
-    TaskConfig cfg;
-    cfg.loadConfig(tp);
+    // Get a config copy
+    TaskConfig cfg = *(tdit->second->getConfig());
+    if (debug>1) RCLCPP_INFO(node->get_logger(),"Loaded task paramter with %d arguments",int(tp.size()));
+    cfg.loadConfig(tp,"");
+    if (debug>1) cfg.printConfig();
     // See if some runtime period has been defined in the parameters
-    period = cfg.task_period.get<double>();
-    foreground = cfg.foreground.get<bool>();
+    period = cfg.get<double>("task_period");
+    foreground = cfg.get<bool>("foreground");
 
     // Finally create the thread responsible for running the task
     std::shared_ptr<ThreadParameters> tparam =
@@ -381,18 +386,18 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     tparam->foreground = foreground;
     tparam->running = false;
 
-    RCLCPP_DEBUG(node->get_logger(), "lt:Locking (name)");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Locking (name)");
     {
         std::unique_lock<std::mutex> lock(tparam->task_mutex);
-        RCLCPP_DEBUG(node->get_logger(), "lt:Locked");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Locked");
 
         enqueueAction(START_TASK,tparam);
 
-        RCLCPP_DEBUG(node->get_logger(), "lt:Wait condition");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Wait condition");
         tparam->task_condition.wait(lock);
-        RCLCPP_DEBUG(node->get_logger(), "lt:Locked");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Locked");
     }
-    RCLCPP_DEBUG(node->get_logger(), "lt:Unlocked (name)");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Unlocked (name)");
 
     return tparam->tpid;
 }
@@ -414,12 +419,12 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
 {
     try {
         double tstart = now().seconds();
-        RCLCPP_DEBUG(node->get_logger(), "lt:Signaling and unlocking");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Signaling and unlocking");
         {
             std::unique_lock<std::mutex> lock(tp->task_mutex);
             tp->task_condition.notify_all();
         }
-        RCLCPP_DEBUG(node->get_logger(), "lt:Unlocked");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:Unlocked");
         tp->updateStatus(now());
 
         tp->running = true;
@@ -438,11 +443,11 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
             return ;
         }
         tp->running = true;
-        RCLCPP_INFO(node->get_logger(), "Running task '%s' at period %f main %d timeout %f periodic %d",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
+        RCLCPP_INFO(node->get_logger(), "Running %s task '%s' at period %f main %d timeout %f periodic %d",tp->foreground?"foreground":"background",tp->task->getName().c_str(),tp->period,(tp==mainThread),tp->task->getTimeout(),tp->task->isPeriodic());
 
         if (tp->task->isPeriodic()) {
             rclcpp::Rate rate(1. / tp->period);
-            RCLCPP_DEBUG(node->get_logger(), "Initialisation done");
+            if (debug>1) RCLCPP_INFO(node->get_logger(), "Initialisation done");
             while (1) {
                 double t0 = now().seconds();
                 if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.seconds() > 1.0)) {
@@ -528,12 +533,12 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
 void TaskScheduler::terminateTask(std::shared_ptr<ThreadParameters> tp)
 {
     if (!tp) return;
-    RCLCPP_DEBUG(node->get_logger(), "Terminating thread %s",tp->task->getName().c_str());
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Terminating thread %s",tp->task->getName().c_str());
     tp->tid->interrupt();
     tp->tid->join();
     tp->running = false;
 
-    RCLCPP_DEBUG(node->get_logger(), "Thread cancelled");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Thread cancelled");
     return;
 }
 
@@ -552,9 +557,9 @@ void TaskScheduler::printTaskSet(const std::string & name, const TaskScheduler::
 void TaskScheduler::cleanupTask(std::shared_ptr<ThreadParameters> tp)
 {
     if (tp == NULL) return ;
-    RCLCPP_DEBUG(node->get_logger(), "Cleaning up task %d:%s",tp->tpid,tp->task->getName().c_str());
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Cleaning up task %d:%s (%s)",tp->tpid,tp->task->getName().c_str(),tp->foreground?"foreground":"background");
     tp->task->doTerminate();
-    RCLCPP_DEBUG(node->get_logger(),  "Task '%s' terminated",tp->task->getName().c_str());
+    if (debug>1) RCLCPP_INFO(node->get_logger(),  "Task '%s' terminated",tp->task->getName().c_str());
     tp->status |= TaskStatus::TASK_TERMINATED;
     tp->statusTime = now();
     tp->statusString = "terminated";
@@ -573,7 +578,10 @@ void TaskScheduler::cleanupTask(std::shared_ptr<ThreadParameters> tp)
     if (tp->foreground) {
         mainThread.reset();
         if (!tp->task->isAnInstanceOf(idle)) {
+            // RCLCPP_INFO(node->get_logger(),  "Back to idle");
             enqueueAction(now()+rclcpp::Duration(IDLE_TIMEOUT),CONDITIONALLY_IDLE,tp);
+        } else {
+            // RCLCPP_INFO(node->get_logger(),  "Terminated foreground task (%d) that is not idle (%d). Weird...",int(tp->task->getDefinition()->getTaskId()), int(idle->getTaskId()));
         }
     }
     enqueueAction(now()+rclcpp::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
@@ -637,9 +645,9 @@ void TaskScheduler::printTaskDirectory(bool with_ros) const
 
 void TaskScheduler::removeConditionalIdle()
 {
-    RCLCPP_DEBUG(node->get_logger(), "rci:Locking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "rci:Locking");
     std::unique_lock<std::mutex> lock(aqMutex);
-    RCLCPP_DEBUG(node->get_logger(), "rci:Locked");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "rci:Locked");
 
     ActionQueue::iterator it = actionQueue.begin();
     while (it != actionQueue.end()) {
@@ -652,9 +660,9 @@ void TaskScheduler::removeConditionalIdle()
         }
     }
 
-    RCLCPP_DEBUG(node->get_logger(), "rci:Signalling");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "rci:Signalling");
     aqCond.notify_all();
-    RCLCPP_DEBUG(node->get_logger(), "rci:Unlocked");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "rci:Unlocked");
 }
 
 TaskScheduler::ThreadAction TaskScheduler::getNextAction()
@@ -663,15 +671,15 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
     rclcpp::Time t;
     ThreadAction ta;
     ActionQueue::iterator it;
-    RCLCPP_DEBUG(node->get_logger(), "gna:Locking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Locking");
     std::unique_lock<std::mutex> lock(aqMutex);
-    RCLCPP_DEBUG(node->get_logger(), "gna:Locked");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Locked");
     try {
         // TODO: this must get the next action in time
         if (actionQueue.empty()) {
-            RCLCPP_DEBUG(node->get_logger(), "gna:Cond Wait");
+            if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Cond Wait");
             aqCond.wait(lock);
-            RCLCPP_DEBUG(node->get_logger(), "gna:Locked");
+            if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Locked");
         }
         while (1) {
             t = now();
@@ -681,20 +689,20 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
                 if (it->first <= t.seconds()) {
                     ta = it->second;
                     actionQueue.erase(it);
-                    RCLCPP_DEBUG(node->get_logger(), "Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
+                    if (debug>1) RCLCPP_INFO(node->get_logger(), "Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
                             ta.tp?(ta.tp->task->getName().c_str()):"none");
                 } else {
                     // wait for the right time or another action to be inserted
-                    RCLCPP_DEBUG(node->get_logger(), "gna:Cond TWait");
+                    if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Cond TWait");
                     int dtimeout((it->first-t.seconds())*1000);
                     aqCond.wait_for(lock,dtimeout*1ms);
-                    RCLCPP_DEBUG(node->get_logger(), "gna:Locked");
+                    if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Locked");
                     continue;
                 }
             } else {
                 ta = it->second;
                 actionQueue.erase(it);
-                RCLCPP_DEBUG(node->get_logger(), "Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "Dequeueing action %.3f %s -- %s",it->first,actionString(ta.type),
                         ta.tp?(ta.tp->task->getName().c_str()):"none");
             }
             break;
@@ -703,45 +711,45 @@ TaskScheduler::ThreadAction TaskScheduler::getNextAction()
         ta.type = WAIT_CANCELLED;
         ta.tp.reset();
     }
-    RCLCPP_DEBUG(node->get_logger(), "gna:Unlocking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "gna:Unlocking");
     return ta;
 }
 
 void TaskScheduler::enqueueAction(ActionType type,std::shared_ptr<ThreadParameters> tp)
 {
     ThreadAction ta;
-    RCLCPP_DEBUG(node->get_logger(), "ea:Locking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Locking");
     std::unique_lock<std::mutex> lock(aqMutex);
-    RCLCPP_DEBUG(node->get_logger(), "ea:Locked");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Locked");
     // if (!runScheduler) return;
     double when = now().seconds();
-    RCLCPP_DEBUG(node->get_logger(), "Enqueueing action %.3f %s -- %s",when,actionString(type),
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Enqueueing action %.3f %s -- %s",when,actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
     ta.tp = tp;
     actionQueue[when] = ta;
-    RCLCPP_DEBUG(node->get_logger(), "ea:Signalling");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Signalling");
     aqCond.notify_all();
-    RCLCPP_DEBUG(node->get_logger(), "ea:Unlocking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Unlocking");
 }
 
 void TaskScheduler::enqueueAction(const rclcpp::Time & when,  ActionType type,std::shared_ptr<ThreadParameters> tp)
 {
     ThreadAction ta;
-    RCLCPP_DEBUG(node->get_logger(), "ea:Locking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Locking");
     std::unique_lock<std::mutex> lock(aqMutex);
-    RCLCPP_DEBUG(node->get_logger(), "ea:Locked");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Locked");
     // if (!runScheduler) return;
-    RCLCPP_DEBUG(node->get_logger(), "Enqueing action %.3f %s -- %s",when.seconds(),actionString(type),
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Enqueing action %.3f %s -- %s",when.seconds(),actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
     ta.tp = tp;
     actionQueue[when.seconds()] = ta;
-    RCLCPP_DEBUG(node->get_logger(), "ea:Signalling");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Signalling");
     aqCond.notify_all();
-    RCLCPP_DEBUG(node->get_logger(), "ea:Unlocking");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Unlocking");
 }
 
 const char *TaskScheduler::actionString(ActionType at)
@@ -776,30 +784,30 @@ int TaskScheduler::runSchedulerLoop()
     // Default:
     // pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
     while (1) {
-        RCLCPP_DEBUG(node->get_logger(), "Waiting next action (%d)",(int)(actionQueue.size()));
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "Waiting next action (%d)",(int)(actionQueue.size()));
         if (!runScheduler && actionQueue.empty()) {
             break;
         }
 
         ThreadAction ta = getNextAction();
-        RCLCPP_DEBUG(node->get_logger(), "%.3f: got action %s %s",now().seconds(),actionString(ta.type),
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "%.3f: got action %s %s",now().seconds(),actionString(ta.type),
                 ta.tp?(ta.tp->task->getName().c_str()):"none");
-        RCLCPP_DEBUG(node->get_logger(), "rsl:Locking");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "rsl:Locking");
         switch (ta.type) {
             case START_IDLE_TASK:
-                RCLCPP_DEBUG(node->get_logger(), "START_IDLE_TASK");
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "START_IDLE_TASK");
                 launchIdleTask();
                 break;
             case START_TASK:
-                RCLCPP_DEBUG(node->get_logger(), "START_TASK %s",ta.tp->task->getName().c_str());
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "START_TASK %s",ta.tp->task->getName().c_str());
                 launchTask(ta.tp);
                 break;
             case DELETE_TASK:
-                RCLCPP_DEBUG(node->get_logger(), "DELETE_TASK %s",ta.tp->task->getName().c_str());
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "DELETE_TASK %s",ta.tp->task->getName().c_str());
                 deleteTask(ta.tp);
                 break;
             case CONDITIONALLY_IDLE:
-                RCLCPP_DEBUG(node->get_logger(), "CONDITIONALLY_IDLE");
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "CONDITIONALLY_IDLE");
                 if ((mainThread==NULL) && runScheduler) {
                     // no new task has been created yet, and only this function
                     // can trigger new task creation
@@ -807,13 +815,13 @@ int TaskScheduler::runSchedulerLoop()
                 }
                 break;
             case WAIT_CANCELLED:
-                RCLCPP_DEBUG(node->get_logger(), "WAIT_CANCELLED");
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "WAIT_CANCELLED");
                 break;
             case NO_ACTION:
-                RCLCPP_DEBUG(node->get_logger(), "NO_ACTION");
+                if (debug>1) RCLCPP_INFO(node->get_logger(), "NO_ACTION");
                 break;
         }
-        RCLCPP_DEBUG(node->get_logger(), "rsl:Unlocked");
+        if (debug>1) RCLCPP_INFO(node->get_logger(), "rsl:Unlocked");
     }
     return 0;
 }
@@ -829,16 +837,16 @@ int TaskScheduler::startScheduler()
 
 int TaskScheduler::stopScheduler()
 {
-    RCLCPP_DEBUG(node->get_logger(), "Stopping scheduler (%d)",runScheduler);
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Stopping scheduler (%d)",runScheduler);
     if (!runScheduler) return 0;
     runScheduler = false;
     enqueueAction(WAIT_CANCELLED,std::shared_ptr<ThreadParameters>());
     aqid.join();
-    RCLCPP_DEBUG(node->get_logger(), "Cleaning-up action queue (%d)",(int)(actionQueue.size()));
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Cleaning-up action queue (%d)",(int)(actionQueue.size()));
 
     std::unique_lock<std::mutex> lock(aqMutex);
     actionQueue.clear();
-    RCLCPP_DEBUG(node->get_logger(), "Scheduler stopped");
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Scheduler stopped");
     return 0;
 }
 
@@ -1001,7 +1009,7 @@ void TaskScheduler::generateTaskListLight(std::vector<task_manager_msgs::TaskDes
                 }
                 else
                 {
-                    RCLCPP_DEBUG(node->get_logger(), "TYPE NOT LEGAL");
+                    if (debug>1) RCLCPP_INFO(node->get_logger(), "TYPE NOT LEGAL");
                 }
                 current_task.parameters.push_back(current_parameter);
             }

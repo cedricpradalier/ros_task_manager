@@ -4,6 +4,7 @@ using namespace task_manager_lib;
 
 TaskIndicator TaskIdleDefault::iterate()
 {
+    // RCLCPP_INFO(node->get_logger(),"Idling...");
 	return TaskStatus::TASK_RUNNING;
 }
 

@@ -1,7 +1,7 @@
 #ifndef TASK_SETPEN_H
 #define TASK_SETPEN_H
 
-#include "task_manager_lib/TaskDefinition.h"
+#include "task_manager_lib/TaskInstance.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 using namespace task_manager_lib;
 

@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 
+#include "task_manager_lib/TaskInstance.h"
 #include "task_manager_lib/TaskDefinition.h"
 
 #include <rclcpp/rclcpp.hpp>
