@@ -3,42 +3,43 @@
 
 using namespace task_manager_turtlesim;
 
-TurtleSimEnv::TurtleSimEnv(ros::NodeHandle & n, unsigned int id) : task_manager_lib::TaskEnvironment(n),
+TurtleSimEnv::TurtleSimEnv(std::shared_ptr<rclcpp::Node> n, unsigned int id) : task_manager_lib::TaskEnvironment(n),
     turtleId(id), paused(false)
 {
     char buffer[128]; sprintf(buffer,"/turtle%d",id);
     std::string tname(buffer);
-    clearClt = nh.serviceClient<std_srvs::Empty>("/clear");
-    setPenClt = nh.serviceClient<turtlesim::SetPen>(tname+"/set_pen");
+    clearClt = node->create_client<std_srvs::srv::Empty>("/clear");
+    setPenClt = node->create_client<turtlesim::srv::SetPen>(tname+"/set_pen");
 
-    buttonsSub = nh.subscribe("/buttons",10,&TurtleSimEnv::buttonCallback,this);
-    poseSub = nh.subscribe(tname+"/pose",1,&TurtleSimEnv::poseCallback,this);
-#if ROS_VERSION_MINIMUM(1, 10, 0) 
-    velPub = nh.advertise<geometry_msgs::Twist>(tname+"/cmd_vel",1);
-#else
-    velPub = nh.advertise<turtlesim::Velocity>(tname+"/command_velocity",1);
-#endif
+    buttonsSub = node->create_subscription<std_msgs::msg::String>("/buttons",1,std::bind(&TurtleSimEnv::buttonCallback,this,std::placeholders::_1));
+    poseSub = node->create_subscription<turtlesim::msg::Pose>(tname+"/pose",1,std::bind(&TurtleSimEnv::poseCallback,this,std::placeholders::_1));
+    velPub = node->create_publisher<geometry_msgs::msg::Twist>(tname+"/cmd_vel",1);
 }
 
-void TurtleSimEnv::setPen(bool on, unsigned int r, unsigned int g, unsigned int b, unsigned int width)
+bool TurtleSimEnv::isSetPenAvailable() {
+    return setPenClt->service_is_ready();
+}
+   
+rclcpp::Client<turtlesim::srv::SetPen>::SharedFuture TurtleSimEnv::setPenAsync(bool on, unsigned int r, unsigned int g, unsigned int b, unsigned int width)
 {
-    turtlesim::SetPen setpen;
-    setpen.request.r = r;
-    setpen.request.g = g;
-    setpen.request.b = b;
-    setpen.request.off = !on;
-    setpen.request.width = width;
-    if (!setPenClt.call(setpen)) {
-        ROS_ERROR("Failed to call service set_pen");
-    }
+    auto request = std::make_shared<turtlesim::srv::SetPen::Request>();
+    request->r = r;
+    request->g = g;
+    request->b = b;
+    request->off = !on;
+    request->width = width;
+
+    return setPenClt->async_send_request(request);
 }
 
-void TurtleSimEnv::clear()
+bool TurtleSimEnv::isClearAvailable() {
+    return clearClt->service_is_ready();
+}
+
+rclcpp::Client<std_srvs::srv::Empty>::SharedFuture TurtleSimEnv::clearAsync()
 {
-    std_srvs::Empty nothing;
-    if (!clearClt.call(nothing)) {
-        ROS_ERROR("Failed to call service clear");
-    }
+    auto request = std::make_shared<std_srvs::srv::Empty::Request>();
+    return clearClt->async_send_request(request);
 }
 
 #ifdef TEST_ACTION_CLIENT

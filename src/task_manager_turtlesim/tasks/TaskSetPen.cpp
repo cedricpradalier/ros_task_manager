@@ -1,16 +1,43 @@
 #include <math.h>
 #include "TaskSetPen.h"
-#include "task_manager_turtlesim/TaskSetPenConfig.h"
 using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-TaskIndicator TaskSetPen::iterate()
+TaskIndicator TaskSetPen::initialise()
 {
-    ROS_INFO("Set pen to %d %d %d %d %d",cfg.on,cfg.r,cfg.g,cfg.b,cfg.width);
-    env->setPen(cfg.on,cfg.r,cfg.g,cfg.b,cfg.width);
-    ros::Duration(cfg.artificial_delay).sleep();
-    return TaskStatus::TASK_COMPLETED;
+    state = WAITING_FOR_CLIENT;
+    return TaskStatus::TASK_INITIALISED;
 }
 
-DYNAMIC_TASK(TaskFactorySetPen);
+TaskIndicator TaskSetPen::iterate()
+{
+    RCLCPP_INFO(node->get_logger(),"Set pen to %d %d %d %d %d",cfg->get<bool>("on"),
+                    cfg->get<int>("r"),cfg->get<int>("g"),cfg->get<int>("b"),cfg->get<int>("width"));
+    switch (state) {
+        case WAITING_FOR_CLIENT:
+            if (!env->isSetPenAvailable()) {
+                RCLCPP_INFO(node->get_logger(),"TaskSetPen: Waiting for Service");
+                break;
+            }
+            future = env->setPenAsync(cfg->get<bool>("on"),
+                    cfg->get<int>("r"),cfg->get<int>("g"),cfg->get<int>("b"),cfg->get<int>("width"));
+            state = WAITING_FOR_FUTURE;
+            // fallthrough
+        case WAITING_FOR_FUTURE:
+            if (!future.valid()) {
+                RCLCPP_ERROR(node->get_logger(),"TaskSetPen: No Future");
+                return TaskStatus::TASK_FAILED;
+            }
+            RCLCPP_INFO(node->get_logger(),"TaskSetPen: Waiting for future");
+            if (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                RCLCPP_INFO(node->get_logger(),"TaskSetPen: received future");
+                return TaskStatus::TASK_COMPLETED;
+            }
+            RCLCPP_INFO(node->get_logger(),"TaskSetPen: Running");
+            break;
+    }
+    return TaskStatus::TASK_RUNNING;
+}
+
+DYNAMIC_TASK(TaskFactorySetPen)

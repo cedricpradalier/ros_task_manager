@@ -19,12 +19,15 @@ class TaskServer : public TaskServerBase {
 
 };
 
+
+
 int main(int argc, char *argv[])
 {
-    ros::init(argc,argv,"turtlesim_tasks");//init ros
-    ros::NodeHandle nh("~");
-    TaskEnvironmentPtr env(new TurtleSimEnv(nh,1));
+    rclcpp::init(argc,argv);//init ros
+    std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("turtlesim_tasks");
+    TaskEnvironmentPtr env(new TurtleSimEnv(node,1));
     TaskServer ts(env);
-    ros::spin();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
     return 0;
 }

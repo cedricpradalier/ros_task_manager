@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
+
 <launch>
-    <include file="$(find task_manager_turtlesim)/launch/button_server2.launch"/>
-    <node name="turtlesim" pkg="turtlesim" type="turtlesim_node"  />
-    <node name="turtlesim_tasks" pkg="task_manager_turtlesim" type="turtlesim_task_server"  output="screen">
-        <param name="lib_path" value="$(find task_manager_turtlesim)/tasks"/>
+    <node name="turtlesim" pkg="turtlesim" exec="turtlesim_node"  />
+    <node name="turtlesim_tasks" pkg="task_manager_turtlesim" exec="turtlesim_task_server" args="--log-level debug">
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim/lib"/>
     </node>
 </launch>

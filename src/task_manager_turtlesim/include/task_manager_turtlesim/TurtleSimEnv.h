@@ -1,23 +1,16 @@
 #ifndef TURTLE_SIM_ENV_H
 #define TURTLE_SIM_ENV_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include "task_manager_lib/TaskDefinition.h"
-#include "std_srvs/Empty.h"
-#include "turtlesim/SetPen.h"
-#if ROS_VERSION_MINIMUM(1, 10, 0) 
-// Hydro
-#include "geometry_msgs/Twist.h"
-#else
-// Groovy and earlier code
-#include "turtlesim/Velocity.h"
-#endif
-#include "turtlesim/Pose.h"
+#include "std_srvs//srv/empty.hpp"
+#include "turtlesim/srv/set_pen.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+#include "turtlesim/msg/pose.hpp"
 #include "boost/algorithm/string.hpp"
-#include "std_msgs/String.h"
-#include "task_manager_turtlesim/FollowPathPL.h"
+#include "std_msgs/msg/string.hpp"
 
-#define TEST_ACTION_CLIENT
+// #define TEST_ACTION_CLIENT
 #ifdef TEST_ACTION_CLIENT
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/simple_client_goal_state.h>
@@ -30,28 +23,29 @@ namespace task_manager_turtlesim {
     {
         protected:
             unsigned int turtleId;
-            ros::Subscriber buttonsSub;
-            ros::Subscriber poseSub;
-            ros::Publisher velPub;
-            ros::ServiceClient setPenClt;
-            ros::ServiceClient clearClt;
+            rclcpp::Subscription<std_msgs::msg::String>::SharedPtr buttonsSub;
+            rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr poseSub;
+            rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr velPub;
+            rclcpp::Client<turtlesim::srv::SetPen>::SharedPtr setPenClt;
+            rclcpp::Client<std_srvs::srv::Empty>::SharedPtr clearClt;
             bool paused;
 
-            void buttonCallback(const std_msgs::String::ConstPtr& msg) {
+            void buttonCallback(const std_msgs::msg::String::SharedPtr msg) {
                 if (boost::algorithm::to_lower_copy(msg->data) == "pause") {
                     paused = !paused;
                     if (paused) {
-                        ROS_INFO("Mission paused");
+                        RCLCPP_INFO(this->getNode()->get_logger(), "Mission paused");
                     } else {
-                        ROS_INFO("Mission resumed");
+                        RCLCPP_INFO(this->getNode()->get_logger(), "Mission resumed");
                     }
                 }
             }
 
-            void poseCallback(const turtlesim::Pose::ConstPtr& msg) {
+            turtlesim::msg::Pose tpose;
+            void poseCallback(const turtlesim::msg::Pose::SharedPtr msg) {
                 tpose = *msg;
             }
-            turtlesim::Pose tpose;
+
 #ifdef TEST_ACTION_CLIENT
             ACTION_DEFINITION(move_base_msgs::MoveBaseAction)
             typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
@@ -59,17 +53,15 @@ namespace task_manager_turtlesim {
             ClientPtr move_base_action_client;
 #endif
 
-            FollowPathPL waypoints;
 
         public:
-            TurtleSimEnv(ros::NodeHandle & nh, unsigned int id=1);
+            TurtleSimEnv(std::shared_ptr<rclcpp::Node> node, unsigned int id=1);
             ~TurtleSimEnv() {};
 
-            const turtlesim::Pose & getPose() const {return tpose;}
+            const turtlesim::msg::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {
-#if ROS_VERSION_MINIMUM(1, 10, 0) 
-                geometry_msgs::Twist cmd;
+                geometry_msgs::msg::Twist cmd;
                 if (paused) {
                     cmd.linear.x = 0.;
                     cmd.angular.z = 0.;
@@ -77,41 +69,21 @@ namespace task_manager_turtlesim {
                     cmd.linear.x = linear;
                     cmd.angular.z = angular;
                 }
-#else
-                turtlesim::Velocity cmd;
-                if (paused) {
-                    cmd.linear = 0.;
-                    cmd.angular = 0.;
-                } else {
-                    cmd.linear = linear;
-                    cmd.angular = angular;
-                }
-#endif
-                velPub.publish(cmd);
+                velPub->publish(cmd);
             }
 
-            void setPen(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
+            bool isSetPenAvailable();
+            rclcpp::Client<turtlesim::srv::SetPen>::SharedFuture setPenAsync(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
 
-            const FollowPathPL & getWP() const {
-                return waypoints;
-            }
-
-            FollowPathPL & getWP() {
-                return waypoints;
-            }
-
-            void popWP() {
-                waypoints.pop_front();
-            }
-
-            void clear();
+            bool isClearAvailable();
+            rclcpp::Client<std_srvs::srv::Empty>::SharedFuture clearAsync();
 #ifdef TEST_ACTION_CLIENT
             ClientPtr getMoveBaseActionClient();
 #endif
     };
 
-    typedef boost::shared_ptr<TurtleSimEnv> TurtleSimEnvPtr;
-    typedef boost::shared_ptr<TurtleSimEnv const> TurtleSimEnvConstPtr;
-};
+    typedef std::shared_ptr<TurtleSimEnv> TurtleSimEnvPtr;
+    typedef std::shared_ptr<TurtleSimEnv const> TurtleSimEnvConstPtr;
+}
 
 #endif // TURTLE_SIM_ENV_H
