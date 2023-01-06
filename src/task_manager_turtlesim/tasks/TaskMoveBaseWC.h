@@ -3,10 +3,10 @@
 
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
-#include "task_manager_action/TaskActionMoveBase.h"
+#include "task_manager_move_base/TaskActionMoveBase.h"
 
 using namespace task_manager_lib;
-using namespace task_manager_action;
+using namespace task_manager_move_base;
 
 namespace task_manager_turtlesim {
     class TaskMoveBaseWC : public TaskActionMoveBase<TurtleSimEnv>
@@ -31,6 +31,6 @@ namespace task_manager_turtlesim {
                 TaskFactoryActionMoveBase<TurtleSimEnv>(env) {}
             virtual ~TaskFactoryMoveBaseWC() {};
     };
-};
+}
 
 #endif // TASK_MOVE_BASE_WC_H

@@ -2,4 +2,4 @@
 #include "TaskMoveBaseWC.h"
 using namespace task_manager_turtlesim;
 
-DYNAMIC_TASK(TaskFactoryMoveBaseWC);
+DYNAMIC_TASK(TaskFactoryMoveBaseWC)

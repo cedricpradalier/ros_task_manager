@@ -45,9 +45,10 @@ rclcpp::Client<std_srvs::srv::Empty>::SharedFuture TurtleSimEnv::clearAsync()
 #ifdef TEST_ACTION_CLIENT
 TurtleSimEnv::ClientPtr TurtleSimEnv::getMoveBaseActionClient() {
     if (!move_base_action_client) {
-        move_base_action_client = ClientPtr(new Client("/move_base",true));
-        if (!move_base_action_client->waitForServer(ros::Duration(5.0))) {
-            ROS_ERROR("Action server /move_base did not reply after 5s, aborting task");
+        move_base_action_client = 
+            rclcpp_action::create_client<move_base_msgs::action::MoveBase>( node, "/move_base");
+        if (!move_base_action_client->wait_for_action_server(std::chrono::seconds(5))) {
+            RCLCPP_ERROR(node->get_logger(),"Action server /move_base did not reply after 5s, aborting task");
             move_base_action_client.reset();
         }
     }

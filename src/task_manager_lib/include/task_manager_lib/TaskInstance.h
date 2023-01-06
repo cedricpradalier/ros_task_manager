@@ -31,6 +31,7 @@ namespace task_manager_lib {
         protected:
             rclcpp::Node::SharedPtr node;
             rclcpp::Node::SharedPtr getNode() {return node;}
+            rclcpp::Node::ConstSharedPtr getNode() const {return node;}
             TaskDefinitionPtr definition;
             /**
              * Storage for some task status string, if required. Can only be set
@@ -129,6 +130,7 @@ namespace task_manager_lib {
 
             TaskEnvironmentPtr getEnvironment() {return env_gen;}
             TaskConfigPtr getConfig() {return cfg_gen;}
+            TaskConfigConstPtr getConfig() const {return cfg_gen;}
         public:
             const std::string & getName() const {
                 return definition->getName();

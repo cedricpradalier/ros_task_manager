@@ -19,11 +19,14 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(task_manager_msgs REQUIRED)
 find_package(task_manager_lib REQUIRED)
+find_package(task_manager_move_base REQUIRED)
 find_package(turtlesim REQUIRED)
+find_package(move_base_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(Boost COMPONENTS thread REQUIRED)
 
 if(BUILD_TESTING)
@@ -40,15 +43,18 @@ endif()
 include_directories(
   include
   ${rclcpp_INCLUDE_DIRS}
+  ${rclcpp_action_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${move_base_msgs_INCLUDE_DIRS}
   ${std_srvs_INCLUDE_DIRS}
   ${turtlesim_INCLUDE_DIRS}
   ${task_manager_msgs_INCLUDE_DIRS}
   ${task_manager_lib_INCLUDE_DIRS}
+  ${task_manager_move_base_INCLUDE_DIRS}
 )
 
-SET(ALL_LIBS ${rclcpp_LIBRARIES} ${task_manager_lib_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${turtlesim_LIBRARIES} ${Boost_THREAD_LIBRARIES} ${CMAKE_DL_LIBS})
+SET(ALL_LIBS ${rclcpp_LIBRARIES} ${rclcpp_action_LIBRARIES} ${task_manager_lib_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${task_manager_move_base_LIBRARIES} ${move_base_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${turtlesim_LIBRARIES} ${Boost_THREAD_LIBRARIES} ${CMAKE_DL_LIBS})
 
 ADD_EXECUTABLE( turtlesim_task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
 ament_target_dependencies(turtlesim_task_server task_manager_lib
@@ -78,6 +84,12 @@ TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForROI ${ALL_LIBS})
 ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${ALL_LIBS})
 
+ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${ALL_LIBS})
+
+ADD_LIBRARY( turtlesim_TaskMoveBaseWC SHARED tasks/TaskMoveBaseWC.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBaseWC ${ALL_LIBS})
+
 install(TARGETS
   turtlesim_task_server
   DESTINATION lib/${PROJECT_NAME})
@@ -91,6 +103,8 @@ install(TARGETS
     turtlesim_TaskReachAngle
     turtlesim_TaskWaitForROI
     turtlesim_TaskWaitForButton
+    turtlesim_TaskMoveBase
+    turtlesim_TaskMoveBaseWC
     DESTINATION lib)
 
 install(

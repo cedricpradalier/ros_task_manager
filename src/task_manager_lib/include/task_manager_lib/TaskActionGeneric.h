@@ -8,7 +8,7 @@
 #include <task_manager_lib/TaskInstance.h>
 
 
-namespace task_manager_action {
+namespace task_manager_lib {
     struct TaskActionGenericWithoutClientConfig : public task_manager_lib::TaskConfig {
         TaskActionGenericWithoutClientConfig()  : task_manager_lib::TaskConfig() {
             define("server_timeout",5.0,"How long to wait for the server to be ready",true);

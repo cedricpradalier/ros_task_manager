@@ -67,4 +67,10 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME})
 
 
+ament_export_dependencies(
+    rclcpp
+    rcl_interfaces
+    std_msgs
+    rosidl_typesupport_cpp
+)
 ament_package()

@@ -1,14 +1,14 @@
 #ifndef TASK_GOTO_MOVE_BASE_H
 #define TASK_GOTO_MOVE_BASE_H
 
-#include "task_manager_action/TaskActionGeneric.h"
+#include "task_manager_lib/TaskActionGeneric.h"
 #include <move_base_msgs/action/move_base.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-namespace task_manager_action {
-    struct TaskActionMoveBaseConfig : public TaskActionGenericConfig {
-        TaskActionMoveBaseConfig() : TaskActionGenericConfig() {
+namespace task_manager_move_base {
+    struct TaskActionMoveBaseConfig : public task_manager_lib::TaskActionGenericConfig {
+        TaskActionMoveBaseConfig() : task_manager_lib::TaskActionGenericConfig() {
             define("goal_x",        0.0, "X coordinate of destination (m)",true);
             define("goal_y",        0.0, "Y coordinate of destination (m)",true);
             define("goal_z",        0.0, "Z coordinate of destination (m)",true);
@@ -22,10 +22,10 @@ namespace task_manager_action {
 
     template <class Environment>
         class TaskActionMoveBase : 
-            public TaskActionGeneric<move_base_msgs::action::MoveBase,TaskActionMoveBaseConfig, Environment>
+            public task_manager_lib::TaskActionGeneric<move_base_msgs::action::MoveBase,TaskActionMoveBaseConfig, Environment>
     {
         protected:
-            typedef TaskActionGeneric<move_base_msgs::action::MoveBase,
+            typedef task_manager_lib::TaskActionGeneric<move_base_msgs::action::MoveBase,
                     TaskActionMoveBaseConfig, Environment> Parent;
 
             void buildActionGoal(typename Parent::Goal & goal) {

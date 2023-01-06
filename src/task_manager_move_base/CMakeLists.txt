@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(task_manager_action)
+project(task_manager_move_base)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -47,7 +47,7 @@ include_directories(
 )
 
 install(
-  DIRECTORY include/task_manager_action
+  DIRECTORY include/task_manager_move_base
   DESTINATION include
 )
 

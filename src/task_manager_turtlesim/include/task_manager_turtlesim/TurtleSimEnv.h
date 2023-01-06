@@ -10,12 +10,10 @@
 #include "boost/algorithm/string.hpp"
 #include "std_msgs/msg/string.hpp"
 
-// #define TEST_ACTION_CLIENT
+#define TEST_ACTION_CLIENT
 #ifdef TEST_ACTION_CLIENT
-#include <actionlib/client/simple_action_client.h>
-#include <actionlib/client/simple_client_goal_state.h>
-#include <actionlib/action_definition.h>
-#include <move_base_msgs/MoveBaseAction.h>
+#include <move_base_msgs/action/move_base.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 #endif
 
 namespace task_manager_turtlesim {
@@ -47,9 +45,7 @@ namespace task_manager_turtlesim {
             }
 
 #ifdef TEST_ACTION_CLIENT
-            ACTION_DEFINITION(move_base_msgs::MoveBaseAction)
-            typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> Client;
-            typedef boost::shared_ptr<Client> ClientPtr;
+            typedef rclcpp_action::Client<move_base_msgs::action::MoveBase>::SharedPtr ClientPtr;
             ClientPtr move_base_action_client;
 #endif
 
@@ -77,6 +73,7 @@ namespace task_manager_turtlesim {
 
             bool isClearAvailable();
             rclcpp::Client<std_srvs::srv::Empty>::SharedFuture clearAsync();
+
 #ifdef TEST_ACTION_CLIENT
             ClientPtr getMoveBaseActionClient();
 #endif
