@@ -2,110 +2,205 @@
 #define TASK_ACTION_GENERIC_H
 
 
-#include <task_manager_msgs/TaskStatus.h>
-#include <task_manager_lib/TaskDefinition.h>
-#include <actionlib/client/simple_action_client.h>
-#include <actionlib/client/simple_client_goal_state.h>
-#include <actionlib/action_definition.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
+#include <task_manager_lib/TaskConfig.h>
+#include <task_manager_lib/TaskInstance.h>
 
 
 namespace task_manager_action {
+    struct TaskActionGenericWithoutClientConfig : public task_manager_lib::TaskConfig {
+        TaskActionGenericWithoutClientConfig()  : task_manager_lib::TaskConfig() {
+            define("server_timeout",5.0,"How long to wait for the server to be ready",true);
+        }
+
+    };
+
+    struct TaskActionGenericConfig : public TaskActionGenericWithoutClientConfig {
+        TaskActionGenericConfig() : TaskActionGenericWithoutClientConfig() {
+            define("action_name","/action","Name of the action server",true);
+        }
+
+    };
+
     
-    template <class Action, class TaskConfig,class TaskEnvironment>
-    class TaskActionGenericWithoutClient : public task_manager_lib::TaskInstance<TaskConfig,TaskEnvironment>
+    // Class Config should inherit from TaskActionGenericWithoutClientConfig
+    template <class Action, class Config,class Environment>
+    class TaskActionGenericWithoutClient : public task_manager_lib::TaskInstance<Config,Environment>
     {
         protected:
-            ACTION_DEFINITION(Action)
+            typedef task_manager_lib::TaskInstance<Config,Environment> Parent;
 
-            typedef actionlib::SimpleActionClient<Action> Client;
-            typedef boost::shared_ptr<Client> ClientPtr;
+
+            using GoalHandleGeneric = rclcpp_action::ClientGoalHandle<Action>;
+            typedef enum {
+                TASK_WAITING_ACTION_SERVER,
+                TASK_WAITING_GOAL_RESPONSE,
+                TASK_WAITING_RESULT,
+                TASK_GOAL_REJECTED,
+                TASK_GOAL_FAILED,
+                TASK_GOAL_SUCCEEDED
+            } TaskState;
+
+            rclcpp::Time t0;
+            TaskState state;
+
+            typedef typename rclcpp_action::Client<Action>::SharedPtr ClientPtr;
             ClientPtr this_action_client;
+            typedef typename Action::Goal Goal;
+            typedef typename Action::Feedback Feedback;
+            typedef typename Action::Result Result;
+            Goal goal_msg;
 
             // This must be declared by inheriting class
-            virtual void buildActionGoal(Goal& goal) const = 0;
+            virtual void buildActionGoal(Goal& goal) = 0;
             virtual ClientPtr getActionClient() = 0;
 
             // This can be overwritten if needed
-            virtual void handleResult(ResultConstPtr result) {};
+            virtual void handleFeedback(const std::shared_ptr<const Feedback> /*feedback*/) {};
+            virtual void handleResult(std::shared_ptr<Result> /*result*/) {};
+
+            void sendGoal() {
+                buildActionGoal(goal_msg);
+                typename rclcpp_action::Client<Action>::SendGoalOptions send_goal_options;
+                send_goal_options.goal_response_callback =
+                    std::bind(&TaskActionGenericWithoutClient<Action,Config,Environment>::goal_response_callback, this, std::placeholders::_1);
+                send_goal_options.feedback_callback =
+                    std::bind(&TaskActionGenericWithoutClient<Action,Config,Environment>::feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
+                send_goal_options.result_callback =
+                    std::bind(&TaskActionGenericWithoutClient<Action,Config,Environment>::result_callback, this, std::placeholders::_1);
+                this_action_client->async_send_goal(goal_msg, send_goal_options);
+            }
+
+              void goal_response_callback(std::shared_future<typename GoalHandleGeneric::SharedPtr> future) {
+                  auto goal_handle = future.get();
+                  if (!goal_handle) {
+                      RCLCPP_ERROR(this->getNode()->get_logger(), "Goal was rejected by server");
+                      state = TASK_GOAL_REJECTED;
+                  } else {
+                      RCLCPP_INFO(this->getNode()->get_logger(), "Goal accepted by server, waiting for result");
+                      state = TASK_WAITING_RESULT;
+                  }
+              }
+
+              void feedback_callback(typename GoalHandleGeneric::SharedPtr,
+                      const std::shared_ptr<const Feedback> feedback) {
+                  this->handleFeedback(feedback);
+              }
+
+              void result_callback(const typename GoalHandleGeneric::WrappedResult & result) {
+                  switch (result.code) {
+                      case rclcpp_action::ResultCode::SUCCEEDED:
+                          this->handleResult(result.result);
+                          state = TASK_GOAL_SUCCEEDED;
+                          break;
+                      case rclcpp_action::ResultCode::ABORTED:
+                          RCLCPP_ERROR(this->getNode()->get_logger(), "Goal was aborted");
+                          state = TASK_GOAL_FAILED;
+                          return;
+                      case rclcpp_action::ResultCode::CANCELED:
+                          RCLCPP_ERROR(this->getNode()->get_logger(), "Goal was canceled");
+                          state = TASK_GOAL_FAILED;
+                          return;
+                      default:
+                          RCLCPP_ERROR(this->getNode()->get_logger(), "Unknown result code");
+                          state = TASK_GOAL_FAILED;
+                          return;
+                  }
+              }
 
         public:
             // Basic constructor, receives the environment and ignore it.
             TaskActionGenericWithoutClient(task_manager_lib::TaskDefinitionPtr def, 
                     task_manager_lib::TaskEnvironmentPtr ev) :
-                task_manager_lib::TaskInstance<TaskConfig,TaskEnvironment>(def,ev){ }
+                task_manager_lib::TaskInstance<Config,Environment>(def,ev){ }
             virtual ~TaskActionGenericWithoutClient() { 
             };
 
             /// Record the starting time
             virtual task_manager_lib::TaskIndicator initialise() {
-                Goal goal;
                 this_action_client = this->getActionClient();
                 if (!this_action_client) {
-                    ROS_ERROR("TaskActionGenericWithoutClient::initialise called without creating client. Aborting");
-                    
-                    return task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED;
+                    RCLCPP_ERROR(this->getNode()->get_logger(),"TaskActionGenericWithoutClient::initialise called without creating client. Aborting");
+                    return task_manager_lib::TaskStatus::TASK_INITIALISATION_FAILED;
                 }
-                buildActionGoal(goal);
-                this_action_client->sendGoal(goal);
-                return task_manager_msgs::TaskStatus::TASK_INITIALISED;
+                state = TASK_WAITING_ACTION_SERVER;
+                t0 = this->getNode()->get_clock()->now();
+                return task_manager_lib::TaskStatus::TASK_INITIALISED;
             }
 
             virtual task_manager_lib::TaskIndicator iterate() {
-                switch (this_action_client->getState().state_) {
-                    case actionlib::SimpleClientGoalState::SUCCEEDED:
-                        this->handleResult(this_action_client->getResult());
-                        return task_manager_msgs::TaskStatus::TASK_COMPLETED;
-                    case actionlib::SimpleClientGoalState::PENDING:
-                    case actionlib::SimpleClientGoalState::ACTIVE:
-                        return task_manager_msgs::TaskStatus::TASK_RUNNING;
+                switch (state) {
+                    case TASK_WAITING_ACTION_SERVER:
+                        if (!this_action_client->action_server_is_ready()) {
+                            if ((this->getNode()->get_clock()->now() - t0).seconds() > 
+                                    task_manager_lib::TaskInstanceBase::getConfig()->get<double>("server_timeout")) {
+                                RCLCPP_ERROR(this->getNode()->get_logger(),"TaskActionGeneric::initialise server is not becoming ready");
+                                return task_manager_lib::TaskStatus::TASK_FAILED;
+                            } else {
+                                return task_manager_lib::TaskStatus::TASK_RUNNING;
+                            }
+                        }
+                        state = TASK_WAITING_GOAL_RESPONSE;
+                        sendGoal();
+                        // fallthrough
+                    case TASK_WAITING_GOAL_RESPONSE:
+                        return task_manager_lib::TaskStatus::TASK_RUNNING;
+                    case TASK_WAITING_RESULT:
+                        return task_manager_lib::TaskStatus::TASK_RUNNING;
+                    case TASK_GOAL_SUCCEEDED:
+                        return task_manager_lib::TaskStatus::TASK_COMPLETED;
+                    case TASK_GOAL_FAILED:
                     default:
-                        return task_manager_msgs::TaskStatus::TASK_FAILED;
+                        return task_manager_lib::TaskStatus::TASK_FAILED;
                 }
             }
 
             virtual task_manager_lib::TaskIndicator terminate() {
                 if (this_action_client) {
-                    switch (this_action_client->getState().state_) {
-                        case actionlib::SimpleClientGoalState::PENDING:
-                        case actionlib::SimpleClientGoalState::ACTIVE:
-                            this_action_client->cancelGoal();
+                    switch (state) {
+                        case TASK_WAITING_GOAL_RESPONSE:
+                        case TASK_WAITING_RESULT:
+                            this_action_client->async_cancel_all_goals();
                             break;
+                        case TASK_GOAL_SUCCEEDED:
+                        case TASK_GOAL_FAILED:
+                        case TASK_WAITING_ACTION_SERVER:
                         default:
                             break;
                     }
                 }
-                return task_manager_msgs::TaskStatus::TASK_TERMINATED;
+                return task_manager_lib::TaskStatus::TASK_TERMINATED;
             }
 
     };
 
-    template <class Action, class TaskConfig,class TaskEnvironment>
-    class TaskActionGeneric : public TaskActionGenericWithoutClient<Action,TaskConfig,TaskEnvironment>
+    // Class Config should inherit from TaskActionGenericConfig or define action_name if 
+    // getActionName is not redefined
+    template <class Action, class Config,class Environment>
+    class TaskActionGeneric : public TaskActionGenericWithoutClient<Action,Config,Environment>
     {
         protected:
-            typedef TaskActionGenericWithoutClient<Action,TaskConfig,TaskEnvironment> Parent;
+            typedef TaskActionGenericWithoutClient<Action,Config,Environment> Parent;
 
             // This must be declared by inheriting class
-            virtual const std::string & getActionName() const = 0;
+            virtual std::string getActionName() const {
+                return task_manager_lib::TaskInstanceBase::getConfig()->get<std::string>("action_name");
+            }
 
         public:
             // Basic constructor, receives the environment and ignore it.
             TaskActionGeneric(task_manager_lib::TaskDefinitionPtr def, 
                     task_manager_lib::TaskEnvironmentPtr ev) :
-                TaskActionGenericWithoutClient<Action,TaskConfig,TaskEnvironment>(def,ev) { }
+                TaskActionGenericWithoutClient<Action,Config,Environment>(def,ev) { }
             virtual ~TaskActionGeneric() { };
 
             virtual typename Parent::ClientPtr getActionClient() {
-                typename Parent::ClientPtr client(new typename Parent::Client(this->getActionName(),true));
-                if (!client->waitForServer(ros::Duration(5.0))) {
-                    ROS_ERROR("Action server %s did not reply after 5s, aborting task",this->getActionName().c_str());
-                    client.reset();
-                }
-                return client;
+                return rclcpp_action::create_client<Action>( this->getNode(), this->getActionName());
             }
     };
 
-};
+}
 
 
 
