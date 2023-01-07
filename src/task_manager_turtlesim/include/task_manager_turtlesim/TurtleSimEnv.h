@@ -70,9 +70,12 @@ namespace task_manager_turtlesim {
 
             bool isSetPenAvailable();
             rclcpp::Client<turtlesim::srv::SetPen>::SharedFuture setPenAsync(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
+            rclcpp::Client<turtlesim::srv::SetPen>::SharedPtr getSetPenClient() {return setPenClt;}
 
             bool isClearAvailable();
             rclcpp::Client<std_srvs::srv::Empty>::SharedFuture clearAsync();
+            rclcpp::Client<std_srvs::srv::Empty>::SharedPtr getClearClient() {return clearClt;}
+
 
 #ifdef TEST_ACTION_CLIENT
             ClientPtr getMoveBaseActionClient();

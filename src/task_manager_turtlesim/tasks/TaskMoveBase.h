@@ -23,7 +23,7 @@ namespace task_manager_turtlesim {
 
         public:
             TaskFactoryMoveBase(TaskEnvironmentPtr env) :
-                TaskFactoryActionMoveBase<TurtleSimEnv>(env) {}
+                TaskFactoryActionMoveBase<TurtleSimEnv>("ActionMoveBase",env) {}
             virtual ~TaskFactoryMoveBase() {};
     };
 }

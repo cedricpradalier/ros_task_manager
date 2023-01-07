@@ -66,8 +66,8 @@ namespace task_manager_move_base {
         protected:
             typedef task_manager_lib::TaskDefinition<TaskActionMoveBaseConfig, Environment, TaskActionMoveBase<Environment> > Parent;
         public:
-            TaskFactoryActionMoveBase(task_manager_lib::TaskEnvironmentPtr env) : 
-                Parent("ActionMoveBase","Publish an action goal for move base",true,env) {}
+            TaskFactoryActionMoveBase(const std::string & name, task_manager_lib::TaskEnvironmentPtr env) : 
+                Parent(name,"Publish an action goal for move base",true,env) {}
             virtual ~TaskFactoryActionMoveBase() {};
     };
 }

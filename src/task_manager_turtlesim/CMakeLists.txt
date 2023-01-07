@@ -66,6 +66,12 @@ TARGET_LINK_LIBRARIES(turtlesim_task_server ${ALL_LIBS})
 ADD_LIBRARY( turtlesim_TaskClear SHARED tasks/TaskClear.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskClear ${ALL_LIBS})
 
+ADD_LIBRARY( turtlesim_TaskClearGeneric SHARED tasks/TaskClearGeneric.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskClearGeneric ${ALL_LIBS})
+
+ADD_LIBRARY( turtlesim_TaskClearGenericWC SHARED tasks/TaskClearGenericWC.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskClearGenericWC ${ALL_LIBS})
+
 ADD_LIBRARY( turtlesim_TaskSetPen SHARED tasks/TaskSetPen.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskSetPen ${ALL_LIBS})
 
@@ -97,6 +103,8 @@ install(TARGETS
 
 install(TARGETS
     turtlesim_TaskClear
+    turtlesim_TaskClearGeneric
+    turtlesim_TaskClearGenericWC
     turtlesim_TaskSetPen
     turtlesim_TaskFail
     turtlesim_TaskGoTo
