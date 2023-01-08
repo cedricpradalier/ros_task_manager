@@ -31,7 +31,7 @@ namespace task_manager_sync {
 
         public:
             TaskEnvironmentSync(std::shared_ptr<rclcpp::Node> n, const std::string & name,
-                    const std::string & topic, float period=0.1);
+                    const std::string & topic="~/sync", float period=0.1);
             virtual ~TaskEnvironmentSync() {};
 
             void addSyncSource(const std::string & topic) ;
