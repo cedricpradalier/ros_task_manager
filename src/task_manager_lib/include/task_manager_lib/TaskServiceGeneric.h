@@ -120,7 +120,7 @@ namespace task_manager_lib {
                 std::string name = this->getServiceName();
                 RCLCPP_INFO(this->getNode()->get_logger(),"Task %s: creating client %s",
                         this->getName().c_str(),name.c_str());
-                return this->getNode()->template create_client<Service>(name);
+                return this->getEnvironment()->services().template registerServiceClient<Service>(name);
             }
     };
 }

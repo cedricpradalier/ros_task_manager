@@ -18,6 +18,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -54,17 +55,11 @@ add_library(task_manager_lib SHARED
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
     src/TaskServerDefault.cpp
-    # src/ServiceStorage.cpp
-    # The files below are not used in ROS2 version for now.
-    # src/SequenceTask.cpp
-    # src/TaskServerInterface.cpp
-    # src/TaskHistory.cpp
-    # src/TaskClient.cpp
 )
 
 
 
-target_link_libraries(task_manager_lib ${rclcpp_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${Boost_THREAD_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(task_manager_lib ${rclcpp_LIBRARIES} ${rclcpp_action_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${Boost_THREAD_LIBRARIES} ${CMAKE_DL_LIBS})
  
 #ament_export_targets(task_manager_lib HAS_LIBRARY_TARGET) 
 
@@ -80,6 +75,7 @@ install(
 ament_export_dependencies(
     Boost
     rclcpp
+    rclcpp_action
     rcl_interfaces
     task_manager_msgs
 )

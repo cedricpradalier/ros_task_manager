@@ -28,29 +28,29 @@ namespace task_manager_lib {
             }
 
             template <class srv> 
-                rclcpp::Client<srv>::SharedPtr getService<(const std::string & s) {
+                typename rclcpp::Client<srv>::SharedPtr getService(const std::string & s) {
                     const std::lock_guard<std::mutex> lock(serviceMapMtx);
                     ServiceMap::iterator it = serviceMap.find(s);
-                    if (it == serviceMap.end()) {
-                        return rclcpp::Client<srv>::SharedPtr();
-                    } else {
-                        rclcpp::Client<srv>::SharedPtr e =
-                            std::dynamic_pointer_cast<rclcpp::Client<srv>,rclcpp::ClientBase>(it->second);
-                        return e;
+                    typename rclcpp::Client<srv>::SharedPtr e;
+                    if (it != serviceMap.end()) {
+                        e = std::dynamic_pointer_cast<rclcpp::Client<srv>,rclcpp::ClientBase>(it->second);
                     }
+                    return e;
                 }
 
 
             template <class srv>
-                rclcpp::Client<srv>::SharedPtr registerServiceClient(const std::string & s, bool replace=false) {
+                typename rclcpp::Client<srv>::SharedPtr registerServiceClient(const std::string & s, bool replace=false) {
                     const std::lock_guard<std::mutex> lock(serviceMapMtx);
                     ServiceMap::iterator it = serviceMap.find(s);
                     if (replace || (it == serviceMap.end())) {
-                        rclcpp::Client<srv>::SharedPtr clientp = node->create_client<srv>(s);
+                        RCLCPP_INFO(node->get_logger(),"Creating new service client for '%s'", s.c_str());
+                        typename rclcpp::Client<srv>::SharedPtr clientp = node->create_client<srv>(s);
                         serviceMap[s] = clientp;
                         return clientp;
                     } else {
-                        rclcpp::Client<srv>::SharedPtr e =
+                        RCLCPP_INFO(node->get_logger(),"Reusing service client for '%s'", s.c_str());
+                        typename rclcpp::Client<srv>::SharedPtr e =
                             std::dynamic_pointer_cast<rclcpp::Client<srv>,rclcpp::ClientBase>(it->second);
                         return e;
                     }
@@ -58,14 +58,14 @@ namespace task_manager_lib {
                 }
 
             template <class srv>
-                void registerServiceClient(const std::string & s, rclcpp::Client<srv>::SharedPtr client) {
+                void registerServiceClient(const std::string & s, typename rclcpp::Client<srv>::SharedPtr client) {
                     assert(client);
                     const std::lock_guard<std::mutex> lock(serviceMapMtx);
                     serviceMap[s]=client;
                 }
 
             template <class srv>
-                void registerServiceClient(const std::string & s, rclcpp::Client<srv>::SharedPtr client) {
+                void registerServiceClient(typename rclcpp::Client<srv>::SharedPtr client) {
                     assert(client);
                     const std::lock_guard<std::mutex> lock(serviceMapMtx);
                     serviceMap[client->get_service_name()]=client;
@@ -74,7 +74,7 @@ namespace task_manager_lib {
 
     };
 
-};
+}
 
 
 #endif // SERVICE_STORAGE_H

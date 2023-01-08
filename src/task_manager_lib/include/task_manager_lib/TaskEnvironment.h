@@ -10,6 +10,7 @@
 #include <mutex>
 #include <string>
 #include <rclcpp/rclcpp.hpp>
+#include "task_manager_lib/ServiceStorage.h"
 
 namespace task_manager_lib {
     /**
@@ -18,7 +19,7 @@ namespace task_manager_lib {
      * the argument.\
      * */
     class TaskEnvironment  {
-        public:
+        protected:
             // This mutex will be locked in all the task instance function
             // (initialize, iterate, terminate) for periodic tasks. However, 
             // for non-periodic tasks, it is not possible to lock the
@@ -29,11 +30,15 @@ namespace task_manager_lib {
             // boost::unique_lock<std::shared_mutex> guard(env_gen->environment_mutex);
             std::mutex environment_mutex;
             rclcpp::Node::SharedPtr node;
+            ServiceStorage service_storage;
         public:
-            TaskEnvironment(rclcpp::Node::SharedPtr node) : node(node) {}
+            TaskEnvironment(rclcpp::Node::SharedPtr node) : node(node), service_storage(node) {}
             virtual ~TaskEnvironment() {}
             rclcpp::Node::SharedPtr getNode() {
                 return node;
+            }
+            ServiceStorage & services() {
+                return service_storage;
             }
     };
 
