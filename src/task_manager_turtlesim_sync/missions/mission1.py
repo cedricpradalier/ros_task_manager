@@ -10,6 +10,8 @@ server_node = rospy.get_param("~server","/turtlesim_tasks1")
 default_period = rospy.get_param("~period",0.2)
 tc = TaskClient(server_node,default_period)
 
+tc.Spawn(x=4,y=4,theta=0,name="turtle2")
+tc.Spawn(x=7,y=7,theta=0,name="turtle3")
 tc.SetStatusSync(status=0);
 tc.GoTo(goal_x=1.0,goal_y=1.0)
 tc.SetStatusSync(status=1);

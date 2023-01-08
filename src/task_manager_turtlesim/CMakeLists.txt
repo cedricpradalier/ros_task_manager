@@ -75,6 +75,9 @@ TARGET_LINK_LIBRARIES(turtlesim_TaskClearGenericWC ${ALL_LIBS})
 ADD_LIBRARY( turtlesim_TaskSetPen SHARED tasks/TaskSetPen.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskSetPen ${ALL_LIBS})
 
+ADD_LIBRARY( turtlesim_TaskSpawn SHARED tasks/TaskSpawnGeneric.cpp)
+TARGET_LINK_LIBRARIES(turtlesim_TaskSpawn ${ALL_LIBS})
+
 ADD_LIBRARY( turtlesim_TaskFail SHARED tasks/TaskFail.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskFail ${ALL_LIBS})
 
@@ -106,6 +109,7 @@ install(TARGETS
     turtlesim_TaskClearGeneric
     turtlesim_TaskClearGenericWC
     turtlesim_TaskSetPen
+    turtlesim_TaskSpawn
     turtlesim_TaskFail
     turtlesim_TaskGoTo
     turtlesim_TaskReachAngle

@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <launch>
-    <node name="turtlesim" pkg="turtlesim" type="turtlesim_node"  />
-    <node pkg="rosservice" type="rosservice" name="spawn2" args="call --wait /spawn 4 4 0 turtle2"/>
-    <node pkg="rosservice" type="rosservice" name="spawn3" args="call --wait /spawn 7 7 0 turtle3"/>
-    <node name="turtlesim_tasks1" pkg="task_manager_turtlesim_sync" type="turtlesim_task_server_sync"  output="screen">
-        <param name="lib_path" value="$(find task_manager_turtlesim_sync)/tasks"/>
+    <node name="turtlesim" pkg="turtlesim" exec="turtlesim_node"  />
+    <node name="turtlesim_tasks1" pkg="task_manager_turtlesim_sync" exec="turtlesim_task_server_sync" >
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim_sync/lib"/>
         <param name="my_id" value="1"/>
         <param name="my_name" value="partner1"/>
-        <remap from="~/partner1" to="/turtlesim_tasks2/sync"/>
-        <remap from="~/partner2" to="/turtlesim_tasks3/sync"/>
+        <remap from="partner1" to="/turtlesim_tasks2/sync"/>
+        <remap from="partner2" to="/turtlesim_tasks3/sync"/>
     </node>
-    <node name="turtlesim_tasks2" pkg="task_manager_turtlesim_sync" type="turtlesim_task_server_sync"  output="screen">
-        <param name="lib_path" value="$(find task_manager_turtlesim_sync)/tasks"/>
+    <node name="turtlesim_tasks2" pkg="task_manager_turtlesim_sync" exec="turtlesim_task_server_sync" >
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim_sync/lib"/>
         <param name="my_id" value="2"/>
         <param name="my_name" value="partner2"/>
-        <remap from="~/partner1" to="/turtlesim_tasks1/sync"/>
-        <remap from="~/partner2" to="/turtlesim_tasks3/sync"/>
+        <remap from="partner1" to="/turtlesim_tasks1/sync"/>
+        <remap from="partner2" to="/turtlesim_tasks3/sync"/>
     </node>
-    <node name="turtlesim_tasks3" pkg="task_manager_turtlesim_sync" type="turtlesim_task_server_sync"  output="screen">
-        <param name="lib_path" value="$(find task_manager_turtlesim_sync)/tasks"/>
+    <node name="turtlesim_tasks3" pkg="task_manager_turtlesim_sync" exec="turtlesim_task_server_sync" >
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim_sync/lib"/>
         <param name="my_id" value="3"/>
         <param name="my_name" value="partner3"/>
-        <remap from="~/partner1" to="/turtlesim_tasks1/sync"/>
-        <remap from="~/partner2" to="/turtlesim_tasks2/sync"/>
+        <remap from="partner1" to="/turtlesim_tasks1/sync"/>
+        <remap from="partner2" to="/turtlesim_tasks2/sync"/>
     </node>
 </launch>

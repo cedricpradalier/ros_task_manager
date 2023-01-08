@@ -82,5 +82,7 @@ ament_export_dependencies(
     task_manager_msgs
     task_manager_lib
 )
+ament_export_include_directories(include)
+ament_export_libraries(task_manager_sync_lib)
 
 ament_package()
