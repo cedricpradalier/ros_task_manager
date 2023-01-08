@@ -1,8 +1,5 @@
 
-#include <math.h>
 #include "task_manager_sync/TaskSetStatusSync.h"
-#include "task_manager_sync/TaskSetStatusSyncConfig.h"
-using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_sync;
 
@@ -10,11 +7,12 @@ using namespace task_manager_sync;
 
 TaskIndicator TaskSetStatusSync::iterate()
 {
-    if (env->isStatusValidForMe(cfg.status)) {
-        env->setStatus(cfg.status);
+    int cfg_status = cfg->get<int>("status");
+    if (env->isStatusValidForMe(cfg_status)) {
+        env->setStatus(cfg_status);
         return TaskStatus::TASK_COMPLETED;
     } else {
-        ROS_ERROR("TaskSetStatusSync: Invalid status request %d",cfg.status);
+        RCLCPP_ERROR(node->get_logger(),"TaskSetStatusSync: Invalid status request %d",cfg_status);
         return TaskStatus::TASK_COMPLETED;
     }
 }

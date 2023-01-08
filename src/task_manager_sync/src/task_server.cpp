@@ -21,15 +21,17 @@ class TaskServer : public TaskServerSync {
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc,argv,"task_server_sync");//init ros
-    ros::NodeHandle nh("~");
+    rclcpp::init(argc,argv);//init ros
+    std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("task_server_sync");
     std::string partner_name = "partner";
-    nh.getParam("my_name",partner_name);
+    node->declare_parameter("my_name", partner_name);
+    partner_name = node->get_parameter("my_name").get_parameter_value().get<std::string>();
 
-    TaskEnvironmentSyncPtr env(new TaskEnvironmentSync(nh,partner_name,"sync"));
+    TaskEnvironmentSyncPtr env(new TaskEnvironmentSync(node,partner_name,"sync"));
     env->addSyncSource("partner1");
     env->addSyncSource("partner2");
     TaskServer ts(env);
-    ros::spin();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
     return 0;
 }

@@ -13,12 +13,15 @@
 #include "task_manager_lib/ServiceStorage.h"
 
 namespace task_manager_lib {
+    class TaskInstanceBase;
     /**
      * Empty class, to be inherited for a specific application. The existence of
      * the class provides an easy way to use the dynamic_cast to check the type of
      * the argument.\
      * */
     class TaskEnvironment  {
+        protected:
+            friend class TaskInstanceBase;
         protected:
             // This mutex will be locked in all the task instance function
             // (initialize, iterate, terminate) for periodic tasks. However, 

@@ -1,18 +1,17 @@
-#include <math.h>
 #include "task_manager_sync/TaskWaitForStatusSync.h"
-#include "task_manager_sync/TaskWaitForStatusSyncConfig.h"
-using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_sync;
 
 
 TaskIndicator TaskWaitForStatusSync::initialise() 
 {
-    if (env->isStatusValidForSource(cfg.partner,cfg.status)) {
-        ROS_INFO("Waiting for partner '%s' to reach status %d",cfg.partner.c_str(),cfg.status);
+    int cfg_status = cfg->get<int>("status");
+    const std::string & partner = cfg->get<std::string>("partner");
+    if (env->isStatusValidForSource(partner,cfg_status)) {
+        RCLCPP_INFO(node->get_logger(),"Waiting for partner '%s' to reach status %d",partner.c_str(),cfg_status);
         return TaskStatus::TASK_INITIALISED;
     } else {
-        ROS_ERROR("Status %d is not a valid status for partner '%s'",cfg.status,cfg.partner.c_str());
+        RCLCPP_ERROR(node->get_logger(),"Status %d is not a valid status for partner '%s'",cfg_status,partner.c_str());
         return TaskStatus::TASK_INITIALISATION_FAILED;
     }
 }
@@ -20,20 +19,17 @@ TaskIndicator TaskWaitForStatusSync::initialise()
 
 TaskIndicator TaskWaitForStatusSync::iterate()
 {
+    int cfg_status = cfg->get<int>("status");
+    const std::string & partner = cfg->get<std::string>("partner");
     int status = 0;
-    if (!env->getStatusRef(cfg.partner,status)) {
+    if (!env->getStatusRef(partner,status)) {
         // not yet received
         return TaskStatus::TASK_RUNNING;
     }
-    if (status == cfg.status)    {
+    if (status == cfg_status)    {
         return TaskStatus::TASK_COMPLETED;
     }
     return TaskStatus::TASK_RUNNING;
-}
-
-TaskIndicator TaskWaitForStatusSync::terminate()
-{
-	return TaskStatus::TASK_TERMINATED;
 }
 
 // This is not designed to be a dynamic task. Use TaskServerSync instead
