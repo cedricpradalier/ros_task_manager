@@ -6,9 +6,8 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    struct TaskClearConfig : public TaskConfig {
-        TaskClearConfig() : TaskConfig() {
-            define("service_name","/clear","Name of the service",true);
+    struct TaskClearConfig : public TaskServiceGenericConfig {
+        TaskClearConfig() : TaskServiceGenericConfig("/clear") {
         }
     };
 

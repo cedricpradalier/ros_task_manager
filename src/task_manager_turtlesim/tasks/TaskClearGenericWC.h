@@ -18,7 +18,7 @@ namespace task_manager_turtlesim {
             virtual ~TaskClear() {};
     };
 
-    class TaskFactoryClear : public TaskDefinition<TaskServiceGenericConfig, TurtleSimEnv, TaskClear>
+    class TaskFactoryClear : public TaskDefinition<TaskServiceGenericWithoutClientConfig, TurtleSimEnv, TaskClear>
     {
 
         public:

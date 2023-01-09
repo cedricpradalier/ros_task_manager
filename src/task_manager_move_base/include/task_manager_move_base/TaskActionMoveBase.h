@@ -8,7 +8,7 @@
 
 namespace task_manager_move_base {
     struct TaskActionMoveBaseConfig : public task_manager_lib::TaskActionGenericConfig {
-        TaskActionMoveBaseConfig() : task_manager_lib::TaskActionGenericConfig() {
+        TaskActionMoveBaseConfig() : task_manager_lib::TaskActionGenericConfig("/move_base") {
             define("goal_x",        0.0, "X coordinate of destination (m)",true);
             define("goal_y",        0.0, "Y coordinate of destination (m)",true);
             define("goal_z",        0.0, "Z coordinate of destination (m)",true);

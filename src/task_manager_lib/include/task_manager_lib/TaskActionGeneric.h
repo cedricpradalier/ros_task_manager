@@ -10,15 +10,15 @@
 
 namespace task_manager_lib {
     struct TaskActionGenericWithoutClientConfig : public task_manager_lib::TaskConfig {
-        TaskActionGenericWithoutClientConfig()  : task_manager_lib::TaskConfig() {
-            define("server_timeout",5.0,"How long to wait for the server to be ready",true);
+        TaskActionGenericWithoutClientConfig(double defautServerTimeout)  : task_manager_lib::TaskConfig() {
+            define("server_timeout",defautServerTimeout,"How long to wait for the server to be ready",true);
         }
 
     };
 
     struct TaskActionGenericConfig : public TaskActionGenericWithoutClientConfig {
-        TaskActionGenericConfig() : TaskActionGenericWithoutClientConfig() {
-            define("action_name","/action","Name of the action server",true);
+        TaskActionGenericConfig(const std::string & defaultActionName,double defautServerTimeout=5.0) : TaskActionGenericWithoutClientConfig(defautServerTimeout) {
+            define("action_name",defaultActionName,"Name of the action server",true);
         }
 
     };

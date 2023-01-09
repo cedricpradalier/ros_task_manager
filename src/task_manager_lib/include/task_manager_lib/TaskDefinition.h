@@ -207,6 +207,11 @@ namespace task_manager_lib {
                     env = castEnvironment();
                     cfg = castConfig();
                 }
+                TaskDefinition(const std::string & tname, const std::string & thelp, bool isperiodic, 
+                        TaskEnvironmentPtr ev, std::shared_ptr<CFG> cfg_init) : TaskDefinitionBase(tname,thelp,isperiodic,ev,cfg_init) {
+                    env = castEnvironment();
+                    cfg = cfg_init;
+                }
                 virtual ~TaskDefinition() {}
 
 

@@ -7,9 +7,8 @@
 using namespace task_manager_lib;
 
 namespace task_manager_turtlesim {
-    struct TaskSpawnConfig : public TaskConfig {
-        TaskSpawnConfig() : TaskConfig() {
-            define("service_name","/spawn","Name of the service",true);
+    struct TaskSpawnConfig : public TaskServiceGenericConfig {
+        TaskSpawnConfig() : TaskServiceGenericConfig("/spawn") {
             define("x",0.0,"x coordinate of the new turtle",true);
             define("y",0.0,"y coordinate of the new turtle",true);
             define("theta",0.0,"heading of the new turtle",true);

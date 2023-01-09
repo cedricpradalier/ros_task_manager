@@ -7,14 +7,14 @@
 
 namespace task_manager_lib {
     struct TaskServiceGenericWithoutClientConfig : public task_manager_lib::TaskConfig {
-        TaskServiceGenericWithoutClientConfig()  : task_manager_lib::TaskConfig() {
-            define("server_timeout",5.0,"How long to wait for the server to be ready",true);
+        TaskServiceGenericWithoutClientConfig(double defautServerTimeout=5.0)  : task_manager_lib::TaskConfig() {
+            define("server_timeout",defautServerTimeout,"How long to wait for the server to be ready",true);
         }
     };
 
     struct TaskServiceGenericConfig : public TaskServiceGenericWithoutClientConfig {
-        TaskServiceGenericConfig() : TaskServiceGenericWithoutClientConfig() {
-            define("service_name","/service","Name of the service",true);
+        TaskServiceGenericConfig(const std::string & defaultServiceName,double defautServerTimeout=5.0) : TaskServiceGenericWithoutClientConfig(defautServerTimeout) {
+            define("service_name",defaultServiceName,"Name of the service",true);
         }
     };
 
