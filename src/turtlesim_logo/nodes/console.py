@@ -17,11 +17,11 @@ rospy.init_node('task_console',disable_signals=False)
 server_node = rospy.get_param("~server",server_node)
 default_period = rospy.get_param("~period",default_period)
 
-print "Node: " + str(server_node)
+print("Node: " + str(server_node))
 tc = TaskClient(server_node,default_period)
 def signal_handler(signal, frame):
     global tc
-    print "Killing all tasks by stopping the keep-alive pulse"
+    print("Killing all tasks by stopping the keep-alive pulse")
     tc.stopAllTasks()
 
 signal.signal(signal.SIGINT,signal_handler)
@@ -36,14 +36,14 @@ def param_string(t):
 
 def index_tasks():
     global tc
-    print "Known tasks summary:"
+    print("Known tasks summary:")
     for t in tc.tasklist.values():
-        print "  %-16s: %s" % (t.name,t.help)
-    print "Tasks name can be used as functions, e.g. Wait(duration=1.0)"
-    print "Use help(Task) to get help on a specific task, e.g. help(Wait)"
-    print "Use Ctrl-C to stop the keep-alive thread and kill all tasks"
-    print "Type status() to display the status of currently running tasks"
-    print "Type index() to display this summary"
+        print("  %-16s: %s" % (t.name,t.help))
+    print( "Tasks name can be used as functions, e.g. Wait(duration=1.0)")
+    print( "Use help(Task) to get help on a specific task, e.g. help(Wait)")
+    print( "Use Ctrl-C to stop the keep-alive thread and kill all tasks")
+    print( "Type status() to display the status of currently running tasks")
+    print( "Type index() to display this summary")
 
 def status():
     global tc

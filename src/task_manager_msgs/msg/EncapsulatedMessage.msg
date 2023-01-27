@@ -1,3 +1,3 @@
 string type
 string md5sum
-string data
+uint8[] data

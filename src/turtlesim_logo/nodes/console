@@ -2,5 +2,5 @@
 
 path=`rospack find turtlesim_logo`
 
-ipython --no-banner -i $path/nodes/console.py -- -s /task_server $*
+ipython3 --no-banner -i $path/nodes/console.py -- -s /task_server $*
 

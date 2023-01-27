@@ -148,6 +148,24 @@ void TaskInstanceBase::doInitialise(unsigned int runtimeId, const TaskParameters
 	statusString.clear();
     this->parseParameters(parameters);
 	taskStatus = this->initialise();
+    switch (taskStatus) {
+        case task_manager_msgs::TaskStatus::TASK_INITIALISED: 
+        case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED:
+            break;
+
+        case task_manager_msgs::TaskStatus::TASK_NEWBORN: 
+        case task_manager_msgs::TaskStatus::TASK_TERMINATED: 
+        case task_manager_msgs::TaskStatus::TASK_CONFIGURED: 
+        case task_manager_msgs::TaskStatus::TASK_RUNNING: 
+        case task_manager_msgs::TaskStatus::TASK_COMPLETED: 
+        case task_manager_msgs::TaskStatus::TASK_FAILED: 
+        case task_manager_msgs::TaskStatus::TASK_TIMEOUT: 
+        case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED:
+        default: 
+            ROS_WARN("Task %s: initialise returned a weird status %s",
+                    getName().c_str(),taskStatusToString(taskStatus));
+            break;
+    }
 }
 
 void TaskInstanceBase::doIterate()
@@ -162,6 +180,24 @@ void TaskInstanceBase::doIterate()
         taskStatus = task_manager_msgs::TaskStatus::TASK_RUNNING;
         taskStatus = this->iterate();
     }
+    switch (taskStatus) {
+        case task_manager_msgs::TaskStatus::TASK_RUNNING: 
+        case task_manager_msgs::TaskStatus::TASK_COMPLETED: 
+        case task_manager_msgs::TaskStatus::TASK_FAILED: 
+            break;
+
+        case task_manager_msgs::TaskStatus::TASK_TERMINATED: 
+        case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED:
+        case task_manager_msgs::TaskStatus::TASK_INITIALISED: 
+        case task_manager_msgs::TaskStatus::TASK_NEWBORN: 
+        case task_manager_msgs::TaskStatus::TASK_CONFIGURED: 
+        case task_manager_msgs::TaskStatus::TASK_TIMEOUT: 
+        case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED:
+        default: 
+            ROS_WARN("Task %s: iterate returned a weird status %s",
+                    getName().c_str(),taskStatusToString(taskStatus));
+            break;
+    }
 }
 
 void TaskInstanceBase::doTerminate()
@@ -169,6 +205,24 @@ void TaskInstanceBase::doTerminate()
     boost::shared_lock<boost::shared_mutex> guard(env_gen->environment_mutex);
 	statusString.clear();
     TaskIndicator ti = this->terminate();
+    switch (ti) {
+        case task_manager_msgs::TaskStatus::TASK_TERMINATED: 
+        case task_manager_msgs::TaskStatus::TASK_FAILED: 
+            break;
+
+        case task_manager_msgs::TaskStatus::TASK_INITIALISATION_FAILED:
+        case task_manager_msgs::TaskStatus::TASK_INITIALISED: 
+        case task_manager_msgs::TaskStatus::TASK_NEWBORN: 
+        case task_manager_msgs::TaskStatus::TASK_CONFIGURED: 
+        case task_manager_msgs::TaskStatus::TASK_RUNNING: 
+        case task_manager_msgs::TaskStatus::TASK_COMPLETED: 
+        case task_manager_msgs::TaskStatus::TASK_TIMEOUT: 
+        case task_manager_msgs::TaskStatus::TASK_CONFIGURATION_FAILED:
+        default: 
+            ROS_WARN("Task %s: terminate returned a weird status %s",
+                    getName().c_str(),taskStatusToString(taskStatus));
+            break;
+    }
     if (ti == task_manager_msgs::TaskStatus::TASK_TERMINATED) {
         taskStatus |= task_manager_msgs::TaskStatus::TASK_TERMINATED; 
     } else {
