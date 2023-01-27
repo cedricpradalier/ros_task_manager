@@ -1,10 +1,15 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('button_server')
+import sys
+
+import roslib; 
 import rospy
 
 
-from button_server.ButtonServer3 import ButtonServer
+if sys.version[0] == '3':
+    from button_server.ButtonServer3 import ButtonServer
+else:
+    from button_server.ButtonServer2 import ButtonServer
 
 if __name__ == '__main__':
     try:
