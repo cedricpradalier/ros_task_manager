@@ -4,7 +4,12 @@ import roslib; roslib.load_manifest('button_server')
 import rospy
 
 
-from button_server.ButtonServer3 import ButtonServer
+import sys
+if sys.version[0] == '3':
+    from button_server.ButtonServer3 import ButtonServer
+else:
+    from button_server.ButtonServer2 import ButtonServer
+
 
 if __name__ == '__main__':
     try:

@@ -84,6 +84,24 @@ void TaskInstanceBase::doInitialise(unsigned int runtimeId, const task_manager_l
     
     taskStatus = this->initialise();
 
+    switch (taskStatus) {
+        case task_manager_msgs::msg::TaskStatus::TASK_INITIALISED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_INITIALISATION_FAILED:
+            break;
+
+        case task_manager_msgs::msg::TaskStatus::TASK_NEWBORN: 
+        case task_manager_msgs::msg::TaskStatus::TASK_TERMINATED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_RUNNING: 
+        case task_manager_msgs::msg::TaskStatus::TASK_COMPLETED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_FAILED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_TIMEOUT: 
+        case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURATION_FAILED:
+        default: 
+            RCLCPP_WARN(node->get_logger(), "Task %s: initialise returned a weird status %s",
+                    getName().c_str(),taskStatusToString(taskStatus));
+            break;
+    }
 }
 
 void TaskInstanceBase::updateParameters() {
@@ -105,6 +123,24 @@ void TaskInstanceBase::doIterate()
         taskStatus = task_manager_msgs::msg::TaskStatus::TASK_RUNNING;
         taskStatus = this->iterate();
     }
+    switch (taskStatus) {
+        case task_manager_msgs::msg::TaskStatus::TASK_RUNNING: 
+        case task_manager_msgs::msg::TaskStatus::TASK_COMPLETED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_FAILED: 
+            break;
+
+        case task_manager_msgs::msg::TaskStatus::TASK_TERMINATED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_INITIALISATION_FAILED:
+        case task_manager_msgs::msg::TaskStatus::TASK_INITIALISED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_NEWBORN: 
+        case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_TIMEOUT: 
+        case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURATION_FAILED:
+        default: 
+            RCLCPP_WARN(node->get_logger(), "Task %s: iterate returned a weird status %s",
+                    getName().c_str(),taskStatusToString(taskStatus));
+            break;
+    }
 }
 
 void TaskInstanceBase::doTerminate()
@@ -113,6 +149,24 @@ void TaskInstanceBase::doTerminate()
     std::unique_lock<std::mutex> guard(env_gen->environment_mutex);
 	statusString.clear();
     TaskIndicator ti = this->terminate();
+    switch (ti) {
+        case task_manager_msgs::msg::TaskStatus::TASK_TERMINATED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_FAILED: 
+            break;
+
+        case task_manager_msgs::msg::TaskStatus::TASK_INITIALISATION_FAILED:
+        case task_manager_msgs::msg::TaskStatus::TASK_INITIALISED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_NEWBORN: 
+        case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_RUNNING: 
+        case task_manager_msgs::msg::TaskStatus::TASK_COMPLETED: 
+        case task_manager_msgs::msg::TaskStatus::TASK_TIMEOUT: 
+        case task_manager_msgs::msg::TaskStatus::TASK_CONFIGURATION_FAILED:
+        default: 
+            RCLCPP_WARN(node->get_logger(), "Task %s: terminate returned a weird status %s",
+                    getName().c_str(),taskStatusToString(taskStatus));
+            break;
+    }
     if (ti == task_manager_msgs::msg::TaskStatus::TASK_TERMINATED) {
         taskStatus |= task_manager_msgs::msg::TaskStatus::TASK_TERMINATED; 
     } else {
