@@ -5,6 +5,9 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
+// #define BE_WEIRD_1
+// #define BE_WEIRD_2
+// #define BE_WEIRD_3
 
 TaskIndicator TaskGoTo::initialise()  {
     initial_pose = env->getPose();
@@ -19,7 +22,11 @@ TaskIndicator TaskGoTo::initialise()  {
     } else {
         ROS_INFO("TaskGoTo: Going to (%.2f,%.2f)",cfg.goal_x,cfg.goal_y);
     }
+#ifdef BE_WEIRD_1
+    return TaskStatus::TASK_RUNNING;
+#else
     return TaskStatus::TASK_INITIALISED;
+#endif
 }
             
 
@@ -49,7 +56,11 @@ TaskIndicator TaskGoTo::iterate()
 		return TaskStatus::TASK_COMPLETED;
     }
     if (r < cfg.dist_threshold) {
-		return TaskStatus::TASK_COMPLETED;
+#ifdef BE_WEIRD_2
+        return TaskStatus::TASK_INITIALISED;
+#else
+        return TaskStatus::TASK_COMPLETED;
+#endif
     }
     double alpha = remainder(atan2((goal_y-tpose.y),goal_x-tpose.x)-tpose.theta,2*M_PI);
     // printf("g %.1f %.1f r %.3f alpha %.1f\n",cfg.goal_x,cfg.goal_y,r,alpha*180./M_PI);
@@ -70,7 +81,11 @@ TaskIndicator TaskGoTo::iterate()
 TaskIndicator TaskGoTo::terminate()
 {
     env->publishVelocity(0,0);
+#ifdef BE_WEIRD_3
+	return TaskStatus::TASK_COMPLETED;
+#else
 	return TaskStatus::TASK_TERMINATED;
+#endif
 }
 
 DYNAMIC_TASK(TaskFactoryGoTo);
