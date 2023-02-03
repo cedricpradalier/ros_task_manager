@@ -565,8 +565,23 @@ namespace task_manager_lib {
             public:
                 typedef TaskInstance<CFG,ENV> Parent;
             protected:
+
+                // Inherited structure from CFG because there is no function to remove the parameters from the server in the default 
+                // CFG object and it's easier to access all of these from a derived class.
+                struct CFGWithDelete : public CFG {
+                    CFGWithDelete() : CFG() {}
+                    void __deleteFromServer__(const ros::NodeHandle &nh) const
+                    {
+                        const std::vector<typename CFG::AbstractParamDescriptionConstPtr> &__param_descriptions__ = this->__getParamDescriptions__();
+                        for (typename std::vector<typename CFG::AbstractParamDescriptionConstPtr>::const_iterator i = __param_descriptions__.begin(); i != __param_descriptions__.end(); ++i)
+                            nh.deleteParam((*i)->name);
+                    }
+                };
+                    
+
                 class DynRecfgData {
                     protected:
+                        ros::NodeHandle nh;
                         boost::shared_ptr< dynamic_reconfigure::Server<CFG> > srv;
                         boost::recursive_mutex mutex;
                         typename dynamic_reconfigure::Server<CFG>::CallbackType f;               
@@ -575,11 +590,19 @@ namespace task_manager_lib {
                             char node_name[td->getName().size()+64];
                             sprintf(node_name,"~%s_%d",td->getName().c_str(),
                                     td->getRuntimeId());
+                            nh = ros::NodeHandle(node_name);
                             f = boost::bind(&Parent::reconfigureCallback,td, _1, _2);
-                            srv.reset(new dynamic_reconfigure::Server<CFG>(mutex,ros::NodeHandle(node_name)));
+                            srv.reset(new dynamic_reconfigure::Server<CFG>(mutex,nh));
                             srv->updateConfig(cfg);
                             srv->setCallback(f);
                         }
+
+                        ~DynRecfgData() {
+                            CFGWithDelete cwd;
+                            cwd.__deleteFromServer__(nh);
+                            srv.reset();
+                        }
+
                 };
                 friend class DynRecfgData;
                 boost::shared_ptr<DynRecfgData> recfg;
