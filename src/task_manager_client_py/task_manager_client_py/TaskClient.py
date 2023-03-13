@@ -1,25 +1,20 @@
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_lib')
 import threading
-import rospy
-import rospy.core
-import rospy.timer
+import rclpy
+from rclpy.node import Node
 import std_msgs.msg
+from std_msgs.msg import Header
 from task_manager_msgs.msg import *
-from task_manager_msgs.encapsulate_message import encapsulate
-from task_manager_lib.srv import *
-from dynamic_reconfigure.encoding import *
-from task_manager_lib.parameter_generator import ParameterListAction
+from task_manager_msgs.srv import *
+from rcl_interfaces.msg import ParameterType, Parameter
+from rclpy.time import Time
 
 # python3
 from functools import reduce
 import argparse
 import threading
-import importlib
 
 import time
-import socket
-import sys
 
 class TaskException(Exception):
     def __init__(self, value,id=None,status=None,statusString=""):
@@ -61,7 +56,7 @@ class ConditionIsCompleted(Condition):
     def isVerified(self):
         if not self.tc.isKnown(self.taskId):
             return False
-        return self.tc.isCompleted(self.taskId) 
+        return self.tc.isCompleted(self.taskId)
 
 class ConditionVariable(Condition):
     def __init__(self, name):
@@ -74,7 +69,6 @@ class ConditionVariable(Condition):
     def isVerified(self):
         return self.var
 
-
 class ConditionIsRunning(Condition):
     def __init__(self, name, tc, taskId):
         self.name = name
@@ -86,8 +80,7 @@ class ConditionIsRunning(Condition):
             return False
         return not self.tc.isCompleted(self.taskId)
 
-
-class TaskClient:
+class TaskClient(Node):
     sock = None
     verbose = 0
     messageid = 0
@@ -122,60 +115,42 @@ class TaskClient:
     def registerStatusFunction(self,f):
         self.status_functions.append(f)
 
-    def getParameterListAction(self):
-        return ParameterListAction()
-
     class TaskDefinition:
         name = ""
         help = ""
         client = None
-        def __init__(self,name,help,cfg,client):
+        def __init__(self,name,help,periodic,cfg,client):
             self.name = name
             self.help = help
+            self.periodic = periodic
             self.config = cfg
-            params = extract_params(decode_description(self.config))
-            self.params = dict([(p["name"],p) for p in params])
-            for p in self.params.values():
-                if p["type"]=="int":
-                    p["conv"]=int
-                if p["type"]=="double":
-                    p["conv"]=float
-                if p["type"]=="str":
-                    p["conv"]=str
-                if p["type"]=="bool":
-                    p["conv"]=bool
-            self.client = client
+            self.params = dict([(p.name,p) for p in cfg])
 
-        def getActionDict(self, pkg, task=None, cfg=None):
-            """
-            Ugly helper function to get simple parameter names for tasks whose 
-            config includes a task_action (TaskParameterListGenerator)
-            Although this has the advantage of depending only
-            on the constants defined in the task parameter module, one should
-            use TaskClient.getParameterListAction() 
-            """
-            if task is None:
-                task="Task"+self.name
-            if cfg is None:
-                cfg=task+"Config"
-            d = {}
-            module = "%s.cfg.%s" % (pkg,cfg)
-            mod = importlib.import_module(module)
-            d["Clear"] = eval("mod.%s_Clear" % task)
-            d["Push"] = eval("mod.%s_Push" % task)
-            d["Execute"] = eval("mod.%s_Execute" % task)
-            return d
+            self.conv = dict()
+            for p in self.params.values():
+                if p.type == ParameterType.PARAMETER_INTEGER:
+                    self.conv[p.name] = int
+                if p.type == ParameterType.PARAMETER_DOUBLE:
+                    self.conv[p.name] = float
+                if p.type == ParameterType.PARAMETER_STRING:
+                    self.conv[p.name] = str
+                if p.type == ParameterType.PARAMETER_BOOL:
+                    self.conv[p.name] = bool
+
+            # print("DEBUG:", cfg)
+            # params = extract_params(decode_description(self.config))
+            self.client = client
 
         def prepareParams(self,paramdict):
             for p in paramdict:
-                if p not in self.params:
+                if p not in self.conv:
                     raise NameError("%s: Parameter '%s' is not declared for task '%s'" % (self.client.server_node,p,self.name))
                 try:
-                    paramdict[p] = self.params[p]["conv"](paramdict[p])
+                    paramdict[p] = self.conv[p](paramdict[p])
                 except ValueError:
                     raise ValueError("%s: Could not convert argument '%s' from '%s' to '%s'"
-                            % (self.client.server_node,p, str(paramdict[p]), self.params[p]["type"]))
-                        
+                            % (self.client.server_node,p, str(paramdict[p]), self.params[p].type))
+
             paramdict['task_name'] = self.name
             return paramdict
 
@@ -185,7 +160,7 @@ class TaskClient:
                 argv = paramdict['argv']
                 del paramdict['argv']
             paramdict = self.prepareParams(paramdict)
-            id = self.client.startTask(paramdict,argv=argv)
+            id = self.client.startTask(paramdict)
             return id
 
         def __call__(self,**paramdict):
@@ -198,12 +173,12 @@ class TaskClient:
             if ('foreground' in paramdict):
                 foreground = bool(paramdict['foreground'])
             if (foreground):
-                rospy.loginfo("%s: Starting task %s in foreground" % (self.client.server_node,self.name))
+                self.client.get_logger().info("%s: Starting task %s in foreground" % (self.client.server_node,self.name))
                 res = self.client.startTaskAndWait(paramdict,argv=argx)
                 return res
             else:
                 id = self.client.startTask(paramdict,argv=argx)
-                rospy.loginfo("%s: Starting task %s in background: %d" % (self.client.server_node,self.name,id))
+                self.get_logger().info("%s: Starting task %s in background: %d" % (self.client.server_node,self.name,id))
                 return id
 
     class TaskStatus:
@@ -226,15 +201,16 @@ class TaskClient:
             return output
 
     def __init__(self,server_node,default_period):
+        super().__init__('task_client')
         self.serviceLock = threading.RLock()
         self.statusLock = threading.RLock()
         self.statusCond = threading.Condition(self.statusLock)
         parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
         parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),
                 nargs=1, help='server node name, e.g. /task_server', type=str)
-        parser.add_argument('--period', '-p',default=default_period,type=float, 
+        parser.add_argument('--period', '-p',default=default_period,type=float,
                 nargs=1, help='default period for new tasks')
-        parser.add_argument('--check', '-c',action='store_const', const=True, dest='check', default=False,  
+        parser.add_argument('--check', '-c',action='store_const', const=True, dest='check', default=False,
                 help='if set, only test task syntax, but do not run')
         args,unknown = parser.parse_known_args()
         # print args
@@ -245,75 +221,107 @@ class TaskClient:
             self.server_node=args.server
         self.check_only=args.check
 
-        rospy.loginfo("Creating link to services on node " + self.server_node)
+        self.get_logger().info("Creating link to services on node " + self.server_node)
         if self.check_only:
-            rospy.loginfo("%s: Dry-run only: this might not work for complex mission"%self.server_node)
-        try:
-            rospy.wait_for_service(self.server_node + '/get_all_tasks')
-            self.get_task_list = rospy.ServiceProxy(self.server_node + '/get_all_tasks', GetTaskList)
-            rospy.wait_for_service(self.server_node + '/start_task')
-            self.start_task = rospy.ServiceProxy(self.server_node + '/start_task', StartTask)
-            rospy.wait_for_service(self.server_node + '/stop_task')
-            self.stop_task = rospy.ServiceProxy(self.server_node + '/stop_task', StopTask)
-            rospy.wait_for_service(self.server_node + '/get_all_status')
-            self.get_status = rospy.ServiceProxy(self.server_node + '/get_all_status', GetAllTaskStatus)
-        except rospy.ServiceException as e:
-            rospy.logerr("%s: Service initialisation failed: %s"%(self.server_node,e))
-            raise
+            self.get_logger().info("%s: Dry-run only: this might not work for complex mission"%self.server_node)
 
-        self.keepAlivePub = rospy.Publisher(self.server_node + "/keep_alive",std_msgs.msg.Header,queue_size=1)
-        self.statusSub = rospy.Subscriber(self.server_node + "/status",
-                TaskStatus, self.status_callback)
-        self.timer = rospy.timer.Timer(rospy.Duration(0.1),self.timerCallback)
+        self.cli_get_all_tasks = self.create_client(GetTaskList, self.server_node + '/get_all_tasks')
+        self.cli_start_task = self.create_client(StartTask, self.server_node + '/start_task')
+        self.cli_stop_task = self.create_client(StopTask, self.server_node + '/stop_task')
+        self.cli_get_all_status = self.create_client(GetAllTaskStatus, self.server_node + '/get_all_status')
+
+        while not self.cli_get_all_tasks.wait_for_service(1.0):
+            self.get_logger().info('Service ' + self.server_node + '/get_all_tasks not available...')
+        while not self.cli_start_task.wait_for_service(1.0):
+            self.get_logger().info('Service ' + self.server_node + '/start_task not available...')
+        while not self.cli_stop_task.wait_for_service(1.0):
+            self.get_logger().info('Service ' + self.server_node + '/stop_task not available...')
+        while not self.cli_get_all_status.wait_for_service(1.0):
+            self.get_logger().info('Service ' + self.server_node + '/get_all_status not available...')
+
+        self.req_get_all_tasks = GetTaskList.Request()
+        self.req_start_task = StartTask.Request()
+        self.req_stop_task = StopTask.Request()
+        self.req_get_all_status = GetAllTaskStatus.Request()
+
+        self.keepAlivePub = self.create_publisher(Header, self.server_node + '/keep_alive', 1)
+        self.statusSub = self.create_subscription(TaskStatus, self.server_node + "/status", self.status_callback, 1)
+        self.timer = self.create_timer(0.1, self.timerCallback)
+
 
         self.updateTaskList()
         self.updateTaskStatus()
-        rospy.sleep(0.5)
+
         self.idle()
-        rospy.sleep(0.5)
-
-
 
     def __del__(self):
-        if not rospy.is_shutdown():
-            self.idle()
+        # print("DEBUG: Deleting task client object")
+        try:
+            if rclpy.ok():
+                self.idle()
+        except Exception as e:
+            pass
 
     def __getattr__(self,name):
         if name=="__dir__":
             return self.tasklist.keys
         return self.tasklist[name]
 
-
-    def timerCallback(self,timerEvent):
-        if self.keepAlive and not rospy.is_shutdown():
+    def timerCallback(self):
+        if self.keepAlive and rclpy.ok():
             try:
                 header = std_msgs.msg.Header()
-                header.stamp = rospy.Time.now()
+                header.stamp = self.get_clock().now().to_msg()
                 self.keepAlivePub.publish(header)
-            except rospy.ROSException as e:
+            except Exception as e:
+                print(e)
                 # Ignore, this sometimes happens on shutdown
                 pass
 
     def updateTaskList(self):
-        try:
-            with self.serviceLock:
-                resp = self.get_task_list()
-            self.tasklist = {}
-            for t in resp.tlist:
-                self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.config,self)
-        except rospy.ServiceException as e:
-            rospy.logerr("Service call failed: %s"%e)
+        # print("DEBUG: update the task list")
+        # try:
+        with self.serviceLock:
+            self.future = self.cli_get_all_tasks.call_async(self.req_get_all_tasks)
+            rclpy.spin_until_future_complete(self, self.future)
+            resp = self.future.result()
+        self.tasklist = {}
+        for t in resp.tlist:
+            # print(t.name)
+            self.tasklist[t.name] = self.TaskDefinition(t.name,t.description,t.periodic,t.config,self)
+        # except Exception as e:
+            # self.get_logger().error("Service call failed: %s"%e)
 
     def printTaskList(self):
         for k,v in self.tasklist.items():
             print("Task %s: %s" % (k,v.help))
 
+    def encodeConfig(self, paramdict):
+        config = []
+        for p in paramdict:
+            P = Parameter()
+            P.name = p
+            value = paramdict[p]
+            if type(value)==int:
+                P.value.type = ParameterType.PARAMETER_INTEGER
+                P.value.integer_value = value
+            elif type(value)==float:
+                P.value.type = ParameterType.PARAMETER_DOUBLE
+                P.value.double_value = value
+            elif type(value)==bool:
+                P.value.type = ParameterType.PARAMETER_BOOL
+                P.value.bool_value = value
+            elif type(value)==str:
+                P.value.type = ParameterType.PARAMETER_STRING
+                P.value.string_value = value
+            config.append(P)
+        return config
 
     def startTask(self,paramdict,name="",foreground=True,period=-1,argv=None):
-        if rospy.is_shutdown():
+        if not rclpy.ok():
             raise TaskException("Aborting due to ROS shutdown")
         if self.check_only:
-            rospy.sleep(0.5)
+            self.sleep()
             return 0
         if period < 0:
             period = self.default_period
@@ -327,25 +335,30 @@ class TaskClient:
                 paramdict['foreground'] = bool(paramdict['foreground'])
             if (period>0) and ('task_period' not in paramdict):
                 paramdict['task_period'] = float(period)
-            config = encode_config(paramdict)
+            config = self.encodeConfig(paramdict)
             if argv:
-                extra = encapsulate(argv)
+                extra = EncapsulatedMessage()
+                self.get_logger().error("Not implemented")
             else:
                 extra = EncapsulatedMessage()
             # print config
-            rospy.loginfo("Starting task %s" % name)
+            self.get_logger().info("Starting task %s" % name)
             with self.serviceLock:
-                resp = self.start_task(name,config,extra)
+                self.req_start_task.name = name
+                self.req_start_task.config = config
+                self.future = self.cli_start_task.call_async(self.req_start_task)
+                rclpy.spin_until_future_complete(self, self.future)
+                resp = self.future.result()
             self.keepAlive = True
             return resp.id
-        except rospy.ServiceException as e:
-            rospy.logerr( "Service call failed: %s"%e)
+        except Exception as e:
+            self.get_logger().error("Service call failed: %s"%e)
             raise
 
     def startTaskAndWait(self,paramdict,name="",foreground=True,period=-1.,argv=None):
         tid = self.startTask(paramdict,name,foreground,period,argv)
         if (self.verbose):
-            rospy.logdebug( "Waiting task %d" % tid)
+            self.get_logger().info("Waiting task %d" % tid)
         if self.check_only:
             return True
         return self.waitTask(tid)
@@ -353,19 +366,25 @@ class TaskClient:
     def stopTask(self,id):
         try:
             with self.serviceLock:
-                resp = self.stop_task(id)
+                self.req_stop_task.id = id
+                self.future = self.cli_stop_task.call_async(self.req_stop_task)
+                rclpy.spin_until_future_complete(self, self.future)
+                resp = self.future.result()
             return 0
-        except rospy.ServiceException as e:
-            rospy.logerr( "Service call failed: %s"%e)
+        except Exception as e:
+            self.get_logger().error( "Service call failed: %s"%e)
             raise
 
     def idle(self):
         try:
             with self.serviceLock:
-                resp = self.stop_task(-1)
+                self.req_stop_task.id = -1
+                self.future = self.cli_stop_task.call_async(self.req_stop_task)
+                rclpy.spin_until_future_complete(self, self.future)
+                resp = self.future.result()
             return 0
-        except rospy.ServiceException as e:
-            rospy.logerr( "Service call failed: %s"%e)
+        except Exception as e:
+            self.get_logger().error( "Service call failed: %s"%e)
             raise
 
     def status_string(self,v):
@@ -376,6 +395,7 @@ class TaskClient:
             return self.taskStatusStrings[v]
 
     def status_callback(self,t):
+        # self.get_logger().info("status cb")
         with self.statusLock:
             ts = self.TaskStatus(self)
             ts.id = t.id
@@ -384,10 +404,10 @@ class TaskClient:
             ts.status = status & 0x000000FF
             ts.foreground = bool(status & 0x100)
             ts.statusString = t.status_string
-            ts.statusTime = t.status_time.to_sec()
+            ts.statusTime = Time.from_msg(t.status_time).nanoseconds / 1e9
             self.taskstatus[ts.id] = ts
 
-            t = rospy.Time.now().to_sec()
+            t = self.get_clock().now().nanoseconds / 1e9
             to_be_deleted = []
             for k,v in self.taskstatus.items():
                 if (t - v.statusTime) > 10.0:
@@ -401,8 +421,6 @@ class TaskClient:
         except RuntimeError:
             # Nobody is waiting
             pass
-
-
 
     def isKnown(self,taskId):
         with self.statusLock:
@@ -420,7 +438,10 @@ class TaskClient:
         try:
             with self.statusLock:
                 with self.serviceLock:
-                    resp = self.get_status()
+                    # resp = self.get_status()
+                    self.future = self.cli_get_all_status.call_async(self.req_get_all_status)
+                    rclpy.spin_until_future_complete(self, self.future)
+                    resp = self.future.result()
                 for t in resp.running_tasks + resp.zombie_tasks:
                     ts = self.TaskStatus(self)
                     ts.id = t.id
@@ -429,42 +450,43 @@ class TaskClient:
                     ts.status = status & 0x000000FF
                     ts.foreground = bool(status & 0x100)
                     ts.statusString = t.status_string
-                    ts.statusTime = t.status_time.to_sec()
+                    ts.statusTime = Time.from_msg(t.status_time).nanoseconds / 1e9
                     self.taskstatus[ts.id] = ts
             try:
                 self.statusCond.notify_all()
             except RuntimeError:
                 # Nobody is waiting
                 pass
-        except rospy.ServiceException as e:
-            rospy.logerr( "%s: Service call failed: %s"%(self.server_node,e))
+        except Exception as e:
+            self.get_logger().error( "%s: Service call failed: %s"%(self.server_node,e))
             raise
 
     def waitTaskList(self,ids,wait_for_all, stop_others):
         statusTerminated = self.taskStatusId['TASK_TERMINATED']
-        t0 = rospy.Time.now().to_sec()
+        t0 = self.get_clock().now()
         completed = dict([(id,False) for id in ids])
         red_fun = lambda x,y: x or y
         if wait_for_all:
             red_fun = lambda x,y: x and y
 
         with self.statusLock:
-            while not rospy.core.is_shutdown():
+            while rclpy.ok():
+                rclpy.spin_once(self)
                 if self.verbose>1:
                     self.printTaskStatus()
-                t1 = rospy.Time.now().to_sec()
+                t1 = self.get_clock().now()
                 if (self.anyConditionVerified()):
                     for id in ids:
                         self.stopTask(id)
                     trueConditions = self.getVerifiedConditions();
                     self.clearConditions()
-                    rospy.loginfo("%s: Task %s terminated on condition" % (self.server_node,str(ids)))
+                    self.get_logger().info("%s: Task %s terminated on condition" % (self.server_node,str(ids)))
                     raise TaskConditionException("%s: Task %s terminated on condition" % (self.server_node,str(ids)),trueConditions)
                 for id in ids:
                     if id not in self.taskstatus:
                         if (t1-t0) > 2.0: 
                             if (self.verbose):
-                                rospy.logerr("%s: Id %d not in taskstatus" % (self.server_node,id))
+                                self.get_logger().error("%s: Id %d not in taskstatus" % (self.server_node,id))
                             raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
                     else:
                         if self.verbose>1:
@@ -474,11 +496,11 @@ class TaskClient:
                         status = self.taskstatus[id].status & (~statusTerminated)
                         if (status == self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
-                                rospy.loginfo("%s: Task %d terminated (%d)" % (self.server_node,id,status))
+                                self.get_logger().info("%s: Task %d terminated (%d)" % (self.server_node,id,status))
                             completed[id] = True
                         elif (status > self.taskStatusId["TASK_COMPLETED"]):
                             if (self.verbose):
-                                rospy.logwarn( "%s: Task %d failed (%d - %s)" %  (self.server_node,id,status,self.status_string(status)))
+                                self.get_logger().warn( "%s: Task %d failed (%d - %s)" %  (self.server_node,id,status,self.status_string(status)))
                             raise TaskException("%s: Task %d:%s failed: %d:%s" % (self.server_node,id,self.taskstatus[id].name,status,self.status_string(status)), id, status,self.taskstatus[id].statusString);
                             # instead of raise?
                             # completed[id] = True
@@ -491,7 +513,7 @@ class TaskClient:
                 # This would be a good idea, except that python is not
                 # receiving the messages while waiting for the condition
                 self.statusCond.wait(0.020)
-            if rospy.core.is_shutdown():
+            if not rclpy.ok():
                 raise TaskException("%s: Aborting due to ROS shutdown"%self.server_node);
             return False
 
