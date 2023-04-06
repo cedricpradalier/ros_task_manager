@@ -477,7 +477,7 @@ class TaskClient(Node):
             while rclpy.ok():
                 self.nothing_new=True
                 while rclpy.ok() and self.nothing_new:
-                    rclpy.spin_once(self,timeout_sec=0)
+                    rclpy.spin_once(self,timeout_sec=0.1)
                 # This would be a good idea, except that python is not
                 # receiving the messages while waiting for the condition
                 # self.statusCond.wait(0.020)
