@@ -3,6 +3,7 @@ import time
 from task_manager_msgs.srv import StartTask
 from rcl_interfaces.msg import Parameter,ParameterValue,ParameterType
 import rclpy
+# from rclpy.executors import MultiThreadedExecutor
 
 from TaskClient import TaskClient
 
@@ -26,6 +27,8 @@ def main(args=None):
 
     server_node = "/turtlesim_tasks"
     tc = TaskClient(server_node, 0.1)
+    # executor = MultiThreadedExecutor(num_threads=2)
+    # executor.add_node(tc)
     print("Task client created")
     tc.verbose = 1
     index(tc)
@@ -33,10 +36,8 @@ def main(args=None):
     tc.Clear()
     tc.GoTo(goal_x=9,goal_y=9)
 
-    # rclpy.spin(tc)
-    # time.sleep(10)
-    del(tc)
-    rclpy.shutdown()
+    # del(tc)
+    # rclpy.shutdown()
 
 
 if __name__ == '__main__':

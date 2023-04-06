@@ -1,20 +1,18 @@
 # ROS specific imports
-import threading
 import rclpy
 from rclpy.node import Node
-import std_msgs.msg
+from rclpy.time import Time
 from std_msgs.msg import Header
+from rcl_interfaces.msg import ParameterType, Parameter
 from task_manager_msgs.msg import *
 from task_manager_msgs.srv import *
-from rcl_interfaces.msg import ParameterType, Parameter
-from rclpy.time import Time
+# from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 
 # python3
 from functools import reduce
 import argparse
 import threading
 
-import time
 
 class TaskException(Exception):
     def __init__(self, value,id=None,status=None,statusString=""):
@@ -205,6 +203,7 @@ class TaskClient(Node):
         self.serviceLock = threading.RLock()
         self.statusLock = threading.RLock()
         self.statusCond = threading.Condition(self.statusLock)
+        # self.status_cb_group = ReentrantCallbackGroup()
         parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
         parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),
                 nargs=1, help='server node name, e.g. /task_server', type=str)
@@ -270,7 +269,7 @@ class TaskClient(Node):
     def timerCallback(self):
         if self.keepAlive and rclpy.ok():
             try:
-                header = std_msgs.msg.Header()
+                header = Header()
                 header.stamp = self.get_clock().now().to_msg()
                 self.keepAlivePub.publish(header)
             except Exception as e:
@@ -396,6 +395,7 @@ class TaskClient(Node):
 
     def status_callback(self,t):
         # self.get_logger().info("status cb")
+        # t0 = self.get_clock().now().nanoseconds / 1e9
         with self.statusLock:
             ts = self.TaskStatus(self)
             ts.id = t.id
@@ -407,8 +407,9 @@ class TaskClient(Node):
             ts.statusString = t.status_string
             ts.statusTime = Time.from_msg(t.status_time).nanoseconds / 1e9
             self.taskstatus[ts.id] = ts
-
             t = self.get_clock().now().nanoseconds / 1e9
+            # self.get_logger().info(f"STATUS CB after lock: {t - t0}")
+            # self.get_logger().info(f"STATUS CB id: {ts.id} name: {ts.name} time_diff: {t - ts.statusTime} status:{ts.status} string:{ts.statusString}")
             to_be_deleted = []
             for k,v in self.taskstatus.items():
                 if (t - v.statusTime) > 10.0:
