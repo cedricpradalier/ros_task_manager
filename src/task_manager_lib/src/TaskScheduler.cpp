@@ -97,7 +97,7 @@ TaskScheduler::TaskScheduler(std::shared_ptr<rclcpp::Node> node, TaskDefinitionP
     getHistorySrv = nh.advertiseService("get_history", &TaskScheduler::getHistory,this);
     executeSequenceTasksSrv=nh.advertiseService("execute_sequence", &TaskScheduler::executeTaskSequence ,this);
 #endif
-    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("~/status",5);
+    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("~/status",50);
     keepAliveSub = node->create_subscription<std_msgs::msg::Header>("~/keep_alive",1,std::bind(&TaskScheduler::keepAliveCallback,this,std::placeholders::_1));
     lastKeepAlive = now();
 }
