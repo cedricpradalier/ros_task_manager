@@ -35,6 +35,8 @@ def main(args=None):
     status(tc)
     tc.Clear()
     tc.GoTo(goal_x=9,goal_y=9)
+    tc.GoTo(goal_x=2,goal_y=2)
+    tc.GoTo(goal_x=5,goal_y=5)
 
     # del(tc)
     # rclpy.shutdown()

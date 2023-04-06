@@ -7,7 +7,7 @@ using std::placeholders::_1;
 bool TaskConfig::declareParameters(rclcpp::Node::SharedPtr node) {
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
         if (!it->second.readOnly()) {
-            node->declare_parameter(ns+it->first,it->second.getDefaultValue(),it->second.getDescription());
+            node->declare_parameter(ns+it->first,it->second.getValue(),it->second.getDescription());
         }
     }
     return true;
@@ -33,6 +33,8 @@ void TaskConfig::updateParameters(rclcpp::Node::SharedPtr node) {
         if (!node->get_parameter(ns+it->first,it->second.getValue())) {
             it->second.setDefaultValue();
         }
+        //rcl_interfaces::msg::ParameterValue pv = it->second.getValue().to_value_msg();
+        //RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Get %s: %d %ld %f %s",(ns+it->first).c_str(), pv.bool_value,pv.integer_value,pv.double_value);
     }
 }
 
@@ -44,6 +46,8 @@ void TaskConfig::publishParameters(rclcpp::Node::SharedPtr node) {
         }
         rclcpp::Parameter p(ns+it->first,it->second.getValue());
         node->set_parameter(p);
+        //rcl_interfaces::msg::ParameterValue pv = it->second.getValue().to_value_msg();
+        //RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Set %s: %d %ld %f %s",(ns+it->first).c_str(), pv.bool_value,pv.integer_value,pv.double_value);
     }
 }
 

@@ -251,6 +251,7 @@ class TaskClient(Node):
         self.updateTaskList()
         self.updateTaskStatus()
 
+        self.nothing_new = True
         self.idle()
 
     def __del__(self):
@@ -423,6 +424,7 @@ class TaskClient(Node):
         except RuntimeError:
             # Nobody is waiting
             pass
+        self.nothing_new = False
 
     def isKnown(self,taskId):
         with self.statusLock:
@@ -473,7 +475,12 @@ class TaskClient(Node):
 
         with self.statusLock:
             while rclpy.ok():
-                rclpy.spin_once(self)
+                self.nothing_new=True
+                while rclpy.ok() and self.nothing_new:
+                    rclpy.spin_once(self,timeout_sec=0)
+                # This would be a good idea, except that python is not
+                # receiving the messages while waiting for the condition
+                # self.statusCond.wait(0.020)
                 if self.verbose>1:
                     self.printTaskStatus()
                 t1 = self.get_clock().now()
@@ -512,9 +519,6 @@ class TaskClient(Node):
                             if not v:
                                 self.stopTask(k)
                     return True
-                # This would be a good idea, except that python is not
-                # receiving the messages while waiting for the condition
-                self.statusCond.wait(0.020)
             if not rclpy.ok():
                 raise TaskException("%s: Aborting due to ROS shutdown"%self.server_node);
             return False
