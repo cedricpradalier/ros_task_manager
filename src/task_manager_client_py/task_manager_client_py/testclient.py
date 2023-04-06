@@ -25,15 +25,15 @@ def main(args=None):
     rclpy.init(args=args)
 
     server_node = "/turtlesim_tasks"
-    tc = TaskClient(server_node, 0.5)
+    tc = TaskClient(server_node, 0.1)
     print("Task client created")
     tc.verbose = 1
     index(tc)
     status(tc)
     tc.Clear()
-    tc.GoTo(goal_x=10,goal_y=-10)
+    tc.GoTo(goal_x=9,goal_y=9)
 
-    rclpy.spin(tc)
+    # rclpy.spin(tc)
     # time.sleep(10)
     del(tc)
     rclpy.shutdown()

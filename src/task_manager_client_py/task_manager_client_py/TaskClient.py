@@ -245,7 +245,7 @@ class TaskClient(Node):
         self.req_get_all_status = GetAllTaskStatus.Request()
 
         self.keepAlivePub = self.create_publisher(Header, self.server_node + '/keep_alive', 1)
-        self.statusSub = self.create_subscription(TaskStatus, self.server_node + "/status", self.status_callback, 1)
+        self.statusSub = self.create_subscription(TaskStatus, self.server_node + "/status", self.status_callback, 50)
         self.timer = self.create_timer(0.1, self.timerCallback)
 
 
@@ -401,6 +401,7 @@ class TaskClient(Node):
             ts.id = t.id
             ts.name = t.name
             status = t.status
+            # print((ts.id,ts.name,status,t.status_time,self.get_clock().now()))
             ts.status = status & 0x000000FF
             ts.foreground = bool(status & 0x100)
             ts.statusString = t.status_string
@@ -484,7 +485,7 @@ class TaskClient(Node):
                     raise TaskConditionException("%s: Task %s terminated on condition" % (self.server_node,str(ids)),trueConditions)
                 for id in ids:
                     if id not in self.taskstatus:
-                        if (t1-t0) > 2.0: 
+                        if (t1-t0) > rclpy.duration.Duration(seconds=2.0): 
                             if (self.verbose):
                                 self.get_logger().error("%s: Id %d not in taskstatus" % (self.server_node,id))
                             raise TaskException("%s: Task %d did not appear in task status" % (self.server_node,id),id);
