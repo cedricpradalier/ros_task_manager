@@ -21,8 +21,8 @@ typedef task_manager_msgs::msg::TaskStatus TaskStatus;
 
 unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
 unsigned int TaskScheduler::debug = 1;
-const double TaskScheduler::DELETE_TIMEOUT=2.0;
-const double TaskScheduler::IDLE_TIMEOUT=0.5;
+const rclcpp::Duration TaskScheduler::DELETE_TIMEOUT(2,0);
+const rclcpp::Duration TaskScheduler::IDLE_TIMEOUT(0,0.5*1e9);
 const unsigned int TaskScheduler::history_size=10;
 
 TaskScheduler::ThreadParameters::ThreadParameters(rclcpp::Publisher<task_manager_msgs::msg::TaskStatus>::SharedPtr pub, TaskScheduler *ts, 
@@ -97,7 +97,7 @@ TaskScheduler::TaskScheduler(std::shared_ptr<rclcpp::Node> node, TaskDefinitionP
     getHistorySrv = nh.advertiseService("get_history", &TaskScheduler::getHistory,this);
     executeSequenceTasksSrv=nh.advertiseService("execute_sequence", &TaskScheduler::executeTaskSequence ,this);
 #endif
-    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("~/status",5);
+    statusPub = node->create_publisher<task_manager_msgs::msg::TaskStatus>("~/status",50);
     keepAliveSub = node->create_subscription<std_msgs::msg::Header>("~/keep_alive",1,std::bind(&TaskScheduler::keepAliveCallback,this,std::placeholders::_1));
     lastKeepAlive = now();
 }
@@ -324,7 +324,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(std::shared_ptr<ThreadParameters
 {
 
     if (tp->foreground) {
-        if (debug>1) RCLCPP_INFO(node->get_logger(), "lt:terminate mainThread %s",mainThread->task->getName().c_str());
+        if ((debug>1) && mainThread) RCLCPP_INFO(node->get_logger(), "lt:terminate mainThread %s",mainThread->task->getName().c_str());
         terminateTask(mainThread);
     }
 
@@ -353,7 +353,7 @@ TaskScheduler::TaskId TaskScheduler::launchTask(std::shared_ptr<ThreadParameters
         if (tp->foreground) {
             launchIdleTask();
         }
-        enqueueAction(now()+rclcpp::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
+        enqueueAction(now()+DELETE_TIMEOUT,DELETE_TASK,tp);
         return 0;
     }
     return tp->tpid;
@@ -578,13 +578,23 @@ void TaskScheduler::cleanupTask(std::shared_ptr<ThreadParameters> tp)
     if (tp->foreground) {
         mainThread.reset();
         if (!tp->task->isAnInstanceOf(idle)) {
-            // RCLCPP_INFO(node->get_logger(),  "Back to idle");
-            enqueueAction(now()+rclcpp::Duration(IDLE_TIMEOUT),CONDITIONALLY_IDLE,tp);
+            if (debug > 1) {
+                RCLCPP_INFO(node->get_logger(),  "Back to idle in %f seconds?", IDLE_TIMEOUT.seconds());
+            }
+            enqueueAction(now()+IDLE_TIMEOUT,CONDITIONALLY_IDLE,tp);
+#if 0
         } else {
-            // RCLCPP_INFO(node->get_logger(),  "Terminated foreground task (%d) that is not idle (%d). Weird...",int(tp->task->getDefinition()->getTaskId()), int(idle->getTaskId()));
+            if (debug > 1) {
+                // Not sure why this should be weird
+                RCLCPP_INFO(node->get_logger(),  "Terminated foreground task (%d) that is not idle (%d). Weird...",tp->task->getDefinition()->getTaskId(), idle->getTaskId());
+            }
+#endif
         }
     }
-    enqueueAction(now()+rclcpp::Duration(DELETE_TIMEOUT),DELETE_TASK,tp);
+    if (debug > 1) {
+        RCLCPP_INFO(node->get_logger(),  "Delete task in %f seconds", DELETE_TIMEOUT.seconds());
+    }
+    enqueueAction(now()+DELETE_TIMEOUT,DELETE_TASK,tp);
 
     // There is a risk that we trigger the execution of a new task before
     // starting idle here. In addition, we need one condition per task
@@ -723,7 +733,7 @@ void TaskScheduler::enqueueAction(ActionType type,std::shared_ptr<ThreadParamete
     if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Locked");
     // if (!runScheduler) return;
     double when = now().seconds();
-    if (debug>1) RCLCPP_INFO(node->get_logger(), "Enqueueing action %.3f %s -- %s",when,actionString(type),
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Enqueueing actionN %.3f %s -- %s",when,actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;
@@ -741,7 +751,7 @@ void TaskScheduler::enqueueAction(const rclcpp::Time & when,  ActionType type,st
     std::unique_lock<std::mutex> lock(aqMutex);
     if (debug>1) RCLCPP_INFO(node->get_logger(), "ea:Locked");
     // if (!runScheduler) return;
-    if (debug>1) RCLCPP_INFO(node->get_logger(), "Enqueing action %.3f %s -- %s",when.seconds(),actionString(type),
+    if (debug>1) RCLCPP_INFO(node->get_logger(), "Enqueing action@ %.3f %s -- %s",when.seconds(),actionString(type),
             tp?(tp->task->getName().c_str()):"none");
 
     ta.type = type;

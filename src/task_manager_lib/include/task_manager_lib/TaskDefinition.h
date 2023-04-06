@@ -127,7 +127,7 @@ namespace task_manager_lib {
 
             // Set the task runtime id . Has to be virtual because it is overloaded by
             // the dynamic class proxy.
-            virtual unsigned int getTaskId() const;
+            virtual int getTaskId() const;
 
             // Set the task name . Has to be virtual because it is overloaded by
             // the dynamic class proxy.
@@ -159,7 +159,7 @@ namespace task_manager_lib {
             // All the functions below are intended for the TaskScheduler.
             // Set the task id . Has to be virtual because it is overloaded by
             // the dynamic class proxy.
-            virtual void setTaskId(unsigned int id);
+            virtual void setTaskId(int id);
 
             // Output a debut string, prefixed by the task name
             void debug(const char *stemplate,...) const; 

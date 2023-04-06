@@ -11,11 +11,11 @@ void TaskDefinitionBase::setName(const std::string & n) {
 	name = n;
 }
 
-void TaskDefinitionBase::setTaskId(unsigned int id) {
+void TaskDefinitionBase::setTaskId(int id) {
 	taskId = id;
 }
 
-unsigned int TaskDefinitionBase::getTaskId() const {
+int TaskDefinitionBase::getTaskId() const {
     return taskId;
 }
 

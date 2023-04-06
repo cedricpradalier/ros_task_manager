@@ -111,6 +111,7 @@ namespace task_manager_lib {
             // Set the task runtime id . Has to be virtual because it is overloaded by
             // the dynamic class proxy.
             virtual TaskDefinitionPtr getDefinition();
+            virtual TaskDefinitionConstPtr getDefinition() const;
 
             // Get the status indicator 
             // Has to be virtual because it is overloaded by the dynamic class proxy.
@@ -146,8 +147,8 @@ namespace task_manager_lib {
             virtual void setRuntimeId(unsigned int id);
 
             // Test if a class is an instance of def
-            bool isAnInstanceOf(const TaskDefinitionBase & def);
-            bool isAnInstanceOf(TaskDefinitionConstPtr def);
+            bool isAnInstanceOf(const TaskDefinitionBase & def) const;
+            bool isAnInstanceOf(TaskDefinitionConstPtr def) const;
 
             // Call the virtual initialise function, but prepare the class before
             // hand.

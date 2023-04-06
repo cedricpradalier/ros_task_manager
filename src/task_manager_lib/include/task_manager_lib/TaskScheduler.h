@@ -191,8 +191,8 @@ namespace task_manager_lib {
 			std::shared_ptr<ThreadParameters> mainThread;
 
 		protected:
-			static const double IDLE_TIMEOUT;
-			static const double DELETE_TIMEOUT;
+			static const rclcpp::Duration IDLE_TIMEOUT;
+			static const rclcpp::Duration DELETE_TIMEOUT;
 			static const unsigned int history_size; 
 			// Action management: create task, terminate task
 			typedef enum {

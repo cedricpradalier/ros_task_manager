@@ -25,6 +25,10 @@ TaskDefinitionPtr TaskInstanceBase::getDefinition() {
     return definition;
 }
 
+TaskDefinitionConstPtr TaskInstanceBase::getDefinition() const {
+    return definition;
+}
+
 task_manager_msgs::msg::TaskStatus TaskInstanceBase::getRosStatus() const {
     task_manager_msgs::msg::TaskStatus st;
     st.name = this->getName();
@@ -56,11 +60,13 @@ void TaskInstanceBase::debug(const char *stemplate,...) const {
 	RCLCPP_INFO(node->get_logger(),"%s: %s",this->getName().c_str(),buffer);
 }
 
-bool TaskInstanceBase::isAnInstanceOf(const TaskDefinitionBase & def) {
+bool TaskInstanceBase::isAnInstanceOf(const TaskDefinitionBase & def) const {
+    // RCLCPP_INFO(node->get_logger(),  " %d isAnInstanceOf task %d: %d",this->getDefinition()->getTaskId(), def.getTaskId(), int(this->getDefinition()->getTaskId() == def.getTaskId()));
     return this->getDefinition()->getTaskId() == def.getTaskId();
 }
 
-bool TaskInstanceBase::isAnInstanceOf(TaskDefinitionConstPtr def) {
+bool TaskInstanceBase::isAnInstanceOf(TaskDefinitionConstPtr def) const {
+    // RCLCPP_INFO(node->get_logger(),  " %d isAnInstanceOf task %d: %d",this->getDefinition()->getTaskId(), def->getTaskId(), int(this->getDefinition()->getTaskId() == def->getTaskId()));
     return this->getDefinition()->getTaskId() == def->getTaskId();
 }
 
@@ -75,8 +81,8 @@ void TaskInstanceBase::doInitialise(unsigned int runtimeId, const task_manager_l
     cfg_gen->loadConfig(parameters);
     // RCLCPP_INFO(node->get_logger(),"After loading Task Config");
     // cfg_gen->printConfig();
-    // cfg_gen->publishParameters(node); // Not relevant for R/O params
     cfg_gen->declareParameters(node);
+    cfg_gen->publishParameters(node); // Not relevant for R/O params
     setParamHandle = node->add_on_set_parameters_callback(std::bind(&TaskInstanceBase::reconfigure_callback, this, std::placeholders::_1));
     timeout = cfg_gen->get<double>("task_timeout");
 	statusString.clear();
