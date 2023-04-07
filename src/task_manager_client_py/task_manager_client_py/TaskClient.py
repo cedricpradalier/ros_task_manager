@@ -176,7 +176,7 @@ class TaskClient(Node):
                 return res
             else:
                 id = self.client.startTask(paramdict,argv=argx)
-                self.get_logger().info("%s: Starting task %s in background: %d" % (self.client.server_node,self.name,id))
+                self.client.get_logger().info("%s: Starting task %s in background: %d" % (self.client.server_node,self.name,id))
                 return id
 
     class TaskStatus:
@@ -251,14 +251,21 @@ class TaskClient(Node):
         self.updateTaskList()
         self.updateTaskStatus()
 
+        # Spin in a separate thread
+        #  self.thread = threading.Thread(target=rclpy.spin, args=(self, ), daemon=True)
+        #  self.thread.start()
+
         self.nothing_new = True
         self.idle()
 
     def __del__(self):
         # print("DEBUG: Deleting task client object")
         try:
+            # self.thread.cancel()
             if rclpy.ok():
                 self.idle()
+            # else:
+            #     self.thread.join()
         except Exception as e:
             pass
 
@@ -273,6 +280,7 @@ class TaskClient(Node):
                 header = Header()
                 header.stamp = self.get_clock().now().to_msg()
                 self.keepAlivePub.publish(header)
+                # self.get_logger().info( "Tick")
             except Exception as e:
                 print(e)
                 # Ignore, this sometimes happens on shutdown
@@ -478,9 +486,6 @@ class TaskClient(Node):
                 self.nothing_new=True
                 while rclpy.ok() and self.nothing_new:
                     rclpy.spin_once(self,timeout_sec=0.1)
-                # This would be a good idea, except that python is not
-                # receiving the messages while waiting for the condition
-                # self.statusCond.wait(0.020)
                 if self.verbose>1:
                     self.printTaskStatus()
                 t1 = self.get_clock().now()
@@ -519,6 +524,9 @@ class TaskClient(Node):
                             if not v:
                                 self.stopTask(k)
                     return True
+                # This would be a good idea, except that python is not
+                # receiving the messages while waiting for the condition
+                # self.statusCond.wait(0.020)
             if not rclpy.ok():
                 raise TaskException("%s: Aborting due to ROS shutdown"%self.server_node);
             return False

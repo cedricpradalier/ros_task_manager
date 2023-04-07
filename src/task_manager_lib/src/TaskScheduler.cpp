@@ -450,6 +450,9 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
             if (debug>1) RCLCPP_INFO(node->get_logger(), "Initialisation done");
             while (1) {
                 double t0 = now().seconds();
+                if (debug > 2) {
+                    RCLCPP_INFO(node->get_logger(), "keepAlive %fs", t0 - lastKeepAlive.seconds());
+                }
                 if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.seconds() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed");
                     tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",rclcpp::Time(t0));
