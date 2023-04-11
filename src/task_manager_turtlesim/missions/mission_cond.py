@@ -1,15 +1,12 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_turtlesim')
-import rospy
-from math import *
-from task_manager_lib.TaskClient import *
-from std_srvs.srv import Trigger,TriggerResponse
+import sys
+import rclpy
+from math import pi
+from task_manager_client_py.TaskClient import *
 
-rospy.init_node('task_client')
-server_node = rospy.get_param("~server","/turtlesim_tasks")
-default_period = rospy.get_param("~period",0.2)
-tc = TaskClient(server_node,default_period)
+rclpy.init(args=sys.argv)
+tc = TaskClient('/turtlesim_tasks', 0.2)
 
 wp = [ [1., 9., pi/2, 0, 0, 255],
     [9., 9., 0., 0, 255, 255],
@@ -25,7 +22,8 @@ def handle_trigger(req):
     print("Received cancel request")
     return TriggerResponse(True,"Done")
 
-s = rospy.Service('cancel_request', Trigger, handle_trigger)
+#TODO
+#s = rospy.Service('cancel_request', Trigger, handle_trigger)
 
 
 while True:
@@ -50,7 +48,7 @@ while True:
         # Clear the conditions if we reach this point
         tc.clearConditions()
     except TaskConditionException as e:
-        rospy.loginfo("Path following interrupted on condition: %s" % \
+        tc.get_logger().info("Path following interrupted on condition: %s" % \
                 " or ".join([str(c) for c in e.conditions]))
         # This means the conditions were triggered. We need to react to it
         # Conditions are cleared on trigger
@@ -64,6 +62,6 @@ while True:
 
 
 
-rospy.loginfo("Mission completed")
+tc.get_logger().info("Mission completed")
 
 

@@ -1,14 +1,12 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_turtlesim')
-import rospy
-from math import *
-from task_manager_lib.TaskClient import *
+import sys
+import rclpy
+from math import pi
+from task_manager_client_py.TaskClient import *
 
-rospy.init_node('task_client')
-server_node = rospy.get_param("~server","/turtlesim_tasks")
-default_period = rospy.get_param("~period",0.2)
-tc = TaskClient(server_node,default_period)
+rclpy.init(args=sys.argv)
+tc = TaskClient('/turtlesim_tasks', 0.2)
 
 wp = [ [1., 9., 0, 0, 255],
     [9., 9., 0, 255, 255],
@@ -31,6 +29,6 @@ tc.ReachAngle(target=pi/2)
 
 
 
-rospy.loginfo("Mission completed")
+tc.get_logger().info("Mission completed")
 
 

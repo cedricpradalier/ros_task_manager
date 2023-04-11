@@ -5,8 +5,10 @@ using std::placeholders::_1;
 
 
 bool TaskConfig::declareParameters(rclcpp::Node::SharedPtr node) {
+    // printConfig();
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
         if (!it->second.readOnly()) {
+            // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Declare %s",(ns+it->first).c_str());
             node->declare_parameter(ns+it->first,it->second.getValue(),it->second.getDescription());
         }
     }
@@ -15,9 +17,15 @@ bool TaskConfig::declareParameters(rclcpp::Node::SharedPtr node) {
 
 
 bool TaskConfig::undeclareParameters(rclcpp::Node::SharedPtr node) {
+    // printConfig();
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
         if (!it->second.readOnly()) {
-            node->undeclare_parameter(ns+it->first);
+            try { 
+                // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Undeclare %s",(ns+it->first).c_str());
+                node->undeclare_parameter(ns+it->first);
+            } catch (rclcpp::exceptions::ParameterNotDeclaredException&) {
+                RCLCPP_WARN(rclcpp::get_logger("TaskConfig"),"undeclared exception while undeclaring '%s'",(ns+it->first).c_str());
+            }
         }
     }
     return true;
@@ -74,9 +82,10 @@ bool TaskConfig::exportToMessage(std::vector<rcl_interfaces::msg::Parameter> & p
 void TaskConfig::printConfig() const {
     for (TaskConfigMap::const_iterator mit=definitions.begin();mit!=definitions.end();mit++) {
         rcl_interfaces::msg::ParameterValue pv = mit->second.getValue().to_value_msg();
-        RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"%s: %d %ld %f %s",mit->first.c_str(),
+        RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"%s: %d %ld %f %s [%s]",mit->first.c_str(),
                 pv.bool_value,pv.integer_value,pv.double_value,
-                mit->second.getDescription().description.c_str());
+                mit->second.getDescription().description.c_str(),
+                mit->second.readOnly()?"RO":"RW");
     }
 }
 

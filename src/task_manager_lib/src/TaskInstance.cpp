@@ -83,7 +83,10 @@ void TaskInstanceBase::doInitialise(unsigned int runtimeId, const task_manager_l
     // cfg_gen->printConfig();
     cfg_gen->declareParameters(node);
     cfg_gen->publishParameters(node); // Not relevant for R/O params
-    setParamHandle = node->add_on_set_parameters_callback(std::bind(&TaskInstanceBase::reconfigure_callback, this, std::placeholders::_1));
+    // TODO: this is a global object, this should not be handled at the
+    // instance level but at the scheduler level, and then redirected
+    // based on namespace
+    // setParamHandle = node->add_on_set_parameters_callback(std::bind(&TaskInstanceBase::reconfigure_callback, this, std::placeholders::_1));
     timeout = cfg_gen->get<double>("task_timeout");
 	statusString.clear();
 

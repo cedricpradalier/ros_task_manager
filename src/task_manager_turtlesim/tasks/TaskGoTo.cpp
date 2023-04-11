@@ -5,6 +5,9 @@ using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
 void TaskGoToConfig::update() {
+
+    // RCLCPP_INFO(rclcpp::get_logger("TaskGoToConfig"),"TaskGoTo: Update");
+    // printConfig();
     goal_x = get<double>("goal_x");
     goal_y = get<double>("goal_y");
     k_v = get<double>("k_v");

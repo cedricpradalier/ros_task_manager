@@ -203,6 +203,14 @@ class TaskClient(Node):
         self.serviceLock = threading.RLock()
         self.statusLock = threading.RLock()
         self.statusCond = threading.Condition(self.statusLock)
+        
+        self.declare_parameter('server', server_node)
+        self.declare_parameter('period', default_period)
+
+        server_node = self.get_parameter('server').get_parameter_value().string_value
+        default_period = self.get_parameter('period').get_parameter_value().double_value
+
+
         # self.status_cb_group = ReentrantCallbackGroup()
         parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
         parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),

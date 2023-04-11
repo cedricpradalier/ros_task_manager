@@ -11,6 +11,7 @@
 
   <depend>task_manager_msgs</depend>
   <depend>task_manager_lib</depend>
+  <depend>task_manager_client_py</depend>
   <depend>task_manager_move_base</depend>
   <depend>turtlesim</depend>
   <depend>move_base_msgs</depend>
