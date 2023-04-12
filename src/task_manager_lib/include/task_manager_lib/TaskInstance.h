@@ -60,23 +60,7 @@ namespace task_manager_lib {
             TaskEnvironmentPtr env_gen;
             TaskConfigPtr cfg_gen;
 
-            rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr setParamHandle;
-            rcl_interfaces::msg::SetParametersResult
-                reconfigure_callback(const std::vector<rclcpp::Parameter> & parameters)
-                {
-                    rcl_interfaces::msg::SetParametersResult result;
-                    result.successful = true;
-                    // for (const auto & parameter : parameters) {
-                    //     if (!some_condition) {
-                    //         result.successful = false;
-                    //         result.reason = "the reason it could not be allowed";
-                    //     }
-                    // }
-                    cfg_gen->loadConfig(parameters,cfg_gen->getNameSpace()); 
-                    this->reconfigure();
-                    return result;
-                }
-
+            bool readyForReconfigure;
             // Setup a dynamic reconfigure server that just update all the
             // config. To be updated 
             virtual void reconfigure() {
@@ -97,6 +81,7 @@ namespace task_manager_lib {
                 node(ev->getNode()), definition(def), taskStatus(task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED), 
                 timeout(-1.0), runId(-1), env_gen(ev), cfg_gen(def->getConfig()) {
                     cfg_gen->setNameSpace(def->getInstanceName()+".");
+                    readyForReconfigure = false;
 
                 }
             virtual ~TaskInstanceBase() {
@@ -172,6 +157,19 @@ namespace task_manager_lib {
             // The functions below are virtual pure and must be implemented by the
             // specific task by linking in the type generated from the .cfg file. 
             // See the TaskDefinitionWithConfig class for details.
+            rcl_interfaces::msg::SetParametersResult
+                reconfigure_callback(const std::vector<rclcpp::Parameter> & parameters)
+                {
+                    rcl_interfaces::msg::SetParametersResult result;
+                    result.successful = true;
+                    cfg_gen->loadConfig(parameters,cfg_gen->getNameSpace()); 
+                    this->reconfigure();
+                    return result;
+                }
+
+            bool isReadyForReconfigure() const {
+                return readyForReconfigure;
+            }
 
         protected:
             // Set of functions only useful for derived classes

@@ -47,16 +47,18 @@ void TaskConfig::updateParameters(rclcpp::Node::SharedPtr node) {
 }
 
 void TaskConfig::publishParameters(rclcpp::Node::SharedPtr node) {
+    std::vector<rclcpp::Parameter> parameters;
     for (TaskConfigMap::const_iterator it=definitions.begin();it!=definitions.end();it++) {
         if (it->second.readOnly()) {
             // This cannot be updated
             continue;
         }
         rclcpp::Parameter p(ns+it->first,it->second.getValue());
-        node->set_parameter(p);
+        parameters.push_back(p);
         //rcl_interfaces::msg::ParameterValue pv = it->second.getValue().to_value_msg();
         //RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Set %s: %d %ld %f %s",(ns+it->first).c_str(), pv.bool_value,pv.integer_value,pv.double_value);
     }
+    node->set_parameters_atomically(parameters);
 }
 
 std::vector<rcl_interfaces::msg::ParameterDescriptor> TaskConfig::getParameterDescriptions() const {
@@ -120,6 +122,11 @@ void TaskConfig::loadConfig(const TaskConfig & cfg) {
 
 void TaskConfig::loadConfig(const std::vector<rclcpp::Parameter> & cfg,const std::string & prefix) {
     for (std::vector<rclcpp::Parameter>::const_iterator it=cfg.begin();it!=cfg.end();it++) {
+        if (it->get_name().rfind(prefix,0)!=0) {
+            // ignoring parameter, this is not for this task
+            continue;
+        }
+        assert(it->get_name().size() >= prefix.size());
         std::string name = it->get_name().substr(prefix.size(),std::string::npos);
         TaskConfigMap::iterator dit = definitions.find(name);
         if (dit == definitions.end()) {

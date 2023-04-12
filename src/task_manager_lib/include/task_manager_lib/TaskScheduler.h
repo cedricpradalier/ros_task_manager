@@ -253,6 +253,13 @@ namespace task_manager_lib {
 			// Generate a task status vector, ready to be published by ROS
 			void generateTaskStatus(std::vector<task_manager_msgs::msg::TaskStatus> & running,
 					std::vector<task_manager_msgs::msg::TaskStatus> & zombies) ;
+
+            
+            rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr setParamHandle;
+            rcl_interfaces::msg::SetParametersResult
+                reconfigure_callback(const std::vector<rclcpp::Parameter> & parameters);
+
+
 #if 0
             // Not implemented for ROS2
 			bool getTaskListLight(task_manager_lib::GetTaskListLight::Request  &req, task_manager_lib::GetTaskListLight::Response &res );

@@ -108,7 +108,9 @@ namespace task_manager_lib {
                 env_gen(ev), cfg_gen(cfg), taskId(-1) {
                     if (cfg_gen) {
                         cfg_gen->setNameSpace(name+".");
-                        cfg_gen->declareParameters(node);
+                        // This clutters the node namespace, and there is 
+                        // no identified use at this stage.
+                        // cfg_gen->declareParameters(node);
                     } else {
                         // Only use case is DynamicTask
                     }

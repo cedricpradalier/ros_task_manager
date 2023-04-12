@@ -92,6 +92,7 @@ TaskScheduler::TaskScheduler(std::shared_ptr<rclcpp::Node> node, TaskDefinitionP
     stopTaskSrv = node->create_service<task_manager_msgs::srv::StopTask>("~/stop_task", std::bind(&TaskScheduler::stopTask,this,std::placeholders::_1,std::placeholders::_2));
     getTaskListSrv = node->create_service<task_manager_msgs::srv::GetTaskList>("~/get_all_tasks", std::bind(&TaskScheduler::getTaskList,this,std::placeholders::_1,std::placeholders::_2));
     getAllTaskStatusSrv = node->create_service<task_manager_msgs::srv::GetAllTaskStatus>("~/get_all_status", std::bind(&TaskScheduler::getAllTaskStatus,this,std::placeholders::_1,std::placeholders::_2));
+    setParamHandle = node->add_on_set_parameters_callback(std::bind(&TaskScheduler::reconfigure_callback, this, std::placeholders::_1));
 #if 0
     getTaskListLightSrv =nh.advertiseService("get_all_tasks_light", &TaskScheduler::getTaskListLight,this);
     getHistorySrv = nh.advertiseService("get_history", &TaskScheduler::getHistory,this);
@@ -357,6 +358,31 @@ TaskScheduler::TaskId TaskScheduler::launchTask(std::shared_ptr<ThreadParameters
         return 0;
     }
     return tp->tpid;
+}
+
+rcl_interfaces::msg::SetParametersResult TaskScheduler::reconfigure_callback(
+        const std::vector<rclcpp::Parameter> & parameters) {
+    rcl_interfaces::msg::SetParametersResult result;
+    result.successful = true;
+    // for (const auto & parameter : parameters) {
+    //     if (!some_condition) {
+    //         result.successful = false;
+    //         result.reason = "the reason it could not be allowed";
+    //     }
+    // }
+    TaskSet::const_iterator it;
+    std::unique_lock<std::mutex> lock(scheduler_mutex);
+    for (it=runningThreads.begin();it!=runningThreads.end();it++) 
+    {
+        if (!it->second->task->isReadyForReconfigure()) {
+            continue;
+        }
+        result = it->second->task->reconfigure_callback(parameters);
+        if (!result.successful) {
+            return result;
+        }
+    }
+    return result;
 }
 
 TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname, 

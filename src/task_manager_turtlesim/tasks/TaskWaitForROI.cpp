@@ -13,6 +13,7 @@ void TaskWaitForROIConfig::update() {
 
 TaskIndicator TaskWaitForROI::iterate()
 {
+    cfg->update();
     const turtlesim::msg::Pose & tpose = env->getPose();
     double r = hypot(cfg->roi_y-tpose.y,cfg->roi_x-tpose.x);
     if (r < cfg->roi_radius) {
