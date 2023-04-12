@@ -6,7 +6,7 @@ using namespace task_manager_turtlesim;
 
 TaskIndicator TaskFail::initialise()  {
     counter = 0;
-    if (cfg->get<int>("error_type") == TaskStatus::TASK_INITIALISATION_FAILED) {
+    if (cfg->error_type == TaskStatus::TASK_INITIALISATION_FAILED) {
         return TaskStatus::TASK_INITIALISATION_FAILED;
     }
     return TaskStatus::TASK_INITIALISED;
@@ -15,8 +15,8 @@ TaskIndicator TaskFail::initialise()  {
 
 TaskIndicator TaskFail::iterate()
 {
-    int error = cfg->get<int>("error_type");
-    if ((signed)counter >= cfg->get<int>("iterations")) {
+    int error = cfg->error_type;
+    if ((signed)counter >= cfg->iterations) {
         return error;
     }
     counter += 1;

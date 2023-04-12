@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#include <memory>
 #include <thread>
 #include <mutex>
 #include <string>
@@ -25,6 +26,29 @@ namespace task_manager_lib {
             std::string ns; // namespace
             TaskConfigMap definitions;
 
+            class GenVariableUpdater {
+                public:
+                    virtual void update(const TaskConfig & cfg, const std::string & name) = 0;
+                    GenVariableUpdater() {}
+                    virtual ~GenVariableUpdater() {}
+            };
+
+            template <class ParameterT>
+                class VariableUpdater : public GenVariableUpdater {
+                    protected:
+                        ParameterT & var;
+                    public:
+                        VariableUpdater(ParameterT & v) : var(v) {}
+                        virtual ~VariableUpdater() {}
+                        virtual void update(const TaskConfig & cfg, const std::string & name) {
+                            var = cfg.get<ParameterT>(name);
+                        }
+                };
+
+            typedef std::shared_ptr<GenVariableUpdater> VariableUpdaterPtr;
+
+            std::map<std::string,VariableUpdaterPtr> updaters;
+
         public:
             TaskConfig() : ns("") {
                 // define("task_rename","","used to rename a task at runtime [deprecated]",true);
@@ -38,8 +62,17 @@ namespace task_manager_lib {
                 void define(const std::string & name,
                         const ParameterT & val,
                         const std::string & description,
-                        bool read_only) {
+                        bool read_only=true) {
                     definitions[name]=TaskParameterDefinition(name,val,description,read_only);
+                }
+
+            template <class ParameterT> 
+                void define(const std::string & name,
+                        const ParameterT & val,
+                        const std::string & description,
+                        bool read_only,ParameterT & var) {
+                    definitions[name]=TaskParameterDefinition(name,val,description,read_only);
+                    updaters[name] = VariableUpdaterPtr(new VariableUpdater<ParameterT>(var));
                 }
 
             void setNameSpace(const std::string & name) {
@@ -58,6 +91,7 @@ namespace task_manager_lib {
 
             std::vector<rcl_interfaces::msg::ParameterDescriptor> getParameterDescriptions() const;
 
+            void updateLinkedVariables() ;
             void loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) ;
 
             void loadConfig(const TaskConfig & cfg) ;

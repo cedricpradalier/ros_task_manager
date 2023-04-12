@@ -6,8 +6,9 @@
 namespace task_manager_lib {
 
     struct TaskWaitConfig : public TaskConfig {
+        double duration;
         TaskWaitConfig() {
-            define("duration",1.0,"How long to wait (s)",true); 
+            define("duration",1.0,"How long to wait (s)",true,duration); 
         }
     };
 

@@ -91,6 +91,11 @@ void TaskConfig::printConfig() const {
     }
 }
 
+void TaskConfig::updateLinkedVariables() {
+    for (std::map<std::string,VariableUpdaterPtr>::iterator it=updaters.begin();it!=updaters.end();it++) {
+        it->second->update(*this,it->first);
+    }
+}
 
 void TaskConfig::loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) {
     // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Load config msgTC %d param", int(cfg.plist.size()));
@@ -100,24 +105,18 @@ void TaskConfig::loadConfig(const task_manager_msgs::msg::TaskConfig & cfg) {
         if (it == definitions.end()) {
             continue;
         }
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," %d %s %d %d %ld %f",int(i),name.c_str(),
-                // cfg.plist[i].value.type, cfg.plist[i].value.bool_value,
-                // cfg.plist[i].value.integer_value, cfg.plist[i].value.double_value);
         it->second.setValue(cfg.plist[i].value);
     }
-    // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Resulting Task Config %d", int(definitions.size()));
-    // printConfig();
+    updateLinkedVariables();
 }
 
 void TaskConfig::loadConfig(const TaskConfig & cfg) {
     // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Load config TC %d", int(cfg.definitions.size()));
     // cfg.printConfig();
     for (TaskConfigMap::const_iterator it=cfg.definitions.begin();it!=cfg.definitions.end();it++) {
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," %s",it->first.c_str());
         definitions[it->first] = it->second;
     }
-    // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Resulting Task Config %d", int(definitions.size()));
-    // printConfig();
+    updateLinkedVariables();
 }
 
 void TaskConfig::loadConfig(const std::vector<rclcpp::Parameter> & cfg,const std::string & prefix) {
@@ -134,8 +133,7 @@ void TaskConfig::loadConfig(const std::vector<rclcpp::Parameter> & cfg,const std
         }
         dit->second.setValue(it->get_parameter_value());
     }
-    // RCLCPP_INFO(rclcpp::get_logger("TaskConfig"),"Resulting Task Config %d", int(definitions.size()));
-    // printConfig();
+    updateLinkedVariables();
 }
 
 void TaskConfig::loadConfig(const std::vector<rcl_interfaces::msg::Parameter> & cfg, const std::string & prefix) {
@@ -148,11 +146,9 @@ void TaskConfig::loadConfig(const std::vector<rcl_interfaces::msg::Parameter> & 
             // printConfig();
             continue;
         }
-        // RCLCPP_INFO(rclcpp::get_logger("TaskConfig")," %s %d %d %ld %f",name.c_str(),
-                // it->value.type, it->value.bool_value,
-                // it->value.integer_value, it->value.double_value);
         dit->second.setValue(rclcpp::ParameterValue(it->value));
     }
+    updateLinkedVariables();
 }
 
 bool TaskConfig::getDefinition(const std::string & name,TaskParameterDefinition & def) {

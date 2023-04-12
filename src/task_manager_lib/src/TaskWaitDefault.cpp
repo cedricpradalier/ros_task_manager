@@ -14,7 +14,7 @@ TaskIndicator TaskWaitDefault::iterate()
     rclcpp::Duration d = node->get_clock()->now() - t0;
     // ROS_INFO("TaskWait: waited %.2fs",d.toSec());
         
-    if (d.seconds() > cfg->get<double>("duration")) {
+    if (d.seconds() > cfg->duration) {
         return TaskStatus::TASK_COMPLETED;
     }
 	return TaskStatus::TASK_RUNNING;

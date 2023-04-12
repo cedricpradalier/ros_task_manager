@@ -4,21 +4,8 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-void TaskGoToConfig::update() {
-
-    // RCLCPP_INFO(rclcpp::get_logger("TaskGoToConfig"),"TaskGoTo: Update");
-    // printConfig();
-    goal_x = get<double>("goal_x");
-    goal_y = get<double>("goal_y");
-    k_v = get<double>("k_v");
-    k_alpha = get<double>("k_alpha");
-    max_velocity = get<double>("max_velocity");
-    dist_threshold = get<double>("dist_threshold");
-    relative = get<bool>("relative");
-}
 
 TaskIndicator TaskGoTo::initialise()  {
-    cfg->update();
     initial_pose = env->getPose();
     if (cfg->relative) {
         RCLCPP_INFO(node->get_logger(),"TaskGoTo: Going to (%.2f,%.2f)",
@@ -37,7 +24,6 @@ TaskIndicator TaskGoTo::initialise()  {
 
 TaskIndicator TaskGoTo::iterate()
 {
-    cfg->update();
     const turtlesim::msg::Pose & tpose = env->getPose();
     double goal_x = cfg->goal_x, goal_y = cfg->goal_y;
     if (cfg->relative) {

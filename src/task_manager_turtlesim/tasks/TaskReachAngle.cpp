@@ -4,18 +4,9 @@ using namespace task_manager_msgs;
 using namespace task_manager_lib;
 using namespace task_manager_turtlesim;
 
-void TaskReachAngleConfig::update() {
-    target = get<double>("target");
-    k_alpha = get<double>("k_alpha");
-    max_vrot = get<double>("max_vrot");
-    threshold = get<double>("threshold");
-    relative = get<bool>("relative");
-}
-
 
 TaskIndicator TaskReachAngle::initialise()
 {
-    cfg->update();
     const turtlesim::msg::Pose & tpose = env->getPose();
     initial_theta = tpose.theta;
 	return TaskStatus::TASK_INITIALISED;
@@ -23,7 +14,6 @@ TaskIndicator TaskReachAngle::initialise()
 
 TaskIndicator TaskReachAngle::iterate()
 {
-    cfg->update();
     const turtlesim::msg::Pose & tpose = env->getPose();
     double target = cfg->relative?(initial_theta+cfg->target):cfg->target;
     double alpha = remainder(target-tpose.theta,2*M_PI);

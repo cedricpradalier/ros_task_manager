@@ -9,9 +9,11 @@ using namespace task_manager_lib;
 namespace task_manager_turtlesim {
     struct TaskFailConfig : public TaskConfig {
         TaskFailConfig() {
-            define("error_type",7,"Type of failure case to generate",  true);
-            define("iterations",0,"Number of iteration before failing",  false);
+            define("error_type",7,"Type of failure case to generate",  true, error_type);
+            define("iterations",0,"Number of iteration before failing",  false, iterations);
         }
+        int error_type;
+        int iterations;
     };
 
 
