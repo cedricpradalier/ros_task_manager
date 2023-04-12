@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/ipython3 --no-banner 
 # ROS specific imports
 import sys
 import rclpy
@@ -33,8 +33,19 @@ def index():
     print( "Type status() to display the status of currently running tasks")
     print( "Type index() to display this summary")
 
+type_str={1:"bool", 2:"integer", 3:"double", 4:"string", 
+        5:"byte array", 6:"bool array", 7:"integer array", 
+        8:"double array", 9:"string array"}
+
 def param_string(C):
-    return "  %s (T %d, ro %s) : %s" % (C.name,C.type,str(C.read_only),C.description)
+    try:
+        tstr=type_str[C.type]
+    except:
+        tstr="unknown"
+    ro="RO"
+    if not C.read_only:
+        ro="RW"
+    return "  %s (%s, %s) : %s" % (C.name,tstr,ro,C.description)
 
 for t in tc.tasklist.values():
     pstring=[param_string(p) for p in t.config]

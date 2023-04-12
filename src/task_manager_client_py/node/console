@@ -1,11 +1,11 @@
 #!/bin/sh
 
-path=`rospack find task_manager_lib`
+path=`ros2 pkg prefix task_manager_client_py`
 
 if which ipython
 then
-    ipython --no-banner -i $path/node/console.py -- $*
+    ipython --no-banner --no-confirm-exit -i $path/lib/task_manager_client_py/console.py -- $*
 else 
-    ipython3 --no-banner -i $path/node/console.py -- $*
+    ipython3 --no-banner --no-confirm-exit -i $path/lib/task_manager_client_py/console.py -- $*
 fi
 
