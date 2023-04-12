@@ -1,14 +1,12 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_turtlesim_sync')
-import rospy
-from math import *
-from task_manager_lib.TaskClient import *
+import sys
+import rclpy
+from math import pi
+from task_manager_client_py.TaskClient import *
 
-rospy.init_node('task_client1')
-server_node = rospy.get_param("~server","/turtlesim_tasks1")
-default_period = rospy.get_param("~period",0.2)
-tc = TaskClient(server_node,default_period)
+rclpy.init(args=sys.argv)
+tc = TaskClient('/turtlesim_tasks1', 0.2)
 
 tc.Spawn(x=4,y=4,theta=0,name="turtle2")
 tc.Spawn(x=7,y=7,theta=0,name="turtle3")
@@ -22,6 +20,6 @@ tc.SetStatusSync(status=0);
 
 
 
-rospy.loginfo("Mission1 completed")
+tc.get_logger().info("Mission1 completed")
 
 
