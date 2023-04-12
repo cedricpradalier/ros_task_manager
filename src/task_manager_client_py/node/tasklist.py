@@ -11,6 +11,11 @@ server_node="turtlesim_tasks"
 if len(sys.argv)>1:
     server_node=sys.argv[1]
 
+verbose=False
+if len(sys.argv)>2:
+    verbose=(sys.argv[2][0].lower()=='t')
+print("Verbose: %s" % str(verbose))
+
 class GetTaskListAsync(Node):
 
     def __init__(self, server):
@@ -26,6 +31,22 @@ class GetTaskListAsync(Node):
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
+def print_param(C):
+    print("  %s (T %d, ro %s) : %s" % (C.name,C.type,str(C.read_only),C.description))
+
+
+def print_task(T,verbose):
+    print("Task: %s" % T.name)
+    print("Description: %s" % T.description)
+    print("Periodic: %s" % str(T.periodic))
+    print("Params:")
+    for c in T.config:
+        if verbose:
+            print_param(c)
+        else:
+            if c.name not in ['task_rename','foreground','task_timeout','task_period']:
+                print_param(c)
+    print("---")
 
 
 def main(args=None):
@@ -33,8 +54,9 @@ def main(args=None):
 
     get_client = GetTaskListAsync(server_node)
     response = get_client.send_request()
-    start_client.get_logger().info( 'Result of start_task:\n %s' % str(response))
-    start_client.destroy_node()
+    for t in response.tlist:
+        print_task(t,verbose)
+    get_client.destroy_node()
     rclpy.shutdown()
 
 

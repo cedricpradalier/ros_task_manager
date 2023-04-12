@@ -1,22 +1,15 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_lib')
-import rospy
-from task_manager_lib.TaskClient import *
-from dynamic_reconfigure.encoding import *
+import sys
+import rclpy
+from task_manager_client_py.TaskClient import *
 import argparse
 import signal
 
     
+rclpy.init(args=sys.argv)
+tc = TaskClient('/turtlesim_tasks', 0.2)
 
-server_node=""
-default_period=0.1
-rospy.init_node('task_console',disable_signals=False,anonymous=True)
-server_node = rospy.get_param("~server",server_node)
-default_period = rospy.get_param("~period",default_period)
-
-print("Node: " + str(server_node))
-tc = TaskClient(server_node,default_period)
 def signal_handler(signal, frame):
     global tc
     print("Killing all tasks by stopping the keep-alive pulse")
@@ -24,13 +17,10 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT,signal_handler)
 
-def param_string(t):
-    if t["type"]=="double" or t["type"]=="int":
-        return "%s: %s in [%s,%s], default %s\n\t%s" % (t["name"],t["type"],\
-                str(t["min"]),str(t["max"]),str(t["default"]),t["description"])
-    else:
-        return "%s: %s, default %s\n\t%s" % (t["name"],t["type"],\
-                str(t["default"]),t["description"])
+def status():
+    global tc
+    tc.printTaskStatus()
+
 
 def index():
     global tc
@@ -43,14 +33,11 @@ def index():
     print( "Type status() to display the status of currently running tasks")
     print( "Type index() to display this summary")
 
-def status():
-    global tc
-    tc.printTaskStatus()
+def param_string(C):
+    return "  %s (T %d, ro %s) : %s" % (C.name,C.type,str(C.read_only),C.description)
 
 for t in tc.tasklist.values():
-    params=extract_params(decode_description(t.config))
-    pnames=[p["name"] for p in params]
-    pstring=[param_string(p) for p in params]
+    pstring=[param_string(p) for p in t.config]
 
     f="def %s(**d):\n\t\"\"\"\n%s\n%s\n\"\"\"\n\tglobal tc;tc.%s(**d)\n" %\
             (t.name, t.help,"\n".join(pstring),t.name)

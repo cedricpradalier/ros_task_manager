@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'teststart = task_manager_client_py.teststart:main', 
-            'tasklist = task_manager_client_py.tasklist:main'
+            'console.py = node.console:main', 
+            'tasklist = node.tasklist:main'
         ],
     },
 )
