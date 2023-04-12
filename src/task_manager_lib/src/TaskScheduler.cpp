@@ -475,29 +475,30 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
             rclcpp::Rate rate(1. / tp->period);
             if (debug>1) RCLCPP_INFO(node->get_logger(), "Initialisation done");
             while (1) {
-                double t0 = now().seconds();
+                rclcpp::Time tnow = now();
+                double t0 = tnow.seconds();
                 if (debug > 2) {
                     RCLCPP_INFO(node->get_logger(), "keepAlive %fs", t0 - lastKeepAlive.seconds());
                 }
                 if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.seconds() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed");
-                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",rclcpp::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",now());
                     break;
                 }
 
                 if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
                     tp->task->debug("TIMEOUT");
-                    tp->setStatus(TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",rclcpp::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",now());
                     break;
                 }
 
                 try {
                     // tp->task->debug("Iterating...");
                     tp->task->doIterate();
-                    tp->updateStatus(now());
+                    tp->updateStatus(tnow);
                 } catch (const std::exception & e) {
                     tp->task->debug("Exception %s",e.what());
-                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",rclcpp::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "Interrupted by Exception",tnow);
                     tp->updateStatus(now());
                     cleanupTask(tp);
                     return ;
@@ -517,12 +518,12 @@ void TaskScheduler::runTask(std::shared_ptr<ThreadParameters> tp)
                 double t0 = now().seconds();
                 if (mainThread && (!mainThread->isAnInstanceOf(idle)) && (t0 - lastKeepAlive.seconds() > 1.0)) {
                     tp->task->debug("KEEPALIVE failed");
-                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",rclcpp::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_INTERRUPTED, "timeout triggered by task keepalive",now());
                     break;
                 }
                 if ((tp->task->getTimeout() > 0) && ((t0-tstart) > tp->task->getTimeout())) {
                     tp->task->debug("TIMEOUT");
-                    tp->setStatus(TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",rclcpp::Time(t0));
+                    tp->setStatus(TaskStatus::TASK_TIMEOUT, "timeout triggered by TaskScheduler",now());
                     break;
                 }
                 tp->updateStatus(now());

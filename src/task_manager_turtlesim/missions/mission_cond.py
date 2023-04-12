@@ -4,6 +4,7 @@ import sys
 import rclpy
 from math import pi
 from task_manager_client_py.TaskClient import *
+from std_srvs.srv import Trigger
 
 rclpy.init(args=sys.argv)
 tc = TaskClient('/turtlesim_tasks', 0.2)
@@ -16,14 +17,15 @@ wp = [ [1., 9., pi/2, 0, 0, 255],
 cancel_request = ConditionVariable("cancel request")
 
 
-def handle_trigger(req):
+def handle_trigger(req,resp):
     global cancel_request
     cancel_request.set(True)
     print("Received cancel request")
-    return TriggerResponse(True,"Done")
+    resp.success = True
+    resp.message = "Done"
+    return resp
 
-#TODO
-#s = rospy.Service('cancel_request', Trigger, handle_trigger)
+s = tc.create_service(Trigger, 'cancel_request', handle_trigger)
 
 
 while True:

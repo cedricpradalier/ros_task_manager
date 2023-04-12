@@ -77,9 +77,12 @@ namespace task_manager_lib {
 
             // Default constructor:
             // task parameters.
-            TaskInstanceBase(TaskDefinitionPtr def, TaskEnvironmentPtr ev) :
+            TaskInstanceBase(TaskDefinitionPtr def, TaskEnvironmentPtr ev, TaskConfigPtr cfg) :
                 node(ev->getNode()), definition(def), taskStatus(task_manager_msgs::msg::TaskStatus::TASK_CONFIGURED), 
-                timeout(-1.0), runId(-1), env_gen(ev), cfg_gen(def->getConfig()) {
+                timeout(-1.0), runId(-1), env_gen(ev), cfg_gen(cfg) {
+                    if (!cfg_gen) {
+                        cfg_gen.reset(new TaskConfig);
+                    }
                     cfg_gen->setNameSpace(def->getInstanceName()+".");
                     readyForReconfigure = false;
 
@@ -226,7 +229,7 @@ namespace task_manager_lib {
             public:
                 // Same constructor as the normal TaskDefinition
                 TaskInstance(TaskDefinitionPtr def, TaskEnvironmentPtr ev) 
-                    : TaskInstanceBase(def,ev) {
+                    : TaskInstanceBase(def,ev,std::shared_ptr<CFG>(new CFG)) {
                         env = castEnvironment();
                         cfg = castConfig();
                     }

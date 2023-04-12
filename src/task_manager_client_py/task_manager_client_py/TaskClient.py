@@ -357,8 +357,7 @@ class TaskClient(Node):
                 self.get_logger().error("Not implemented")
             else:
                 extra = EncapsulatedMessage()
-            # print config
-            self.get_logger().info("Starting task %s" % name)
+            # self.get_logger().info("Starting task %s" % name)
             with self.serviceLock:
                 self.req_start_task.name = name
                 self.req_start_task.config = config
@@ -424,14 +423,16 @@ class TaskClient(Node):
             ts.statusString = t.status_string
             ts.statusTime = Time.from_msg(t.status_time).nanoseconds / 1e9
             self.taskstatus[ts.id] = ts
-            t = self.get_clock().now().nanoseconds / 1e9
-            # self.get_logger().info(f"STATUS CB after lock: {t - t0}")
-            # self.get_logger().info(f"STATUS CB id: {ts.id} name: {ts.name} time_diff: {t - ts.statusTime} status:{ts.status} string:{ts.statusString}")
+            current_time = self.get_clock().now().nanoseconds / 1e9
+            # self.get_logger().info(f"STATUS CB after lock: {current_time - t0}")
+            # self.get_logger().info(f"STATUS CB id: {ts.id} name: {ts.name} time_diff: {current_time - ts.statusTime} status:{ts.status} string:{ts.statusString}")
             to_be_deleted = []
             for k,v in self.taskstatus.items():
-                if (t - v.statusTime) > 10.0:
+                if (current_time - v.statusTime) > 10.0:
+                    # print("TBD TS %d %f %f %s" % (self.taskstatus[k].id,current_time,v.statusTime,str(t.status_time)))
                     to_be_deleted.append(k)
             for k in to_be_deleted:
+                # print("Deleting TS %d" % self.taskstatus[k].id)
                 del self.taskstatus[k]
             for f in self.status_functions:
                 f(ts)

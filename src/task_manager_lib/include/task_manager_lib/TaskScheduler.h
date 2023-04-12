@@ -105,7 +105,7 @@ namespace task_manager_lib {
 					statusTime = tnow;
 					statusPub->publish(getRosStatus());
 					// manageHistory();
-					//ROS_INFO("Pub: task %d %s %s",tpid, task->getName().c_str(),taskStatusToString(status));
+					// task->debug("Pub: task %d %s %s",tpid, task->getName().c_str(),taskStatusToString(status));
 				}
 
 				

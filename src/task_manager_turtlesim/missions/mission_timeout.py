@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_turtlesim')
-import rospy
-from math import *
-from task_manager_lib.TaskClient import *
+import sys
+import rclpy
+from math import pi
+from task_manager_client_py.TaskClient import *
 
-rospy.init_node('task_client')
-server_node = rospy.get_param("~server","/turtlesim_tasks")
-default_period = rospy.get_param("~period",0.2)
-tc = TaskClient(server_node,default_period)
+rclpy.init(args=sys.argv)
+tc = TaskClient('/turtlesim_tasks', 0.2)
+# tc.verbose=2
+
 
 wp = [ [1., 9., pi/2, 0, 0, 255],
     [9., 9., 0., 0, 255, 255],
@@ -29,9 +29,10 @@ while True:
             tc.ReachAngle(target=p[2])
             tc.SetPen(on=True,r=p[3],g=p[4],b=p[5])
             tc.GoTo(goal_x=p[0],goal_y=p[1],task_timeout=2.0)
-    except TaskException, e:
+    except TaskException as e:
+        tc.get_logger().warn("Path following exception: %s" % str(e) )
         if e.status == TaskStatus.TASK_TIMEOUT:
-            rospy.loginfo("Path following interrupted by timeout, as expected: %s" % str(e))
+            tc.get_logger().info("Path following interrupted by timeout, as expected: %s" % str(e))
             tc.ReachAngle(target=pi/2)
         else:
             raise
@@ -44,6 +45,6 @@ while True:
 
 
 
-rospy.loginfo("Mission completed")
+tc.get_logger().info("Mission completed")
 
 
