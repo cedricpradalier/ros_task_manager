@@ -19,6 +19,6 @@ tc.SetStatusSync(status=0);
 
 
 
-rospy.loginfo("Mission2 completed")
+tc.get_logger().info("Mission2 completed")
 
 
