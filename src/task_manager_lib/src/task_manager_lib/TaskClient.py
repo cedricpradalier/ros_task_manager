@@ -62,7 +62,8 @@ class ConditionIsCompleted(Condition):
     def __del__(self):
         try:
             if self.tc.isKnown(self.taskId) and self.stopOnClear:
-                print("Stopping task %d on condition clear" % self.taskId)
+                if self.tc.verbose:
+                    print("Stopping task %d on condition clear" % self.taskId)
                 self.tc.stopTask(self.taskId)
         except:
             pass
