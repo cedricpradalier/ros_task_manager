@@ -46,10 +46,20 @@ class NegatedCondition(Condition):
         return not self.cond.isVerified()
 
 class ConditionIsCompleted(Condition):
-    def __init__(self, name, tc, taskId):
+    def __init__(self, name, tc, taskId,stopOnClear=True):
         self.name = name
         self.tc = tc
         self.taskId = taskId
+        self.stopOnClear = stopOnClear
+
+    def __del__(self):
+        try:
+            if self.tc.isKnown(self.taskId) and self.stopOnClear:
+                if self.tc.verbose:
+                    print("Stopping task %d on condition clear" % self.taskId)
+                self.tc.stopTask(self.taskId)
+        except:
+            pass
 
     def isVerified(self):
         if not self.tc.isKnown(self.taskId):
