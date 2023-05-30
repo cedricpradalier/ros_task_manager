@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # ROS specific imports
-import roslib; roslib.load_manifest('task_manager_turtlesim')
 import rospy
 from math import *
 from task_manager_lib.TaskClient import *
