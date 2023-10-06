@@ -94,6 +94,7 @@ ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${ALL_LIBS})
 
 IF( ${task_manager_move_base_FOUND} )
+    ADD_DEFINITIONS(TEST_ACTION_CLIENT)
     SET(MoveBase_Targets turtlesim_TaskMoveBase turtlesim_TaskMoveBaseWC)
     ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
     TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${ALL_LIBS})
