@@ -8,7 +8,7 @@ endif()
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -78,6 +78,8 @@ ament_export_dependencies(
     rclcpp_action
     rcl_interfaces
     task_manager_msgs
+    std_msgs
+    std_srvs
 )
 ament_export_include_directories(include)
 ament_export_libraries(task_manager_lib)

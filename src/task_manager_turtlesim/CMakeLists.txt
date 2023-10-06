@@ -8,7 +8,7 @@ endif()
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -19,15 +19,15 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(task_manager_msgs REQUIRED)
 find_package(task_manager_lib REQUIRED)
-find_package(task_manager_move_base REQUIRED)
 find_package(turtlesim REQUIRED)
-find_package(move_base_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(Boost COMPONENTS thread REQUIRED)
+
+find_package(task_manager_move_base)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -93,12 +93,14 @@ TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForROI ${ALL_LIBS})
 ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${ALL_LIBS})
 
-ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${ALL_LIBS})
+IF( ${task_manager_move_base_FOUND} )
+    SET(MoveBase_Targets turtlesim_TaskMoveBase turtlesim_TaskMoveBaseWC)
+    ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
+    TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${ALL_LIBS})
 
-ADD_LIBRARY( turtlesim_TaskMoveBaseWC SHARED tasks/TaskMoveBaseWC.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBaseWC ${ALL_LIBS})
-
+    ADD_LIBRARY( turtlesim_TaskMoveBaseWC SHARED tasks/TaskMoveBaseWC.cpp)
+    TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBaseWC ${ALL_LIBS})
+endif()
 install(TARGETS
   turtlesim_task_server
   DESTINATION lib/${PROJECT_NAME})
@@ -115,8 +117,7 @@ install(TARGETS
     turtlesim_TaskReachAngle
     turtlesim_TaskWaitForROI
     turtlesim_TaskWaitForButton
-    turtlesim_TaskMoveBase
-    turtlesim_TaskMoveBaseWC
+    ${MoveBase_Targets}
     DESTINATION lib)
 
 install(
