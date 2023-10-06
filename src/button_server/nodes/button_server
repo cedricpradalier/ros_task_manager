@@ -1,19 +1,16 @@
 #!/usr/bin/python3
 # ROS specific imports
-import rospy
 
 
 import sys
-if sys.version[0] == '3':
-    from button_server.ButtonServer3 import ButtonServer
-else:
-    from button_server.ButtonServer2 import ButtonServer
+from button_server.ButtonServer3 import ButtonServer
+import rclpy
 
 
 if __name__ == '__main__':
-    try:
-        server = ButtonServer()
-        server.run()
-    except rospy.ROSInterruptException: 
-        pass
+    rclpy.init(args=sys.argv)
+    server = ButtonServer()
+    server.run()
+    server.destroy_node()
+    rclpy.shutdown()
 
