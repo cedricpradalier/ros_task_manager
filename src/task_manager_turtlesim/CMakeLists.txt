@@ -28,6 +28,7 @@ find_package(rclcpp_action REQUIRED)
 find_package(Boost COMPONENTS thread REQUIRED)
 
 find_package(task_manager_move_base)
+find_package(task_manager_nav2)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -46,15 +47,26 @@ include_directories(
   ${rclcpp_action_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
-  ${move_base_msgs_INCLUDE_DIRS}
   ${std_srvs_INCLUDE_DIRS}
   ${turtlesim_INCLUDE_DIRS}
   ${task_manager_msgs_INCLUDE_DIRS}
   ${task_manager_lib_INCLUDE_DIRS}
   ${task_manager_move_base_INCLUDE_DIRS}
+  ${task_manager_nav2_INCLUDE_DIRS}
 )
 
-SET(ALL_LIBS ${rclcpp_LIBRARIES} ${rclcpp_action_LIBRARIES} ${task_manager_lib_LIBRARIES} ${task_manager_msgs_LIBRARIES} ${task_manager_move_base_LIBRARIES} ${move_base_msgs_LIBRARIES} ${std_msgs_LIBRARIES} ${std_srvs_LIBRARIES} ${turtlesim_LIBRARIES} ${Boost_THREAD_LIBRARIES} ${CMAKE_DL_LIBS})
+SET(ALL_LIBS 
+    ${rclcpp_LIBRARIES} 
+    ${rclcpp_action_LIBRARIES} 
+    ${task_manager_lib_LIBRARIES} 
+    ${task_manager_msgs_LIBRARIES} 
+    ${task_manager_move_base_LIBRARIES} 
+    ${task_manager_nav2_LIBRARIES} 
+    ${std_msgs_LIBRARIES} 
+    ${std_srvs_LIBRARIES} 
+    ${turtlesim_LIBRARIES}
+    ${Boost_THREAD_LIBRARIES} 
+    ${CMAKE_DL_LIBS})
 
 ADD_EXECUTABLE( turtlesim_task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
 ament_target_dependencies(turtlesim_task_server task_manager_lib
@@ -94,13 +106,18 @@ ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${ALL_LIBS})
 
 IF( ${task_manager_move_base_FOUND} )
-    ADD_DEFINITIONS(TEST_ACTION_CLIENT)
+    ADD_DEFINITIONS(-DTEST_ACTION_CLIENT)
     SET(MoveBase_Targets turtlesim_TaskMoveBase turtlesim_TaskMoveBaseWC)
     ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
     TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${ALL_LIBS})
 
     ADD_LIBRARY( turtlesim_TaskMoveBaseWC SHARED tasks/TaskMoveBaseWC.cpp)
     TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBaseWC ${ALL_LIBS})
+endif()
+IF( ${task_manager_nav2_FOUND} )
+    SET(Nav2_Targets turtlesim_TaskNav2)
+    ADD_LIBRARY( turtlesim_TaskNav2 SHARED tasks/TaskNav2.cpp)
+    TARGET_LINK_LIBRARIES(turtlesim_TaskNav2 ${ALL_LIBS})
 endif()
 install(TARGETS
   turtlesim_task_server
@@ -119,6 +136,7 @@ install(TARGETS
     turtlesim_TaskWaitForROI
     turtlesim_TaskWaitForButton
     ${MoveBase_Targets}
+    ${Nav2_Targets}
     DESTINATION lib)
 
 install(

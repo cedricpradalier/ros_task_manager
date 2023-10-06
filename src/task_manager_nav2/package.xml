@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>task_manager_turtlesim</name>
+  <name>task_manager_nav2</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="cedric.pradalier@gmail.com">cedricp</maintainer>
@@ -9,15 +9,9 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>task_manager_msgs</depend>
+  <depend>nav2_msgs</depend>
   <depend>task_manager_lib</depend>
-  <depend>task_manager_client_py</depend>
-  <depend>task_manager_move_base</depend>
-  <depend>task_manager_nav2</depend>
-  <depend>turtlesim</depend>
-  <depend>std_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>geometry_msgs</depend>
+  <depend>task_manager_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
 
