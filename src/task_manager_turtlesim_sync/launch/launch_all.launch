@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+    <node name="turtlesim" pkg="turtlesim" exec="turtlesim_node"  />
+    <node name="turtlesim_tasks1" pkg="task_manager_turtlesim_sync" exec="turtlesim_task_server_sync" >
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim_sync/lib"/>
+        <param name="my_id" value="1"/>
+        <param name="my_name" value="partner1"/>
+        <remap from="partner1" to="/turtlesim_tasks2/sync"/>
+        <remap from="partner2" to="/turtlesim_tasks3/sync"/>
+    </node>
+    <node name="turtlesim_tasks2" pkg="task_manager_turtlesim_sync" exec="turtlesim_task_server_sync" >
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim_sync/lib"/>
+        <param name="my_id" value="2"/>
+        <param name="my_name" value="partner2"/>
+        <remap from="partner1" to="/turtlesim_tasks1/sync"/>
+        <remap from="partner2" to="/turtlesim_tasks3/sync"/>
+    </node>
+    <node name="turtlesim_tasks3" pkg="task_manager_turtlesim_sync" exec="turtlesim_task_server_sync" >
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim_sync/lib"/>
+        <param name="my_id" value="3"/>
+        <param name="my_name" value="partner3"/>
+        <remap from="partner1" to="/turtlesim_tasks1/sync"/>
+        <remap from="partner2" to="/turtlesim_tasks2/sync"/>
+    </node>
+    <node name="mission1" pkg="task_manager_turtlesim_sync" exec="mission1.py"  >
+        <param name="server" value="/turtlesim_tasks1"/>
+    </node>
+    <node name="mission2" pkg="task_manager_turtlesim_sync" exec="mission2.py"  >
+        <param name="server" value="/turtlesim_tasks2"/>
+    </node>
+    <node name="mission3" pkg="task_manager_turtlesim_sync" exec="mission3.py"  >
+        <param name="server" value="/turtlesim_tasks3"/>
+    </node>
+</launch>

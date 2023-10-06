@@ -77,5 +77,13 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(PROGRAMS  
+    missions/mission.py
+    missions/mission1.py
+    missions/mission2.py
+    missions/mission3.py
+    DESTINATION lib/${PROJECT_NAME} 
+)
+
 
 ament_package()

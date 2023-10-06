@@ -148,4 +148,16 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(PROGRAMS  
+    missions/dummy_service.py
+    missions/mission.py
+    missions/mission_buttons.py
+    missions/mission_cond.py
+    missions/mission_fail.py
+    missions/mission_fast_cond.py
+    missions/mission_square.py
+    missions/mission_timeout.py
+    DESTINATION lib/${PROJECT_NAME} 
+)
+
 ament_package()

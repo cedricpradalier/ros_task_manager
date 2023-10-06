@@ -1,6 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # ROS specific imports
-import roslib; roslib.load_manifest('button_server')
 import rospy
 
 

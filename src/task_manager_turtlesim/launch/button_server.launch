@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <launch>
-   <node name="button_server" pkg="button_server" type="button_server" clear_params="true" output="screen">
+    <!-- Not functional for now -->
+   <node name="button_server" pkg="button_server" exec="button_server">
     <param name="button0" value="Go"/>
     <param name="button0_color" value="lightgreen"/>
     <param name="button1" value="Pause"/>
