@@ -23,10 +23,10 @@ namespace task_manager_turtlesim {
             bool triggered;
 
             void buttonCallback(const std_msgs::msg::String::SharedPtr msg) {
-                RCLCPP_INFO(node->get_logger(),"%p,Received text %s (%d string in set)",this,msg->data.c_str(),(int)expected_string.size());
+                RCLCPP_INFO(node->get_logger(),"%p,Received text %s (%d string in set)",(void*)this,msg->data.c_str(),(int)expected_string.size());
                 if (expected_string.find(boost::algorithm::to_lower_copy(msg->data)) != expected_string.end()) {
                     triggered = true;
-                    RCLCPP_INFO(node->get_logger(),"%p: Triggered",this);
+                    RCLCPP_INFO(node->get_logger(),"%p: Triggered",(void*)this);
                 }
             }
 

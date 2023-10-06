@@ -103,7 +103,7 @@ TaskScheduler::TaskScheduler(std::shared_ptr<rclcpp::Node> node, TaskDefinitionP
     lastKeepAlive = now();
 }
 
-void TaskScheduler::keepAliveCallback(const std_msgs::msg::Header::SharedPtr) 
+void TaskScheduler::keepAliveCallback(std_msgs::msg::Header::ConstSharedPtr) 
 {
     lastKeepAlive = now();
 }

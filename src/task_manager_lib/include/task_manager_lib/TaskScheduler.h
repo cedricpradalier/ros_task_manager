@@ -178,7 +178,7 @@ namespace task_manager_lib {
 			rclcpp::Client<> executeSequenceTasksSrv;
 			std::vector<TaskHistory> history;
 #endif
-			void keepAliveCallback(const std_msgs::msg::Header::SharedPtr msg);
+			void keepAliveCallback(const std_msgs::msg::Header::ConstSharedPtr msg);
 
 		protected:
 			TaskDefinitionPtr idle;

@@ -4,7 +4,7 @@
 #include "task_manager_lib/TaskActionGeneric.h"
 #include <nav2_msgs/action/navigate_to_pose.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 namespace task_manager_nav2 {
     struct TaskActionNav2Config : public task_manager_lib::TaskActionGenericConfig {

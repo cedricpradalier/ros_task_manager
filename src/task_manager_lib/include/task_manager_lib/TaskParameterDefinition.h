@@ -35,6 +35,7 @@ namespace task_manager_lib {
                     descriptor.type = value.get_type();
                     descriptor.description = description;
                     descriptor.read_only = read_only;
+                    descriptor.dynamic_typing = true; // from galactic, necessary to allow undeclaring
                 }
             virtual ~TaskParameterDefinition(){}
             

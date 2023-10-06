@@ -29,7 +29,7 @@ rclcpp::Client<turtlesim::srv::SetPen>::SharedFuture TurtleSimEnv::setPenAsync(b
     request->off = !on;
     request->width = width;
 
-    return setPenClt->async_send_request(request);
+    return setPenClt->async_send_request(request).future.share();
 }
 
 bool TurtleSimEnv::isClearAvailable() {
@@ -39,7 +39,7 @@ bool TurtleSimEnv::isClearAvailable() {
 rclcpp::Client<std_srvs::srv::Empty>::SharedFuture TurtleSimEnv::clearAsync()
 {
     auto request = std::make_shared<std_srvs::srv::Empty::Request>();
-    return clearClt->async_send_request(request);
+    return clearClt->async_send_request(request).future.share();
 }
 
 #ifdef TEST_ACTION_CLIENT

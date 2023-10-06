@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # ROS specific imports
 import roslib; roslib.load_manifest('task_manager_turtlesim')
 import rospy

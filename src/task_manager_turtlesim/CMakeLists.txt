@@ -23,6 +23,7 @@ find_package(turtlesim REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(Boost COMPONENTS thread REQUIRED)
@@ -46,6 +47,7 @@ include_directories(
   ${rclcpp_INCLUDE_DIRS}
   ${rclcpp_action_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
+  ${tf2_geometry_msgs_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
   ${std_srvs_INCLUDE_DIRS}
   ${turtlesim_INCLUDE_DIRS}
@@ -59,6 +61,8 @@ SET(ALL_LIBS
     ${rclcpp_LIBRARIES} 
     ${rclcpp_action_LIBRARIES} 
     ${task_manager_lib_LIBRARIES} 
+    ${geometry_msgs_LIBRARIES} 
+    ${tf2_geometry_msgs_LIBRARIES} 
     ${task_manager_msgs_LIBRARIES} 
     ${task_manager_move_base_LIBRARIES} 
     ${task_manager_nav2_LIBRARIES} 

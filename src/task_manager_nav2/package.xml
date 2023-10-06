@@ -12,6 +12,7 @@
   <depend>nav2_msgs</depend>
   <depend>task_manager_lib</depend>
   <depend>task_manager_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
 

@@ -72,8 +72,7 @@ namespace task_manager_lib {
                 this_action_client->async_send_goal(goal_msg, send_goal_options);
             }
 
-              void goal_response_callback(std::shared_future<typename GoalHandleGeneric::SharedPtr> future) {
-                  auto goal_handle = future.get();
+              void goal_response_callback(const typename GoalHandleGeneric::SharedPtr & goal_handle) {
                   if (!goal_handle) {
                       RCLCPP_ERROR(this->getNode()->get_logger(), "Goal was rejected by server");
                       state = TASK_GOAL_REJECTED;

@@ -48,7 +48,7 @@ namespace task_manager_lib {
             void sendRequest() {
                 auto request = std::make_shared<typename Service::Request>();
                 this->buildServiceRequest(*request);
-                future = this_service_client->async_send_request(request);
+                future = this_service_client->async_send_request(request).future.share();
             }
 
         public:

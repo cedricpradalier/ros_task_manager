@@ -20,6 +20,7 @@ find_package(ament_cmake REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(task_manager_lib REQUIRED)
 find_package(task_manager_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 
@@ -43,6 +44,7 @@ ament_export_dependencies(
     rclcpp
     rclcpp_action
     task_manager_msgs
+    tf2_geometry_msgs
     nav2_msgs
     task_manager_lib
     tf2

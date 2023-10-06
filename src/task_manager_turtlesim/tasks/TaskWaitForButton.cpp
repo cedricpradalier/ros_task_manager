@@ -17,7 +17,7 @@ TaskIndicator TaskWaitForButton::initialise()
     for (unsigned int i=0;i<splitted.size();i++) {
         expected_string.insert(to_lower_copy(splitted[i]));
     }
-    RCLCPP_INFO(node->get_logger(),"%p: Waiting for button: '%s'",this,cfg->get<std::string>("text").c_str());
+    RCLCPP_INFO(node->get_logger(),"%p: Waiting for button: '%s'",(void*)this,cfg->get<std::string>("text").c_str());
 	return TaskStatus::TASK_INITIALISED;
 }
 
