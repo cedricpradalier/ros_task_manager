@@ -10,7 +10,7 @@
 #include "boost/algorithm/string.hpp"
 #include "std_msgs/msg/string.hpp"
 
-#define TEST_ACTION_CLIENT
+// #define TEST_ACTION_CLIENT
 #ifdef TEST_ACTION_CLIENT
 #include <move_base_msgs/action/move_base.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
