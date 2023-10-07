@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <launch>
-    <include file="$(find task_manager_turtlesim)/launch/button_server2.launch"/>
-    <node name="turtlesim" pkg="turtlesim" type="turtlesim_node"  />
-    <node name="turtlesim_tasks" pkg="task_manager_turtlesim" type="turtlesim_task_server"  output="screen">
-        <param name="lib_path" value="$(find task_manager_turtlesim)/tasks"/>
-
+    <include file="$(find-pkg-share task_manager_turtlesim)/button_server.launch"/>
+    <node name="turtlesim" pkg="turtlesim" exec="turtlesim_node"  />
+    <node name="turtlesim_tasks" pkg="task_manager_turtlesim" exec="turtlesim_task_server" namespace="">
+        <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/task_manager_turtlesim/lib"/>
+    </node>
+    <node name="mission" pkg="task_manager_turtlesim" exec="mission_square.py"  >
         <!-- Works as a remap, but make the system functionally unusable -->
         <!-- <remap from="~/status" to="/task_status"/> -->
         <remap from="/buttons" to="/buttony"/>

@@ -115,10 +115,10 @@ class ButtonServer(Node):
             self.declare_parameter('button%d_color'%i, '')
             self.declare_parameter('button%d_style'%i, '')
         for i in range(nb):
-            bname = self.get_parameter("~button%d"%i).get_parameter_value().string_value
-            btext = self.get_parameter("~button%d_text"%i).get_parameter_value().string_value
-            bcolor = self.get_parameter("~button%d_color"%i).get_parameter_value().string_value
-            bstyle = self.get_parameter("~button%d_style"%i).get_parameter_value().string_value
+            bname = self.get_parameter("button%d"%i).get_parameter_value().string_value
+            btext = self.get_parameter("button%d_text"%i).get_parameter_value().string_value
+            bcolor = self.get_parameter("button%d_color"%i).get_parameter_value().string_value
+            bstyle = self.get_parameter("button%d_style"%i).get_parameter_value().string_value
             if bname != "":
                 self.blist.append(Button(bname,btext,bcolor,bstyle))
         if len(self.blist)==0:

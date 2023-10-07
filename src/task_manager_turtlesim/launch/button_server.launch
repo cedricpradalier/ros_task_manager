@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <launch>
-    <!-- Not functional for now -->
-   <node name="button_server" pkg="button_server" exec="button_server">
-    <param name="button0" value="Go"/>
-    <param name="button0_color" value="lightgreen"/>
-    <param name="button1" value="Pause"/>
-    <param name="button1_style" value="background-color:#202020;color:white;"/>
-    <param name="button2" value="Home"/>
-    <param name="button2_text" value="Go Home"/>
-    <param name="button2_color" value="lightblue"/>
-    <param name="button3" value="Abort"/>
-    <param name="button3_style" value="background-color:red;color:black;"/>
+   <node name="button_server" pkg="button_server" exec="button_server_node">
+       <param name="root" value="$(find-pkg-share button_server)"/>
+       <param name="port" value="5180"/>
+       <param name="num_buttons" value="3"/>
+       <param name="button0" value="Go"/>
+       <param name="button0_color" value="lightgreen"/>
+       <param name="button1" value="Pause"/>
+       <param name="button1_style" value="background-color:#202020;color:white;"/>
+       <param name="button2" value="Home"/>
+       <param name="button2_text" value="Go Home"/>
+       <param name="button2_color" value="lightblue"/>
+       <param name="button3" value="Abort"/>
+       <param name="button3_style" value="background-color:red;color:black;"/>
    </node>
 </launch>
