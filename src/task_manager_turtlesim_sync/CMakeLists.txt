@@ -70,7 +70,7 @@ install(TARGETS
     turtlesim_TaskGoTo
     turtlesim_TaskReachAngle
     turtlesim_TaskSpawn
-    DESTINATION lib)
+    DESTINATION lib/${PROJECT_NAME})
 
 install(
   DIRECTORY launch/

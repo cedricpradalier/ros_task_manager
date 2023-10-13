@@ -2,11 +2,11 @@
 
 
 <launch>
-    <arg name="merge_install" default="false"/>
+    <arg name="merge_install" default="true"/>
     <!-- normal install -->
-        <let name="lib_base" value="task_manager_turtlesim_sync/"/> 
+        <!-- <let name="lib_base" value="task_manager_turtlesim_sync/"/> -->
     <!-- merge install -->
-        <!-- <let name="lib_base" value=""/> -->
+        <let name="lib_base" value=""/> -->
     <node name="turtlesim" pkg="turtlesim" exec="turtlesim_node"  />
     <node name="turtlesim_tasks" pkg="task_manager_turtlesim" exec="turtlesim_task_server" namespace="">
         <param name="lib_path" value="$(env COLCON_PREFIX_PATH)/$(var lib_base)lib/task_manager_turtlesim"/>
