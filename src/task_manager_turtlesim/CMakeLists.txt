@@ -141,7 +141,7 @@ install(TARGETS
     turtlesim_TaskWaitForButton
     ${MoveBase_Targets}
     ${Nav2_Targets}
-    DESTINATION lib)
+    DESTINATION lib/${PROJECT_NAME})
 
 install(
   DIRECTORY launch/

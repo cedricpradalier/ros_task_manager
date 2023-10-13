@@ -232,9 +232,13 @@ void TaskScheduler::addTask(TaskDefinitionPtr td)
 void TaskScheduler::loadTask(const std::string & filename, TaskEnvironmentPtr env)
 {
     try {
-        TaskDefinitionPtr td(new DynamicTask(filename, env));
+        RCLCPP_DEBUG(node->get_logger(), "Trying to load %s",filename.c_str());
+        DynamicTask *dt = new DynamicTask(filename, env);
+        TaskDefinitionPtr td(dt);
 
-        addTask(td);
+        if (dt->loadTask(false)) {
+            addTask(td);
+        }
     } catch (DynamicTask::DLLoadError & e) {
         RCLCPP_ERROR(node->get_logger(), "Ignoring file '%s': '%s'",filename.c_str(),e.what());
     }
