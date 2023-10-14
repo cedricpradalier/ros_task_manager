@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<launch>
+    <!-- commented button server while it is non-functional -->
+    <include file="$(find-pkg-share task_manager_turtlesim)/launch_server_mi.launch"/>
+    <node name="mission" pkg="task_manager_turtlesim" exec="mission_square.py"  >
+        <param name="server" value="/turtlesim_tasks"/>
+    </node>
+</launch>
