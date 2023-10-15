@@ -4,7 +4,7 @@
 <launch>
     <arg name="merge_install" default="false"/>
     <!-- normal install -->
-        <let name="lib_base" value="task_manager_turtlesim_sync/"/> 
+        <let name="lib_base" value="task_manager_turtlesim/"/> 
     <!-- merge install -->
         <!-- <let name="lib_base" value=""/> -->
     <include file="$(find-pkg-share task_manager_turtlesim)/button_server.launch"/>
