@@ -54,6 +54,8 @@ namespace task_manager_turtlesim {
             TurtleSimEnv(std::shared_ptr<rclcpp::Node> node, unsigned int id=1);
             ~TurtleSimEnv() {};
 
+            DECLARE_ENV_CHECKSUM;
+
             const turtlesim::msg::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {

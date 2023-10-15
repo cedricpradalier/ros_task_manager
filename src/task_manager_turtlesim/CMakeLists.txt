@@ -72,6 +72,9 @@ SET(ALL_LIBS
     ${Boost_THREAD_LIBRARIES} 
     ${CMAKE_DL_LIBS})
 
+file(SHA256 ${PROJECT_SOURCE_DIR}/include/task_manager_turtlesim/TurtleSimEnv.h ENV_CHECK_SUM)
+add_compile_definitions(ENV_CHECK_SUM=${ENV_CHECK_SUM})
+
 ADD_EXECUTABLE( turtlesim_task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
 ament_target_dependencies(turtlesim_task_server task_manager_lib
     task_manager_msgs geometry_msgs rclcpp std_msgs)

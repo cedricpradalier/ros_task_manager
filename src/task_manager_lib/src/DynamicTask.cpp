@@ -24,10 +24,35 @@ bool DynamicTask::loadTask(bool exceptions) {
         if (exceptions) {
             throw DLLoadError(error);
         } else {
-            RCLCPP_ERROR(node->get_logger(),"%s",DLLoadError(error).what());
+            RCLCPP_ERROR(node->get_logger(),"%s",error.c_str());
             return false;
         }
 	}
+	EnvCheckSum ef = (EnvCheckSum)dlsym(handle, "getEnvironmentCheckSum");
+    if (!ef) {
+		dlclose(handle);
+        handle = NULL;
+        if (exceptions) {
+            throw DLLoadError("The getEnvironmentCheckSum is NULL. The task probably missed the DYNAMIC_TASK macro");
+        } else {
+            RCLCPP_ERROR(node->get_logger(),"The getEnvironmentCheckSum is NULL. The task probably missed the DYNAMIC_TASK macro");
+            return false;
+        }
+    }
+    RCLCPP_DEBUG(node->get_logger(),"Task %s Env check sum: %s",filename.c_str(),ef()); 
+    RCLCPP_DEBUG(node->get_logger(),"Env check sum: %s",env_gen->getEnvironmentCheckSum()); 
+    if (std::string(ef()) != std::string(env_gen->getEnvironmentCheckSum())) {
+        RCLCPP_INFO(node->get_logger(),"Task %s Env check sum: %s",filename.c_str(),ef()); 
+        RCLCPP_INFO(node->get_logger(),"Env check sum: %s",env_gen->getEnvironmentCheckSum()); 
+		dlclose(handle);
+        handle = NULL;
+        if (exceptions) {
+            throw DLLoadError("The environment checksum is inconsistent. The task has been compiled with a different environment.");
+        } else {
+            RCLCPP_ERROR(node->get_logger(),"The environment checksum is inconsistent. The task has been compiled with a different environment.");
+            return false;
+        }
+    }
 	TaskFactory tf = (TaskFactory)dlsym(handle, "TaskFactoryObject");
     if (!tf) {
 		dlclose(handle);
@@ -35,7 +60,7 @@ bool DynamicTask::loadTask(bool exceptions) {
         if (exceptions) {
             throw DLLoadError("The TaskFactoryObject is NULL. The task probably missed the DYNAMIC_TASK macro");
         } else {
-            RCLCPP_ERROR(node->get_logger(),"%s",DLLoadError("The TaskFactoryObject is NULL. The task probably missed the DYNAMIC_TASK macro").what());
+            RCLCPP_ERROR(node->get_logger(),"The TaskFactoryObject is NULL. The task probably missed the DYNAMIC_TASK macro");
             return false;
         }
     }
@@ -46,7 +71,7 @@ bool DynamicTask::loadTask(bool exceptions) {
         if (exceptions) {
             throw DLLoadError("taskfactory returned NULL task");
         } else {
-            RCLCPP_ERROR(node->get_logger(),"%s",DLLoadError("taskfactory returned NULL task").what());
+            RCLCPP_ERROR(node->get_logger(),"taskfactory returned NULL task");
             return false;
         }
 	}

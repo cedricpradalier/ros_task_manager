@@ -45,6 +45,9 @@ include_directories(
 
 SET(ALL_LIBS ${rclcpp_LIBRARIES} ${task_manager_sync_LIBRARIES} ${std_msgs_LIBRARIES}  ${turtlesim_LIBRARIES} ${CMAKE_DL_LIBS})
 
+file(SHA256 ${PROJECT_SOURCE_DIR}/include/task_manager_turtlesim_sync/TurtleSimEnv.h ENV_CHECK_SUM)
+add_compile_definitions(ENV_CHECK_SUM=${ENV_CHECK_SUM})
+
 ADD_EXECUTABLE( turtlesim_task_server_sync src/task_server.cpp src/TurtleSimEnv.cpp) 
 ament_target_dependencies(turtlesim_task_server_sync task_manager_sync
     geometry_msgs rclcpp std_msgs)
