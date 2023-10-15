@@ -16,8 +16,8 @@
 #warning ENV_CHECK_SUM is not defined, please add it in CMakeLists.txt
 #define ENV_CHECK_SUM env_default
 #endif
-#define STRINGIFY(x)  #x
-#define ENV_CHECK_SUM_STR(x) STRINGIFY(x)
+#define CHECK_SUM_STRINGIFY(x)  #x
+#define ENV_CHECK_SUM_STR(x) CHECK_SUM_STRINGIFY(x)
 
 
 namespace task_manager_lib {
