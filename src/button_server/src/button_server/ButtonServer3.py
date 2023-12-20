@@ -20,10 +20,10 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type','text/html')
             self.end_headers()
             ButtonServer.global_server.buildPage()
-            self.wfile.write(ButtonServer.global_server.page)
-            self.wfile.close()
+            self.wfile.write(ButtonServer.global_server.page.encode())
+            # self.wfile.close()
             return
-        elif self.path == "/lib/jquery-1.8.2.min.js":
+        elif self.path == "/lib/jquery-3.6.4.min.js":
             http.server.SimpleHTTPRequestHandler.do_GET(self)
             return
         found = False
@@ -37,8 +37,9 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == "/button":
-            length = int(self.headers.getheader("content-length"))
-            l = self.rfile.read(length).split("=")
+            length = int(self.headers.get("content-length"))
+            l = self.rfile.read(length)
+            l = l.decode("utf-8", "ignore").split("=")
             if l[0] != "name":
                 self.send_error(404,"Invalid form field")
                 return
@@ -47,7 +48,7 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(result) 
+            self.wfile.write(result.encode()) 
             ButtonServer.global_server.publish(buttonname)
         return
 
@@ -129,7 +130,7 @@ class ButtonServer:
           <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
           <META HTTP-EQUIV="refresh" CONTENT="15">
           <title>Button Server</title>
-            <script language="javascript" type="text/javascript" src="lib/jquery-1.8.2.min.js"></script>
+            <script language="javascript" type="text/javascript" src="lib/jquery-3.6.4.min.js"></script>
           </head>
           <body>
             <center>
