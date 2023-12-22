@@ -37,9 +37,8 @@ namespace task_manager_lib {
         public:
             TaskEnvironment(rclcpp::Node::SharedPtr node) : node(node), service_storage(node) {}
             virtual ~TaskEnvironment() {}
-            rclcpp::Node::SharedPtr getNode() {
-                return node;
-            }
+            rclcpp::Node::SharedPtr getNode() { return node; }
+            rclcpp::Node::ConstSharedPtr getNode() const {return node;}
             ServiceStorage & services() {
                 return service_storage;
             }
