@@ -8,6 +8,7 @@
 #include "task_manager_lib/TaskServerInterface.h"
 #include "task_manager_lib/TaskIdleDefault.h"
 #include "task_manager_lib/TaskWaitDefault.h"
+#include "task_manager_lib/TaskSystem.h"
 
 
 namespace task_manager_lib {
@@ -66,6 +67,11 @@ namespace task_manager_lib {
                 if (_wait) {
                     ts.addTask(_wait);
                 }
+            }
+
+            void addSystemTask() {
+                TaskDefinitionPtr sys(new TaskFactorySystem(env));
+                ts.addTask(sys);
             }
 
             void start() {

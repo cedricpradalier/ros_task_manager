@@ -14,6 +14,7 @@ using namespace task_manager_lib;
 class TaskServer : public TaskServerBase {
     public:
         TaskServer(TaskEnvironmentPtr _env) : TaskServerBase(_env,true) {
+            this->addSystemTask(); // Not added by default
             start();
         }
 

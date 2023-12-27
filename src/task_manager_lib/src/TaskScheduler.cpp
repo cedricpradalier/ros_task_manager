@@ -19,7 +19,7 @@ using namespace task_manager_lib;
 
 
 unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
-unsigned int TaskScheduler::debug = 1;
+unsigned int TaskScheduler::debug = 2;
 const double TaskScheduler::DELETE_TIMEOUT=2.0;
 const double TaskScheduler::IDLE_TIMEOUT=0.5;
 const unsigned int TaskScheduler::history_size=10;

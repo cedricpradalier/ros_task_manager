@@ -46,6 +46,7 @@ add_service_files(
 generate_dynamic_reconfigure_options(
     cfg/MinimalTask.cfg
     cfg/TaskWait.cfg
+    cfg/TaskSystem.cfg
 )
 
 # make sure configure headers are built before any node using them
@@ -94,6 +95,7 @@ add_library(task_manager_lib
     src/SequenceTask.cpp
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
+    src/TaskSystem.cpp
     src/TaskServerInterface.cpp
     src/TaskHistory.cpp
     src/ServiceStorage.cpp
