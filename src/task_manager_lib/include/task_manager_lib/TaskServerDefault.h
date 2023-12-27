@@ -43,6 +43,8 @@ namespace task_manager_lib {
             void start() ;
 
 
+			void addSystemTask();
+
 			void addTask(TaskDefinitionPtr task) {
                 ts.addTask(task);
             }

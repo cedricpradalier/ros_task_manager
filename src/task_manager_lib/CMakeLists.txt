@@ -56,6 +56,7 @@ add_library(task_manager_lib SHARED
     src/TaskScheduler.cpp
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
+    src/TaskSystem.cpp
     src/TaskServerDefault.cpp
 )
 
