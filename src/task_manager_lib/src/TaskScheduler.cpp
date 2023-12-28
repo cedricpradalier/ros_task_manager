@@ -19,7 +19,7 @@ using namespace task_manager_lib;
 
 
 unsigned int TaskScheduler::ThreadParameters::gtpid = 0;
-unsigned int TaskScheduler::debug = 2;
+unsigned int TaskScheduler::debug = 0;
 const double TaskScheduler::DELETE_TIMEOUT=2.0;
 const double TaskScheduler::IDLE_TIMEOUT=0.5;
 const unsigned int TaskScheduler::history_size=10;
@@ -87,6 +87,10 @@ TaskScheduler::TaskScheduler(ros::NodeHandle & nh, boost::shared_ptr<TaskDefinit
     ROS_INFO("Task scheduler created: debug %d",debug);
 
     n = nh;
+    int debug_param = TaskScheduler::debug;
+    debug_param = nh.getParam("task_scheduler_debug",debug_param);
+    TaskScheduler::debug = debug_param;
+
     startTaskSrv = nh.advertiseService("start_task", &TaskScheduler::startTask,this);
     stopTaskSrv = nh.advertiseService("stop_task", &TaskScheduler::stopTask,this);
     getTaskListSrv = nh.advertiseService("get_all_tasks", &TaskScheduler::getTaskList,this);

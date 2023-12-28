@@ -115,43 +115,64 @@ class ButtonServer:
         if len(self.blist)==0:
             self.blist = [Button("test","Debug Button","lightgreen")]
 
+        self.loaded_page = None
         self.buildPage()
+        self.load_page = rospy.get_param("~load_page","")
+        if self.load_page != "":
+            try:
+                self.loaded_page=open(self.load_page,"r").read()
+                rospy.loginfo("Loaded page '%s'" % self.load_page)
+            except BaseException as e:
+                rospy.logerror("Cannot load '%s': %s" % (self.load_page,str(e)))
+        self.save_page = rospy.get_param("~save_page","")
+        if self.save_page != "":
+            try:
+                with open(self.save_page,"w") as f:
+                    f.write(self.page)
+                rospy.loginfo("Saved auto-generated page to '%s'" % self.save_page)
+            except BaseException as e:
+                rospy.logerror("Cannot save page to '%s': %s" % (self.save_page,str(e)))
 
         self.root = roslib.packages.get_pkg_dir('button_server')
         os.chdir(self.root)
         self.httpd = MyServer(("", self.port), self.handler)
 
     def buildPage(self):
-        self.page = """
-        <http>
-          <head>
-          <meta http-equiv="content-type" content="text/html; charset=windows-1250">
-          <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
-          <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
-          <META HTTP-EQUIV="refresh" CONTENT="15">
-          <title>Button Server</title>
-            <script language="javascript" type="text/javascript" src="lib/jquery-3.6.4.min.js"></script>
-          </head>
-          <body>
-            <center>
-            <h1>Button Server</h1>
-            </center>
-            %s
-            <center>
-            %s
-            <br>
-            <div id=result> _ </div>
-            </center>
-            <script id="source" language="javascript" type="text/javascript">
-            $(document).ajaxError(function(e, xhr, settings, exception) {
-                alert('error in: ' + settings.url + ' \\n'+'error:\\n' + exception + '\\nresponse:\\n' + xhr.responseText );
-            });
-            %s 
-            </script>
-          </body>
-        </http>
-        """ % (self.getHeader(), "<hl/>\n".join([b.getInput() for b in self.blist]),
-                "\n".join([b.getFunction() for b in self.blist]))
+        if self.loaded_page is not None:
+            self.page = self.loaded_page
+        else:
+            self.page = """
+            <http>
+              <head>
+              <meta http-equiv="content-type" content="text/html; charset=windows-1250">
+              <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+              <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+              <META HTTP-EQUIV="refresh" CONTENT="15">
+              <title>Button Server</title>
+                <script language="javascript" type="text/javascript" src="lib/jquery-3.6.4.min.js"></script>
+              </head>
+              <body>
+                <center>
+                <h1>Button Server</h1>
+                </center>
+                <div id=header>
+                %s
+                </div>
+                <center>
+                %s
+                <br>
+                <div id=result> _ </div>
+                </center>
+                <script id="source" language="javascript" type="text/javascript">
+                $(document).ajaxError(function(e, xhr, settings, exception) {
+                    alert('error in: ' + settings.url + ' \\n'+'error:\\n' + exception + '\\nresponse:\\n' + xhr.responseText );
+                });
+                %s 
+                </script>
+              </body>
+            </http>
+            """ % (self.getHeader(), "".join([b.getInput() for b in self.blist]),
+                    "\n".join([b.getFunction() for b in self.blist]))
 
     def getHeader(self):
         # To be overloaded
