@@ -88,6 +88,9 @@ class ConditionIsRunning(Condition):
             return False
         return not self.tc.isCompleted(self.taskId)
 
+def listConverter(x,t):
+    return [t(y) for y in x]
+
 class TaskClient(Node):
     sock = None
     verbose = 0
@@ -123,6 +126,45 @@ class TaskClient(Node):
     def registerStatusFunction(self,f):
         self.status_functions.append(f)
 
+    class ParamValue:
+        def __init__(self,name,typeV):
+            self.name=name
+            if typeV == bool:
+                self.typeV = ParameterType.PARAMETER_BOOL
+            elif typeV == float:
+                self.typeV = ParameterType.PARAMETER_DOUBLE
+            elif typeV == str:
+                self.typeV = ParameterType.PARAMETER_STRING
+            elif typeV == int:
+                self.typeV = ParameterType.PARAMETER_INTEGER
+            else:
+                self.typeV=typeV
+
+        def toParam(self,value):
+            param = Parameter()
+            param.name = self.name
+            param.value.type = self.typeV
+            if self.typeV == ParameterType.PARAMETER_INTEGER:
+                param.value.integer_value = int(value)
+            elif self.typeV == ParameterType.PARAMETER_DOUBLE:
+                param.value.double_value = float(value)
+            elif self.typeV == ParameterType.PARAMETER_STRING:
+                param.value.string_value = str(value)
+            elif self.typeV == ParameterType.PARAMETER_BOOL:
+                param.value.bool_value = bool(value)
+            elif self.typeV == ParameterType.PARAMETER_BYTE_ARRAY:
+                param.value.byte_array_value = [int(x) for x in value]
+            elif self.typeV == ParameterType.PARAMETER_BOOL_ARRAY:
+                param.value.bool_array_value = [bool(x) for x in value]
+            elif self.typeV == ParameterType.PARAMETER_INTEGER_ARRAY:
+                param.value.integer_array_value = [int(x) for x in value]
+            elif self.typeV == ParameterType.PARAMETER_DOUBLE_ARRAY:
+                param.value.double_array_value = [float(x) for x in value]
+            elif self.typeV == ParameterType.PARAMETER_STRING_ARRAY:
+                param.value.string_array_value = [str(x) for x in value]
+            return param
+
+
     class TaskDefinition:
         name = ""
         help = ""
@@ -136,39 +178,32 @@ class TaskClient(Node):
 
             self.conv = dict()
             for p in self.params.values():
-                if p.type == ParameterType.PARAMETER_INTEGER:
-                    self.conv[p.name] = int
-                if p.type == ParameterType.PARAMETER_DOUBLE:
-                    self.conv[p.name] = float
-                if p.type == ParameterType.PARAMETER_STRING:
-                    self.conv[p.name] = str
-                if p.type == ParameterType.PARAMETER_BOOL:
-                    self.conv[p.name] = bool
+                self.conv[p.name] = TaskClient.ParamValue(p.name,p.type)
 
             # print("DEBUG:", cfg)
             # params = extract_params(decode_description(self.config))
             self.client = client
 
         def prepareParams(self,paramdict):
+            config={}
             for p in paramdict:
                 if p not in self.conv:
                     raise NameError("%s: Parameter '%s' is not declared for task '%s'" % (self.client.server_node,p,self.name))
                 try:
-                    paramdict[p] = self.conv[p](paramdict[p])
+                    config[p] = self.conv[p].toParam(paramdict[p])
                 except ValueError:
                     raise ValueError("%s: Could not convert argument '%s' from '%s' to '%s'"
                             % (self.client.server_node,p, str(paramdict[p]), self.params[p].type))
 
-            paramdict['task_name'] = self.name
-            return paramdict
+            return config
 
         def start(self,**paramdict):
             argv = None
             if ('argv' in paramdict):
                 argv = paramdict['argv']
                 del paramdict['argv']
-            paramdict = self.prepareParams(paramdict)
-            id = self.client.startTask(paramdict)
+            config = self.prepareParams(paramdict)
+            id = self.client.startTask(self.name,config)
             return id
 
         def __call__(self,**paramdict):
@@ -176,16 +211,16 @@ class TaskClient(Node):
             if ('argv' in paramdict):
                 argx = paramdict['argv']
                 del paramdict['argv']
-            paramdict = self.prepareParams(paramdict)
             foreground = True
             if ('foreground' in paramdict):
                 foreground = bool(paramdict['foreground'])
+            config = self.prepareParams(paramdict)
             if (foreground):
                 self.client.get_logger().info("%s: Starting task %s in foreground" % (self.client.server_node,self.name))
-                res = self.client.startTaskAndWait(paramdict,argv=argx)
+                res = self.client.startTaskAndWait(self.name,config,argv=argx)
                 return res
             else:
-                id = self.client.startTask(paramdict,argv=argx)
+                id = self.client.startTask(self.name,config,argv=argx)
                 self.client.get_logger().info("%s: Starting task %s in background: %d" % (self.client.server_node,self.name,id))
                 return id
 
@@ -325,25 +360,10 @@ class TaskClient(Node):
     def encodeConfig(self, paramdict):
         config = []
         for p in paramdict:
-            P = Parameter()
-            P.name = p
-            value = paramdict[p]
-            if type(value)==int:
-                P.value.type = ParameterType.PARAMETER_INTEGER
-                P.value.integer_value = value
-            elif type(value)==float:
-                P.value.type = ParameterType.PARAMETER_DOUBLE
-                P.value.double_value = value
-            elif type(value)==bool:
-                P.value.type = ParameterType.PARAMETER_BOOL
-                P.value.bool_value = value
-            elif type(value)==str:
-                P.value.type = ParameterType.PARAMETER_STRING
-                P.value.string_value = value
-            config.append(P)
+            config.append(paramdict[p])
         return config
 
-    def startTask(self,paramdict,name="",foreground=True,period=-1,argv=None):
+    def startTask(self,name,paramdict,foreground=True,period=-1,argv=None):
         if not rclpy.ok():
             raise TaskException("Aborting due to ROS shutdown")
         if self.check_only:
@@ -352,15 +372,12 @@ class TaskClient(Node):
         if period < 0:
             period = self.default_period
         try:
-            if ('task_name' in paramdict):
-                name=paramdict['task_name']
-                del paramdict['task_name']
             if ('foreground' not in paramdict):
-                paramdict['foreground'] = bool(foreground)
-            else:
-                paramdict['foreground'] = bool(paramdict['foreground'])
+                param = TaskClient.ParamValue('foreground',bool)
+                paramdict['foreground'] = param.toParam(foreground)
             if (period>0) and ('task_period' not in paramdict):
-                paramdict['task_period'] = float(period)
+                param = TaskClient.ParamValue('task_period',float)
+                paramdict['task_period'] = param.toParam(period)
             config = self.encodeConfig(paramdict)
             if argv:
                 extra = EncapsulatedMessage()
@@ -380,8 +397,8 @@ class TaskClient(Node):
             self.get_logger().error("Service call failed: %s"%e)
             raise
 
-    def startTaskAndWait(self,paramdict,name="",foreground=True,period=-1.,argv=None):
-        tid = self.startTask(paramdict,name,foreground,period,argv)
+    def startTaskAndWait(self,name,paramdict,foreground=True,period=-1.,argv=None):
+        tid = self.startTask(name,paramdict,foreground,period,argv)
         if (self.verbose):
             self.get_logger().info("Waiting task %d" % tid)
         if self.check_only:

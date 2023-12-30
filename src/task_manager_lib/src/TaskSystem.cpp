@@ -11,10 +11,24 @@ TaskIndicator TaskSystem::initialise()
         // child process
         signal(SIGKILL,SIG_DFL);
         signal(SIGINT,SIG_DFL);
-        int res = execl("/bin/sh", "sh", "-c", cfg->command.c_str(), (char*)NULL);
-        if (res == -1) {
-            perror("execl failed: ");
-            return TaskStatus::TASK_INITIALISATION_FAILED;
+        if (cfg->command_array.empty()) {
+            int res = execl("/bin/sh", "sh", "-c", cfg->command.c_str(), (char*)NULL);
+            if (res == -1) {
+                perror("execl failed: ");
+                return TaskStatus::TASK_INITIALISATION_FAILED;
+            }
+        } else {
+            using charP = char *;
+            charP * argv = new charP[cfg->command_array.size()+1];
+            for (size_t i=0;i<cfg->command_array.size();i++) {
+                argv[i] = strdup(cfg->command_array[i].c_str());
+            }
+            argv[cfg->command_array.size()] = (char*)NULL;
+            int res = execv(argv[0],argv);
+            if (res == -1) {
+                perror("execv failed: ");
+                return TaskStatus::TASK_INITIALISATION_FAILED;
+            }
         }
     }
     RCLCPP_INFO(getNode()->get_logger(),"Started child process with PID %d",pid);

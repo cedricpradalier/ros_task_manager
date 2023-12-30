@@ -7,9 +7,11 @@ namespace task_manager_lib {
     struct TaskSystemConfig : public TaskConfig {
         double terminate_time;
         std::string command;
+        std::vector<std::string> command_array;
         TaskSystemConfig() {
             define("terminate_time",5.0,"Tolerance time to terminate (s)",true,terminate_time); 
             define("command",std::string("exit"),"Command to execute",true,command); 
+            define("command_array",command_array,"Command to execute in an array form (if it is not empty, 'command' will be ignored)",true,command_array); 
         }
     };
 
