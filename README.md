@@ -6,6 +6,8 @@ Generic Task Manager for ROS.
 The complete documentation is available on:
 https://hal.archives-ouvertes.fr/hal-01435823
 
+For a quick start, it is recommanded to look at the [turtlesim application](https://github.com/cedricpradalier/ros_task_manager/tree/master/src/task_manager_turtlesim) sample, and in particular the [mission definition](https://github.com/cedricpradalier/ros_task_manager/tree/master/src/task_manager_turtlesim/missions) in python.
+
 Developing a complete robotic system often requires combining multiple
 behaviours into a complex decision grid, with elements running in sequence or
 in parallel, eventually interrupting each others. To solve this 'age-old'
