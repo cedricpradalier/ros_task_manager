@@ -39,6 +39,8 @@ namespace task_manager_lib {
             DynamicTask(const std::string & fname, TaskEnvironmentPtr env);
             virtual ~DynamicTask();
 
+            bool loadTask(bool exceptions);
+
             //
             // All virtual function below are just forwarding their function to the
             // loaded class.

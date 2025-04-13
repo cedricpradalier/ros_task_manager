@@ -26,6 +26,8 @@ namespace task_manager_turtlesim_sync {
             TurtleSimEnv(std::shared_ptr<rclcpp::Node> node, const std::string & name, unsigned int id=1);
             ~TurtleSimEnv() {};
 
+            DECLARE_ENV_CHECKSUM;
+
             const turtlesim::msg::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {

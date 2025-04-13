@@ -42,6 +42,8 @@ include_directories(
   ${task_manager_lib_INCLUDE_DIRS}
 )
 
+add_compile_definitions(ENV_CHECK_SUM=task_manager_sync)
+
 add_library(task_manager_sync_lib SHARED
     src/TaskEnvironmentSync.cpp
     src/TaskServerSync.cpp
@@ -63,9 +65,9 @@ install(
   DESTINATION include
 )
 
-install(TARGETS
-  test_server_sync
-  DESTINATION lib/${PROJECT_NAME})
+# install(TARGETS
+#   test_server_sync
+#   DESTINATION lib/${PROJECT_NAME})
 
 
 install(

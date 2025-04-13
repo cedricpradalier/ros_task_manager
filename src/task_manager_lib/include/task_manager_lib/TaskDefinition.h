@@ -233,7 +233,9 @@ namespace task_manager_lib {
     //  TaskXXX(std::shared_ptr<TaskEnvironment> env)
     //
     typedef TaskDefinitionPtr (*TaskFactory)(std::shared_ptr<TaskEnvironment>&);
+    typedef const char * (*EnvCheckSum)();
 #define DYNAMIC_TASK(T) extern "C" {\
+    const char * getEnvironmentCheckSum() { return ENV_CHECK_SUM_STR(ENV_CHECK_SUM); } \
     task_manager_lib::TaskDefinitionPtr TaskFactoryObject(task_manager_lib::TaskEnvironmentPtr environment) {\
         return TaskDefinitionPtr(new T(environment));\
     } \

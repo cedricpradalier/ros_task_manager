@@ -46,6 +46,8 @@ include_directories(
   ${task_manager_msgs_INCLUDE_DIRS}
 )
 
+add_compile_definitions(ENV_CHECK_SUM=task_manager_lib)
+
 add_library(task_manager_lib SHARED
     src/DynamicTask.cpp
     src/TaskConfig.cpp
@@ -54,6 +56,7 @@ add_library(task_manager_lib SHARED
     src/TaskScheduler.cpp
     src/TaskIdleDefault.cpp
     src/TaskWaitDefault.cpp
+    src/TaskSystem.cpp
     src/TaskServerDefault.cpp
 )
 

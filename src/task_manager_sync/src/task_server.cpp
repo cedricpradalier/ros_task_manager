@@ -19,6 +19,17 @@ class TaskServer : public TaskServerSync {
 
 };
 
+class TestSyncEnv: public task_manager_sync::TaskEnvironmentSync
+{
+    public:
+        TestSyncEnv(std::shared_ptr<rclcpp::Node> node, const std::string & name) 
+            : task_manager_sync::TaskEnvironmentSync(node,name) {}
+        ~TestSyncEnv() {}
+
+        DECLARE_ENV_CHECKSUM;
+};
+
+
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc,argv);//init ros
@@ -27,7 +38,7 @@ int main(int argc, char *argv[])
     node->declare_parameter("my_name", partner_name);
     partner_name = node->get_parameter("my_name").get_parameter_value().get<std::string>();
 
-    TaskEnvironmentSyncPtr env(new TaskEnvironmentSync(node,partner_name));
+    TaskEnvironmentSyncPtr env(new TestSyncEnv(node,partner_name));
     env->addSyncSource("partner1");
     env->addSyncSource("partner2");
     TaskServer ts(env);

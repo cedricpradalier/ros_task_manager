@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "task_manager_lib/TaskServerDefault.h"
+#include "task_manager_lib/TaskSystem.h"
 
 using namespace task_manager_lib; 
 
@@ -55,5 +56,9 @@ void TaskServerBase::start() {
     ts.startScheduler();
 }
 
+void TaskServerBase::addSystemTask() {
+    TaskDefinitionPtr sys(new TaskFactorySystem(env));
+    ts.addTask(sys);
+}
 
 
