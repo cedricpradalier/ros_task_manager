@@ -28,8 +28,9 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(Boost COMPONENTS thread REQUIRED)
 
-find_package(task_manager_move_base)
 find_package(task_manager_nav2)
+# Does not exist anymore in ROS2
+# find_package(task_manager_move_base)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -53,8 +54,8 @@ include_directories(
   ${turtlesim_INCLUDE_DIRS}
   ${task_manager_msgs_INCLUDE_DIRS}
   ${task_manager_lib_INCLUDE_DIRS}
-  ${task_manager_move_base_INCLUDE_DIRS}
   ${task_manager_nav2_INCLUDE_DIRS}
+  ${task_manager_move_base_INCLUDE_DIRS}
 )
 
 SET(ALL_LIBS 
@@ -72,6 +73,24 @@ SET(ALL_LIBS
     ${Boost_THREAD_LIBRARIES} 
     ${CMAKE_DL_LIBS})
 
+macro(add_task)
+    message("Adding task ${ARGV0}")
+    ADD_LIBRARY( turtlesim_${ARGV0} SHARED tasks/${ARGV0}.cpp)
+    # ament_target_dependencies(floornav_${ARGV0} ${ALL_DEPS})
+    target_link_libraries(turtlesim_${ARGV0} PUBLIC
+        ${geometry_msgs_TARGETS}
+        ${std_msgs_TARGETS}
+        ${task_manager_msgs_TARGETS}
+        rclcpp::rclcpp
+        rclcpp_action::rclcpp_action
+        tf2::tf2
+        tf2_geometry_msgs::tf2_geometry_msgs
+        ${ALL_LIBS}
+    )
+    install(TARGETS turtlesim_${ARGV0} DESTINATION lib/${PROJECT_NAME})
+endmacro()
+
+
 file(SHA256 ${PROJECT_SOURCE_DIR}/include/task_manager_turtlesim/TurtleSimEnv.h ENV_CHECK_SUM)
 add_compile_definitions(ENV_CHECK_SUM=${ENV_CHECK_SUM})
 
@@ -82,69 +101,32 @@ ament_target_dependencies(turtlesim_task_server task_manager_lib
 TARGET_LINK_OPTIONS(turtlesim_task_server PRIVATE "-rdynamic")
 TARGET_LINK_LIBRARIES(turtlesim_task_server ${ALL_LIBS})
 
-ADD_LIBRARY( turtlesim_TaskClear SHARED tasks/TaskClear.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskClear ${ALL_LIBS})
+add_task(TaskClear)
+add_task(TaskClearGeneric)
+add_task(TaskSetPen)
+# add_task(TaskSpawn)
+add_task(TaskFail)
+add_task(TaskGoTo)
+add_task(TaskReachAngle)
+add_task(TaskWaitForButton)
+add_task(TaskConstant)
+add_task(TaskRamp)
 
-ADD_LIBRARY( turtlesim_TaskClearGeneric SHARED tasks/TaskClearGeneric.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskClearGeneric ${ALL_LIBS})
 
-ADD_LIBRARY( turtlesim_TaskClearGenericWC SHARED tasks/TaskClearGenericWC.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskClearGenericWC ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskSetPen SHARED tasks/TaskSetPen.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskSetPen ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskSpawn SHARED tasks/TaskSpawnGeneric.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskSpawn ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskFail SHARED tasks/TaskFail.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskFail ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskGoTo SHARED tasks/TaskGoTo.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskGoTo ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskReachAngle SHARED tasks/TaskReachAngle.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskReachAngle ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskWaitForROI SHARED tasks/TaskWaitForROI.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForROI ${ALL_LIBS})
-
-ADD_LIBRARY( turtlesim_TaskWaitForButton SHARED tasks/TaskWaitForButton.cpp)
-TARGET_LINK_LIBRARIES(turtlesim_TaskWaitForButton ${ALL_LIBS})
 
 IF( ${task_manager_move_base_FOUND} )
     ADD_DEFINITIONS(-DTEST_ACTION_CLIENT)
-    SET(MoveBase_Targets turtlesim_TaskMoveBase turtlesim_TaskMoveBaseWC)
-    ADD_LIBRARY( turtlesim_TaskMoveBase SHARED tasks/TaskMoveBase.cpp)
-    TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBase ${ALL_LIBS})
-
-    ADD_LIBRARY( turtlesim_TaskMoveBaseWC SHARED tasks/TaskMoveBaseWC.cpp)
-    TARGET_LINK_LIBRARIES(turtlesim_TaskMoveBaseWC ${ALL_LIBS})
+    add_task(TaskMoveBase)
+    add_task(TaskMoveBaseWC)
 endif()
 IF( ${task_manager_nav2_FOUND} )
-    SET(Nav2_Targets turtlesim_TaskNav2)
-    ADD_LIBRARY( turtlesim_TaskNav2 SHARED tasks/TaskNav2.cpp)
-    TARGET_LINK_LIBRARIES(turtlesim_TaskNav2 ${ALL_LIBS})
+    add_task(TaskNav2)
 endif()
+
 install(TARGETS
   turtlesim_task_server
   DESTINATION lib/${PROJECT_NAME})
 
-
-install(TARGETS
-    turtlesim_TaskClear
-    turtlesim_TaskClearGeneric
-    turtlesim_TaskClearGenericWC
-    turtlesim_TaskSetPen
-    turtlesim_TaskSpawn
-    turtlesim_TaskFail
-    turtlesim_TaskGoTo
-    turtlesim_TaskReachAngle
-    turtlesim_TaskWaitForROI
-    turtlesim_TaskWaitForButton
-    ${MoveBase_Targets}
-    ${Nav2_Targets}
-    DESTINATION lib/${PROJECT_NAME})
 
 install(
   DIRECTORY launch/
@@ -160,6 +142,7 @@ install(PROGRAMS
     missions/mission_fast_cond.py
     missions/mission_square.py
     missions/mission_timeout.py
+    missions/mission_period.py
     DESTINATION lib/${PROJECT_NAME} 
 )
 

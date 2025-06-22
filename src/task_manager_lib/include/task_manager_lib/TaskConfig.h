@@ -112,6 +112,11 @@ namespace task_manager_lib {
                     return it->second.get<ParameterT>();
                 }
 
+            bool has(const std::string & name) const {
+                TaskConfigMap::const_iterator it = definitions.find(name);
+                return (it != definitions.end()) ;
+            }
+
             bool exportToMessage(std::vector<rcl_interfaces::msg::Parameter> & plist) const ;
             void printConfig() const ;
     };
