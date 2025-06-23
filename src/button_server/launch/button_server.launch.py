@@ -36,28 +36,30 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 import launch_ros.actions
 import launch_ros.descriptions
 
-base_dir=str(Path(get_package_share_directory("task_manager_turtlesim")).parents[1])
+base_dir=get_package_share_directory("button_server")
 
 def generate_launch_description():
     return LaunchDescription([
-        IncludeLaunchDescription(
-              PythonLaunchDescriptionSource([get_package_share_directory('task_manager_turtlesim') ,
-                        '/button_server.launch.py'])
-              ),
         launch_ros.actions.Node(
-            package='turtlesim', executable='turtlesim_node', name='turtlesim',
-            output='screen'),
-
-        launch_ros.actions.Node(
-            package='task_manager_turtlesim', executable='turtlesim_task_server', name='turtlesim_tasks',
+            package='button_server', executable='button_server_node',
+            name='button_server',
             parameters=[
-                {'lib_path': os.path.join(base_dir,"lib","task_manager_turtlesim")},
+                {'root': os.path.join(base_dir,"root")},
+                {'port': 5180},
+                {'num_buttons': 3},
+                {'button0': "Go"},
+                {'button0_color': "lightgreen"},
+                {'button1': "Abort"},
+                {'button1_color': "red"},
+                {'button2': "Pause"},
+                {'button2_style': "background-color:black;color:white;"},
+                {'button3': "Home"},
+                {'button3_text': "Go Home"},
+                {'button3_color': "blue"},
                 ],
             remappings=[
                 #('~/clouds3d', '/points'),
