@@ -2,7 +2,11 @@
 
 #include <memory>
 #include "task_manager_lib/TaskServerDefault.h"
+#include "task_manager_lib/TaskIdleDefault.h"
 #include "task_manager_lib/TaskSystem.h"
+#include "task_manager_lib/TaskTrigger.h"
+#include "task_manager_lib/TaskSetBool.h"
+#include "task_manager_lib/TaskWaitDefault.h"
 
 using namespace task_manager_lib; 
 
@@ -20,29 +24,46 @@ void TaskServerBase::reloadTasks() {
     RCLCPP_INFO(node->get_logger(), "Reload completed");
 }
 
-TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, bool default_wait) : node(_env->getNode()), lib_path("./lib"), env(_env), 
+TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, bool default_tasks) : node(_env->getNode()), lib_path("./lib"), env(_env), 
     idle(new TaskFactoryIdleDefault(env)), ts(node, idle, 0.5)/*, tsi(ts)*/ {
         node->declare_parameter("lib_path", lib_path);
-        if (default_wait) {
-            TaskDefinitionPtr wait(new TaskFactoryWaitDefault(env));
+        if (default_tasks) {
+            wait.reset(new TaskFactoryWaitDefault(env));
             ts.addTask(wait);
+            trigger.reset(new TaskFactoryTrigger(env));
+            ts.addTask(trigger);
+            setbool.reset(new TaskFactorySetBool(env));
+            ts.addTask(setbool);
         }
     }
 
-TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_wait) : node(_env->getNode()), lib_path("./lib"), 
+TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_tasks) : node(_env->getNode()), lib_path("./lib"), 
     env(_env), idle(_idle), ts(node, idle, 0.5)/*, tsi(ts)*/ {
         node->declare_parameter("lib_path", lib_path);
-        if (default_wait) {
-            TaskDefinitionPtr wait(new TaskFactoryWaitDefault(env));
+        if (default_tasks) {
+            wait.reset(new TaskFactoryWaitDefault(env));
             ts.addTask(wait);
+            trigger.reset(new TaskFactoryTrigger(env));
+            ts.addTask(trigger);
+            setbool.reset(new TaskFactorySetBool(env));
+            ts.addTask(setbool);
         }
     }
 
-TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, TaskDefinitionPtr _wait) : node(_env->getNode()), lib_path("./lib"), 
+TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, TaskDefinitionPtr _wait, TaskDefinitionPtr _trigger, TaskDefinitionPtr _setbool) : node(_env->getNode()), lib_path("./lib"), 
     env(_env), idle(_idle), ts(node, idle, 0.5)/*, tsi(ts)*/ {
         node->declare_parameter("lib_path", lib_path);
         if (_wait) {
+            wait = _wait;
             ts.addTask(_wait);
+        }
+        if (_trigger) {
+            trigger = _trigger;
+            ts.addTask(_trigger);
+        }
+        if (_setbool) {
+            setbool = _setbool;
+            ts.addTask(_setbool);
         }
     }
 
