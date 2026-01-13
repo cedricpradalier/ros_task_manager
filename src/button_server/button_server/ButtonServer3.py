@@ -27,7 +27,7 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(ButtonServer.global_server.page.encode('utf-8'))
             #self.wfile.close()
             return
-        elif self.path == "/lib/jquery-3.7.1.min.js":
+        elif self.path == "/lib/jquery-3.6.4.min.js":
             http.server.SimpleHTTPRequestHandler.do_GET(self)
             return
         found = False
@@ -127,8 +127,6 @@ class ButtonServer(Node):
         self.buildPage()
 
         os.chdir(self.root)
-        # for root, dirs, files in os.walk('.'):
-        #     self.get_logger().info(str((root,[f for f in files])))
         self.httpd = MyServer(("", self.port), self.handler)
 
     def buildPage(self):
@@ -140,7 +138,7 @@ class ButtonServer(Node):
           <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
           <META HTTP-EQUIV="refresh" CONTENT="15">
           <title>Button Server</title>
-            <script language="javascript" type="text/javascript" src="lib/jquery-3.7.1.min.js"></script>
+            <script language="javascript" type="text/javascript" src="lib/jquery-3.6.4.min.js"></script>
           </head>
           <body>
             <center>
@@ -177,7 +175,7 @@ class ButtonServer(Node):
         while rclpy.ok():
             rclpy.spin_once(self,timeout_sec=0.05)
             try:
-                # self.get_logger().info("Handling next request")
+                # rospy.loginfo("Handling next request")
                 self.httpd.handle_request()
             except ValueError:
                 if rclpy.ok():

@@ -14,8 +14,7 @@ setup(
         (os.path.join('share/',package_name), ['package.xml']),
         #Include all launch files.
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*.launch'))),
-        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*.launch.py'))),
-        (os.path.join('share', package_name, 'root','lib'), glob(os.path.join('lib', 'jquery-3.7.1.min.js'))),
+        (os.path.join('share', package_name, 'lib'), glob(os.path.join('lib', 'jquery-3.6.4.min.js'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

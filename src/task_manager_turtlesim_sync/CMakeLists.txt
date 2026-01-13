@@ -19,6 +19,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(turtlesim REQUIRED)
+find_package(turtlesim_msgs REQUIRED)
 find_package(task_manager_sync REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -40,10 +41,11 @@ include_directories(
   ${std_msgs_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
   ${turtlesim_INCLUDE_DIRS}
+  ${turtlesim_msgs_INCLUDE_DIRS}
   ${task_manager_sync_INCLUDE_DIRS}
 )
 
-SET(ALL_LIBS ${rclcpp_LIBRARIES} ${task_manager_sync_LIBRARIES} ${std_msgs_LIBRARIES}  ${turtlesim_LIBRARIES} ${CMAKE_DL_LIBS})
+SET(ALL_LIBS ${rclcpp_LIBRARIES} ${task_manager_sync_LIBRARIES} ${std_msgs_LIBRARIES}  ${turtlesim_LIBRARIES} ${turtlesim_msgs_LIBRARIES} ${CMAKE_DL_LIBS})
 
 file(SHA256 ${PROJECT_SOURCE_DIR}/include/task_manager_turtlesim_sync/TurtleSimEnv.h ENV_CHECK_SUM)
 add_compile_definitions(ENV_CHECK_SUM=${ENV_CHECK_SUM})

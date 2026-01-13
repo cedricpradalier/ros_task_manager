@@ -9,10 +9,10 @@ TurtleSimEnv::TurtleSimEnv(std::shared_ptr<rclcpp::Node> n, unsigned int id) : t
     char buffer[128]; sprintf(buffer,"/turtle%d",id);
     std::string tname(buffer);
     clearClt = node->create_client<std_srvs::srv::Empty>("/clear");
-    setPenClt = node->create_client<turtlesim::srv::SetPen>(tname+"/set_pen");
+    setPenClt = node->create_client<turtlesim_msgs::srv::SetPen>(tname+"/set_pen");
 
     buttonsSub = node->create_subscription<std_msgs::msg::String>("/buttons",1,std::bind(&TurtleSimEnv::buttonCallback,this,std::placeholders::_1));
-    poseSub = node->create_subscription<turtlesim::msg::Pose>(tname+"/pose",1,std::bind(&TurtleSimEnv::poseCallback,this,std::placeholders::_1));
+    poseSub = node->create_subscription<turtlesim_msgs::msg::Pose>(tname+"/pose",1,std::bind(&TurtleSimEnv::poseCallback,this,std::placeholders::_1));
     velPub = node->create_publisher<geometry_msgs::msg::Twist>(tname+"/cmd_vel",1);
 }
 
@@ -20,9 +20,9 @@ bool TurtleSimEnv::isSetPenAvailable() {
     return setPenClt->service_is_ready();
 }
    
-rclcpp::Client<turtlesim::srv::SetPen>::SharedFuture TurtleSimEnv::setPenAsync(bool on, unsigned int r, unsigned int g, unsigned int b, unsigned int width)
+rclcpp::Client<turtlesim_msgs::srv::SetPen>::SharedFuture TurtleSimEnv::setPenAsync(bool on, unsigned int r, unsigned int g, unsigned int b, unsigned int width)
 {
-    auto request = std::make_shared<turtlesim::srv::SetPen::Request>();
+    auto request = std::make_shared<turtlesim_msgs::srv::SetPen::Request>();
     request->r = r;
     request->g = g;
     request->b = b;

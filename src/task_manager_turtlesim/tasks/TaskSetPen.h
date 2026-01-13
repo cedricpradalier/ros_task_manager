@@ -16,10 +16,10 @@ namespace task_manager_turtlesim {
         }
     };
 
-    class TaskSetPen : public TaskServiceGenericWithoutClient<turtlesim::srv::SetPen,TaskSetPenConfig,TurtleSimEnv>
+    class TaskSetPen : public TaskServiceGenericWithoutClient<turtlesim_msgs::srv::SetPen,TaskSetPenConfig,TurtleSimEnv>
     {
         protected:
-            virtual rclcpp::Client<turtlesim::srv::SetPen>::SharedPtr getServiceClient() {
+            virtual rclcpp::Client<turtlesim_msgs::srv::SetPen>::SharedPtr getServiceClient() {
                 return env->getSetPenClient();
             }
             virtual void buildServiceRequest(Request& req) {

@@ -406,12 +406,8 @@ TaskScheduler::TaskId TaskScheduler::launchTask(const std::string & taskname,
     cfg.loadConfig(tp,"");
     if (debug>1) cfg.printConfig();
     // See if some runtime period has been defined in the parameters
-    if (cfg.has("task_period")) {
-        period = cfg.get<double>("task_period");
-    }
-    if (cfg.has("foreground")) {
-        foreground = cfg.get<bool>("foreground");
-    }
+    period = cfg.get<double>("task_period");
+    foreground = cfg.get<bool>("foreground");
 
     // Finally create the thread responsible for running the task
     std::shared_ptr<ThreadParameters> tparam =

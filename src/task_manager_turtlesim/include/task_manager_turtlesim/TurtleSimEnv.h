@@ -4,9 +4,9 @@
 #include <rclcpp/rclcpp.hpp>
 #include "task_manager_lib/TaskDefinition.h"
 #include "std_srvs//srv/empty.hpp"
-#include "turtlesim/srv/set_pen.hpp"
+#include "turtlesim_msgs/srv/set_pen.hpp"
 #include "geometry_msgs/msg/twist.hpp"
-#include "turtlesim/msg/pose.hpp"
+#include "turtlesim_msgs/msg/pose.hpp"
 #include "boost/algorithm/string.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -22,9 +22,9 @@ namespace task_manager_turtlesim {
         protected:
             unsigned int turtleId;
             rclcpp::Subscription<std_msgs::msg::String>::SharedPtr buttonsSub;
-            rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr poseSub;
+            rclcpp::Subscription<turtlesim_msgs::msg::Pose>::SharedPtr poseSub;
             rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr velPub;
-            rclcpp::Client<turtlesim::srv::SetPen>::SharedPtr setPenClt;
+            rclcpp::Client<turtlesim_msgs::srv::SetPen>::SharedPtr setPenClt;
             rclcpp::Client<std_srvs::srv::Empty>::SharedPtr clearClt;
             bool paused;
 
@@ -39,8 +39,8 @@ namespace task_manager_turtlesim {
                 }
             }
 
-            turtlesim::msg::Pose tpose;
-            void poseCallback(const turtlesim::msg::Pose::SharedPtr msg) {
+            turtlesim_msgs::msg::Pose tpose;
+            void poseCallback(const turtlesim_msgs::msg::Pose::SharedPtr msg) {
                 tpose = *msg;
             }
 
@@ -56,7 +56,7 @@ namespace task_manager_turtlesim {
 
             DECLARE_ENV_CHECKSUM;
 
-            const turtlesim::msg::Pose & getPose() const {return tpose;}
+            const turtlesim_msgs::msg::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {
                 geometry_msgs::msg::Twist cmd;
@@ -71,8 +71,8 @@ namespace task_manager_turtlesim {
             }
 
             bool isSetPenAvailable();
-            rclcpp::Client<turtlesim::srv::SetPen>::SharedFuture setPenAsync(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
-            rclcpp::Client<turtlesim::srv::SetPen>::SharedPtr getSetPenClient() {return setPenClt;}
+            rclcpp::Client<turtlesim_msgs::srv::SetPen>::SharedFuture setPenAsync(bool on, unsigned int r=0xFF, unsigned int g=0xFF, unsigned int b=0xFF, unsigned int width=1);
+            rclcpp::Client<turtlesim_msgs::srv::SetPen>::SharedPtr getSetPenClient() {return setPenClt;}
 
             bool isClearAvailable();
             rclcpp::Client<std_srvs::srv::Empty>::SharedFuture clearAsync();

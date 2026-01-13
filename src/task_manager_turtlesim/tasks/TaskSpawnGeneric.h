@@ -1,7 +1,7 @@
 #ifndef TASK_SPAWN_H
 #define TASK_SPAWN_H
 
-#include "turtlesim/srv/spawn.hpp"
+#include "turtlesim_msgs/srv/spawn.hpp"
 #include "task_manager_lib/TaskServiceGeneric.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 using namespace task_manager_lib;
@@ -16,7 +16,7 @@ namespace task_manager_turtlesim {
         }
     };
 
-    class TaskSpawn : public TaskServiceGeneric<turtlesim::srv::Spawn,TaskSpawnConfig,TurtleSimEnv>
+    class TaskSpawn : public TaskServiceGeneric<turtlesim_msgs::srv::Spawn,TaskSpawnConfig,TurtleSimEnv>
     {
         protected:
 

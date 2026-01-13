@@ -1,7 +1,7 @@
 #ifndef TASK_WAIT_FOR_ROI_H
 #define TASK_WAIT_FOR_ROI_H
 
-#include <turtlesim/msg/pose.hpp>
+#include <turtlesim_msgs/msg/pose.hpp>
 #include "task_manager_lib/TaskInstance.h"
 #include "task_manager_turtlesim/TurtleSimEnv.h"
 

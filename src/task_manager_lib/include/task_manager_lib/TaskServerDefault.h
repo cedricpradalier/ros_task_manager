@@ -5,6 +5,8 @@
 #include <std_srvs/srv/empty.hpp>
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_lib/TaskScheduler.h"
+#include "task_manager_lib/TaskIdleDefault.h"
+#include "task_manager_lib/TaskWaitDefault.h"
 // Not implemented for ROS2
 //#include "task_manager_lib/TaskServerInterface.h"
 
@@ -19,8 +21,6 @@ namespace task_manager_lib {
             TaskEnvironmentPtr env;
             TaskDefinitionPtr idle;
             TaskDefinitionPtr wait;
-            TaskDefinitionPtr trigger;
-            TaskDefinitionPtr setbool;
             TaskScheduler ts;
             // TaskServerInterface tsi;
 
@@ -34,11 +34,11 @@ namespace task_manager_lib {
             }
 
         public:
-            TaskServerBase(TaskEnvironmentPtr _env, bool default_tasks=false);
+            TaskServerBase(TaskEnvironmentPtr _env, bool default_wait=false);
 
-            TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_tasks=false);
+            TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_wait=false);
 
-            TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, TaskDefinitionPtr _wait=TaskDefinitionPtr(), TaskDefinitionPtr _trigger=TaskDefinitionPtr(), TaskDefinitionPtr _setbool=TaskDefinitionPtr());
+            TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, TaskDefinitionPtr _wait);
 
             void start() ;
 

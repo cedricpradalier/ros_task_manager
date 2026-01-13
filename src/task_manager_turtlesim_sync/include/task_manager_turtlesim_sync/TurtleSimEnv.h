@@ -5,7 +5,7 @@
 #include "task_manager_lib/TaskDefinition.h"
 #include "task_manager_sync/TaskEnvironmentSync.h"
 #include "geometry_msgs/msg/twist.hpp"
-#include "turtlesim/msg/pose.hpp"
+#include "turtlesim_msgs/msg/pose.hpp"
 
 
 namespace task_manager_turtlesim_sync {
@@ -13,12 +13,12 @@ namespace task_manager_turtlesim_sync {
     {
         protected:
             unsigned int turtleId;
-            rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr poseSub;
+            rclcpp::Subscription<turtlesim_msgs::msg::Pose>::SharedPtr poseSub;
             rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr velPub;
 
 
-            turtlesim::msg::Pose tpose;
-            void poseCallback(const turtlesim::msg::Pose::SharedPtr msg) {
+            turtlesim_msgs::msg::Pose tpose;
+            void poseCallback(const turtlesim_msgs::msg::Pose::SharedPtr msg) {
                 tpose = *msg;
             }
 
@@ -28,7 +28,7 @@ namespace task_manager_turtlesim_sync {
 
             DECLARE_ENV_CHECKSUM;
 
-            const turtlesim::msg::Pose & getPose() const {return tpose;}
+            const turtlesim_msgs::msg::Pose & getPose() const {return tpose;}
 
             void publishVelocity(double linear, double angular) {
                 geometry_msgs::msg::Twist cmd;

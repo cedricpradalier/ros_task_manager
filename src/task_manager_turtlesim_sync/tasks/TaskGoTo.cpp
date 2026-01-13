@@ -35,7 +35,7 @@ TaskIndicator TaskGoTo::initialise()  {
 TaskIndicator TaskGoTo::iterate()
 {
     cfg->update();
-    const turtlesim::msg::Pose & tpose = env->getPose();
+    const turtlesim_msgs::msg::Pose & tpose = env->getPose();
     double goal_x = cfg->goal_x, goal_y = cfg->goal_y;
     if (cfg->relative) {
         goal_x = initial_pose.x

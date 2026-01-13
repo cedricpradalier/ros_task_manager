@@ -7,14 +7,14 @@ using namespace task_manager_turtlesim;
 
 TaskIndicator TaskReachAngle::initialise()
 {
-    const turtlesim::msg::Pose & tpose = env->getPose();
+    const turtlesim_msgs::msg::Pose & tpose = env->getPose();
     initial_theta = tpose.theta;
 	return TaskStatus::TASK_INITIALISED;
 }
 
 TaskIndicator TaskReachAngle::iterate()
 {
-    const turtlesim::msg::Pose & tpose = env->getPose();
+    const turtlesim_msgs::msg::Pose & tpose = env->getPose();
     double target = cfg->relative?(initial_theta+cfg->target):cfg->target;
     double alpha = remainder(target-tpose.theta,2*M_PI);
     if (fabs(alpha) < cfg->threshold) {

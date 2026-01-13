@@ -1,7 +1,7 @@
 #ifndef TASK_GOTO_H
 #define TASK_GOTO_H
 
-#include <turtlesim/msg/pose.hpp>
+#include <turtlesim_msgs/msg/pose.hpp>
 #include "task_manager_lib/TaskInstance.h"
 #include "task_manager_turtlesim_sync/TurtleSimEnv.h"
 
@@ -33,7 +33,7 @@ namespace task_manager_turtlesim_sync {
     class TaskGoTo : public TaskInstance<TaskGoToConfig, TurtleSimEnv>
     {
         protected:
-            turtlesim::msg::Pose initial_pose;
+            turtlesim_msgs::msg::Pose initial_pose;
 
         public:
             TaskGoTo(TaskDefinitionPtr def, TaskEnvironmentPtr env) : Parent(def,env) {}
