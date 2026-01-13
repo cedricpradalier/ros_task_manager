@@ -57,11 +57,13 @@ ament_export_dependencies(rosidl_default_runtime)
 include_directories(include)
 
 add_executable(task_manager_msgs_encapsulate src/test_encapsulate.cpp)
-ament_target_dependencies(task_manager_msgs_encapsulate rclcpp std_msgs)
-rosidl_target_interfaces(task_manager_msgs_encapsulate ${PROJECT_NAME} "rosidl_typesupport_cpp")
 # Probably for humble
-# rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
-# target_link_libraries(task_manager_msgs_encapsulate "${cpp_typesupport_target}")
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(task_manager_msgs_encapsulate PUBLIC
+    ${std_msgs_TARGETS}
+    rclcpp::rclcpp
+    "${cpp_typesupport_target}"
+)
 
 install(TARGETS
   task_manager_msgs_encapsulate

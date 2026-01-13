@@ -51,11 +51,24 @@ file(SHA256 ${PROJECT_SOURCE_DIR}/include/task_manager_turtlesim_sync/TurtleSimE
 add_compile_definitions(ENV_CHECK_SUM=${ENV_CHECK_SUM})
 
 ADD_EXECUTABLE( turtlesim_task_server_sync src/task_server.cpp src/TurtleSimEnv.cpp) 
-ament_target_dependencies(turtlesim_task_server_sync task_manager_sync
-    geometry_msgs rclcpp std_msgs)
+# ament_target_dependencies(turtlesim_task_server_sync task_manager_sync
+#     geometry_msgs rclcpp std_msgs)
+
 # Necessary target for the tasks to see the symbols of the main
 TARGET_LINK_OPTIONS(turtlesim_task_server_sync PRIVATE "-rdynamic")
-TARGET_LINK_LIBRARIES(turtlesim_task_server_sync ${ALL_LIBS})
+target_link_libraries(turtlesim_task_server_sync PUBLIC 
+      ${geometry_msgs_TARGETS}
+      ${std_msgs_TARGETS}
+      ${task_manager_msgs_TARGETS}
+      ${turtlesim_msgs_TARGETS}
+      rclcpp::rclcpp
+      ${task_manager_lib_LIBRARIES}
+      ${task_manager_sync_LIBRARIES}
+      ${turtlesim_LIBRARIES}
+      ${CMAKE_DL_LIBS}
+)
+
+
 
 ADD_LIBRARY( turtlesim_TaskGoTo SHARED tasks/TaskGoTo.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskGoTo ${ALL_LIBS})

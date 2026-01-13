@@ -29,7 +29,9 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(Boost COMPONENTS thread REQUIRED)
 
-find_package(task_manager_move_base)
+#Disabled for kilted and above
+#find_package(task_manager_move_base)
+
 find_package(task_manager_nav2)
 
 if(BUILD_TESTING)
@@ -79,11 +81,20 @@ file(SHA256 ${PROJECT_SOURCE_DIR}/include/task_manager_turtlesim/TurtleSimEnv.h 
 add_compile_definitions(ENV_CHECK_SUM=${ENV_CHECK_SUM})
 
 ADD_EXECUTABLE( turtlesim_task_server src/task_server.cpp src/TurtleSimEnv.cpp) 
-ament_target_dependencies(turtlesim_task_server task_manager_lib
-    task_manager_msgs geometry_msgs rclcpp std_msgs)
+# ament_target_dependencies(turtlesim_task_server task_manager_lib
+#     task_manager_msgs geometry_msgs rclcpp std_msgs)
 # Necessary target for the tasks to see the symbols of the main
 TARGET_LINK_OPTIONS(turtlesim_task_server PRIVATE "-rdynamic")
-TARGET_LINK_LIBRARIES(turtlesim_task_server ${ALL_LIBS})
+target_link_libraries(turtlesim_task_server PUBLIC 
+      ${geometry_msgs_TARGETS}
+      ${std_msgs_TARGETS}
+      ${task_manager_msgs_TARGETS}
+      ${turtlesim_msgs_TARGETS}
+      rclcpp::rclcpp
+      ${task_manager_lib_LIBRARIES} 
+      ${turtlesim_LIBRARIES}
+      ${CMAKE_DL_LIBS}
+)
 
 ADD_LIBRARY( turtlesim_TaskClear SHARED tasks/TaskClear.cpp)
 TARGET_LINK_LIBRARIES(turtlesim_TaskClear ${ALL_LIBS})
