@@ -27,7 +27,10 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(ButtonServer.global_server.page.encode('utf-8'))
             #self.wfile.close()
             return
-        elif self.path == "/lib/jquery-3.6.4.min.js":
+        elif self.path == "/lib/jquery-3.7.1.min.js":
+            http.server.SimpleHTTPRequestHandler.do_GET(self)
+            return
+        elif self.path == "/favicon.ico":
             http.server.SimpleHTTPRequestHandler.do_GET(self)
             return
         found = False
@@ -138,7 +141,7 @@ class ButtonServer(Node):
           <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
           <META HTTP-EQUIV="refresh" CONTENT="15">
           <title>Button Server</title>
-            <script language="javascript" type="text/javascript" src="lib/jquery-3.6.4.min.js"></script>
+            <script language="javascript" type="text/javascript" src="lib/jquery-3.7.1.min.js"></script>
           </head>
           <body>
             <center>
@@ -177,7 +180,7 @@ class ButtonServer(Node):
             try:
                 # rospy.loginfo("Handling next request")
                 self.httpd.handle_request()
-            except ValueError:
+            except (KeyboardInterrupt,ValueError):
                 if rclpy.ok():
                     raise
 
