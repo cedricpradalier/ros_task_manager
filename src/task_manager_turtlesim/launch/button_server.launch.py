@@ -47,7 +47,7 @@ def generate_launch_description():
             package='button_server', executable='button_server_node',
             name='button_server',
             parameters=[
-                {'root': os.path.join(get_package_share_directory('button_server'),"root")},
+                {'root': os.path.join(get_package_share_directory('button_server'),".")},
                 {'port': 5180},
                 {'num_buttons': 4},
                 {'button0': "Go"},
