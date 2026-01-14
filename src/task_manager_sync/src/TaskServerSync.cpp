@@ -3,7 +3,7 @@
 
 
 using namespace task_manager_sync ;
-TaskServerSync::TaskServerSync(TaskEnvironmentPtr _env, bool default_wait) : TaskServerBase(_env,default_wait) {
+TaskServerSync::TaskServerSync(TaskEnvironmentPtr _env, bool default_tasks) : TaskServerBase(_env,default_tasks) {
     task_manager_sync::TaskEnvironmentSyncPtr senv = 
         std::dynamic_pointer_cast<task_manager_sync::TaskEnvironmentSync>(_env);
     if (!senv) {

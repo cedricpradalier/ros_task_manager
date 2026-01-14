@@ -34,16 +34,19 @@ namespace task_manager_lib {
             }
 
         public:
-            TaskServerBase(TaskEnvironmentPtr _env, bool default_wait=false);
+            TaskServerBase(TaskEnvironmentPtr _env, bool default_tasks=false);
 
-            TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_wait=false);
+            TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_tasks=false);
 
             TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, TaskDefinitionPtr _wait);
 
             void start() ;
 
 
+			void addWaitTask();
 			void addSystemTask();
+			void addTriggerTask();
+			void addSetBoolTask();
 
 			void addTask(TaskDefinitionPtr task) {
                 ts.addTask(task);

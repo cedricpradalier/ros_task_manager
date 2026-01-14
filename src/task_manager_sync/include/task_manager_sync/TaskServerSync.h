@@ -11,7 +11,7 @@
 namespace task_manager_sync {
     class TaskServerSync : public task_manager_lib::TaskServerBase {
         public:
-            TaskServerSync(TaskEnvironmentPtr _env, bool default_wait=true);  
+            TaskServerSync(TaskEnvironmentPtr _env, bool default_tasks=true);  
     };
 
 }

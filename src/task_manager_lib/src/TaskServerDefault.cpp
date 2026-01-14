@@ -3,6 +3,8 @@
 #include <memory>
 #include "task_manager_lib/TaskServerDefault.h"
 #include "task_manager_lib/TaskSystem.h"
+#include "task_manager_lib/TaskSetBool.h"
+#include "task_manager_lib/TaskTrigger.h"
 
 using namespace task_manager_lib; 
 
@@ -20,21 +22,23 @@ void TaskServerBase::reloadTasks() {
     RCLCPP_INFO(node->get_logger(), "Reload completed");
 }
 
-TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, bool default_wait) : node(_env->getNode()), lib_path("./lib"), env(_env), 
+TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, bool default_tasks) : node(_env->getNode()), lib_path("./lib"), env(_env), 
     idle(new TaskFactoryIdleDefault(env)), ts(node, idle, 0.5)/*, tsi(ts)*/ {
         node->declare_parameter("lib_path", lib_path);
-        if (default_wait) {
-            TaskDefinitionPtr wait(new TaskFactoryWaitDefault(env));
-            ts.addTask(wait);
+        if (default_tasks) {
+            addWaitTask();
+            addTriggerTask();
+            addSetBoolTask();
         }
     }
 
-TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_wait) : node(_env->getNode()), lib_path("./lib"), 
+TaskServerBase::TaskServerBase(TaskEnvironmentPtr _env, TaskDefinitionPtr _idle, bool default_tasks) : node(_env->getNode()), lib_path("./lib"), 
     env(_env), idle(_idle), ts(node, idle, 0.5)/*, tsi(ts)*/ {
         node->declare_parameter("lib_path", lib_path);
-        if (default_wait) {
-            TaskDefinitionPtr wait(new TaskFactoryWaitDefault(env));
-            ts.addTask(wait);
+        if (default_tasks) {
+            addWaitTask();
+            addTriggerTask();
+            addSetBoolTask();
         }
     }
 
@@ -54,6 +58,21 @@ void TaskServerBase::start() {
     ts.loadAllTasks(lib_path,env);
     ts.printTaskDirectory(true);
     ts.startScheduler();
+}
+
+void TaskServerBase::addWaitTask() {
+    TaskDefinitionPtr wait(new TaskFactoryWaitDefault(env));
+    ts.addTask(wait);
+}
+
+void TaskServerBase::addTriggerTask() {
+    TaskDefinitionPtr trigger(new TaskFactoryTrigger(env));
+    ts.addTask(trigger);
+}
+
+void TaskServerBase::addSetBoolTask() {
+    TaskDefinitionPtr sb(new TaskFactorySetBool(env));
+    ts.addTask(sb);
 }
 
 void TaskServerBase::addSystemTask() {
