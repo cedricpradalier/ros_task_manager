@@ -1,6 +1,0 @@
-#!/bin/sh
-
-path=`rospack find turtlesim_logo`
-
-ipython --no-banner -i $path/nodes/console.py -- -s /task_server $*
-
