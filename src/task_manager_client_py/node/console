@@ -1,11 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
 path=`ros2 pkg prefix task_manager_client_py`
 
+server="$1"
+if test "x${server:0:1}" = "x/"
+then
+    # adding the ros args for the server
+    server_arg="--ros-args -p server:=$server"
+    shift
+fi
+
 if which ipython
 then
-    ipython --no-banner --no-confirm-exit -i $path/lib/task_manager_client_py/console.py -- $*
+    irpython --no-banner --no-confirm-exit -i $path/lib/task_manager_client_py/console.py -- $server_arg $*
 else 
-    ipython3 --no-banner --no-confirm-exit -i $path/lib/task_manager_client_py/console.py -- $*
+    ipython3 --no-banner --no-confirm-exit -i $path/lib/task_manager_client_py/console.py -- $server_arg $*
 fi
 

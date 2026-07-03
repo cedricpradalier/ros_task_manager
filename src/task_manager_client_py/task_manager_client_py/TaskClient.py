@@ -245,6 +245,7 @@ class TaskClient(Node):
 
     def __init__(self,server_node,default_period):
         super().__init__('task_client')
+        self.check_only = False
         self.serviceLock = threading.RLock()
         self.statusLock = threading.RLock()
         self.statusCond = threading.Condition(self.statusLock)
@@ -252,26 +253,30 @@ class TaskClient(Node):
         self.declare_parameter('server', server_node)
         self.declare_parameter('period', default_period)
 
-        server_node = self.get_parameter('server').get_parameter_value().string_value
-        default_period = self.get_parameter('period').get_parameter_value().double_value
+        use_sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
+        self.get_logger().info("Task client started with use_sim_time=" + str(use_sim_time))
+        
+        self.server_node = self.get_parameter('server').get_parameter_value().string_value
+        self.default_period = self.get_parameter('period').get_parameter_value().double_value
 
 
         # self.status_cb_group = ReentrantCallbackGroup()
-        parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
-        parser.add_argument('--server', '-s',default=server_node,required=(server_node==""),
-                nargs=1, help='server node name, e.g. /task_server', type=str)
-        parser.add_argument('--period', '-p',default=default_period,type=float,
-                nargs=1, help='default period for new tasks')
-        parser.add_argument('--check', '-c',action='store_const', const=True, dest='check', default=False,
-                help='if set, only test task syntax, but do not run')
-        args,unknown = parser.parse_known_args()
-        # print args
-        self.default_period=args.period
-        if type(args.server) is list:
-            self.server_node=args.server[0]
-        else:
-            self.server_node=args.server
-        self.check_only=args.check
+        # argparse is deprecated
+        # parser = argparse.ArgumentParser(description='Client to run and control tasks on a given server node')
+        # parser.add_argument('--server', '-s',default=self.server_node,required=(server_node==""),
+        #         nargs=1, help='server node name, e.g. /task_server', type=str)
+        # parser.add_argument('--period', '-p',default=self.default_period,type=float,
+        #         nargs=1, help='default period for new tasks')
+        # parser.add_argument('--check', '-c',action='store_const', const=True, dest='check', default=False,
+        #         help='if set, only test task syntax, but do not run')
+        # args,unknown = parser.parse_known_args()
+        # # print args
+        # self.default_period=args.period
+        # if type(args.server) is list:
+        #     self.server_node=args.server[0]
+        # else:
+        #     self.server_node=args.server
+        # self.check_only=args.check
 
         self.get_logger().info("Creating link to services on node " + self.server_node)
         if self.check_only:

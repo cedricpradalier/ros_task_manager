@@ -8,7 +8,7 @@ import signal
 
     
 rclpy.init(args=sys.argv)
-tc = TaskClient('/turtlesim_tasks', 0.2)
+tc = TaskClient('/task_server_node', 0.2)
 
 def signal_handler(signal, frame):
     global tc
