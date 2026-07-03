@@ -138,7 +138,10 @@ endif()
 IF( ${task_manager_nav2_FOUND} )
     SET(Nav2_Targets turtlesim_TaskNav2)
     ADD_LIBRARY( turtlesim_TaskNav2 SHARED tasks/TaskNav2.cpp)
-    TARGET_LINK_LIBRARIES(turtlesim_TaskNav2 ${ALL_LIBS})
+    TARGET_LINK_LIBRARIES(turtlesim_TaskNav2 
+        ${nav2_msgs_TARGETS}
+        ${ALL_LIBS}
+    )
 endif()
 install(TARGETS
   turtlesim_task_server
