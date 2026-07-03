@@ -8,14 +8,14 @@
 
 namespace task_manager_nav2 {
     struct TaskActionNav2Config : public task_manager_lib::TaskActionGenericConfig {
-        TaskActionNav2Config() : task_manager_lib::TaskActionGenericConfig("/nav2") {
+        TaskActionNav2Config() : task_manager_lib::TaskActionGenericConfig("/navigate_to_pose") {
             define("goal_x",        0.0, "X coordinate of destination (m)",true);
             define("goal_y",        0.0, "Y coordinate of destination (m)",true);
             define("goal_z",        0.0, "Z coordinate of destination (m)",true);
             define("goal_roll",     0.0, "Roll at destination (rad)",true);
             define("goal_pitch",    0.0, "Pitch at destination (rad)",true);
             define("goal_yaw",      0.0, "Yaw/Heading at destination (rad)",true);
-            define("behaviour",      "MainTree", "Name of the behaviour tree",true);
+            define("behaviour",      "", "Name of the behaviour tree",true);
             define("frame_id",      "world", "Name of the reference frame",true);
         }
 
